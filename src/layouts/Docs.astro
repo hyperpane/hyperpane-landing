@@ -1,13 +1,14 @@
 ---
-// The docs, laid out as the app is: the title bar, a sidebar styled as the
-// app's (section heads, rows with icons, tree lines for pages inside
-// others), the page on the app's ground, and the status bar. Full width, on
-// their own: none of the landing's frame.
+// The docs, as Astralyx's Sidebar component (ui.astralyx.dev/components/
+// sidebar): an inset frame on the page's ground, a transparent rail on the
+// left (the logotype, then section labels and rows with icons, a tree line
+// for pages inside others) and the page in a rounded panel beside it, with
+// a bar of its own (where you are, the site and Download). None of the
+// landing's header: the docs have their own frame.
 import { getCollection } from "astro:content";
 import Head from "../components/Head.astro";
-import Nav from "../components/Nav.astro";
 import Sprite from "../components/Sprite.astro";
-import StatusBar from "../components/StatusBar.astro";
+import { site } from "../site";
 
 interface Props {
   title?: string;
@@ -29,6 +30,7 @@ for (const doc of docs) {
   group.items.push(doc);
 }
 const depth = (id: string) => id.split("/").length - 1;
+const page = docs.find((d) => d.id === current);
 ---
 
 <!doctype html>
@@ -39,13 +41,20 @@ const depth = (id: string) => id.split("/").length - 1;
   <body class="app">
     <Sprite />
     <a class="skip" href="#main">Skip to content</a>
-    <Nav />
-    <div class="app-body">
-      <aside class="app-side">
-        <nav aria-label="Documentation">
-          <a href="/docs" class:list={["side-row", { "is-selected": current === "__index" }]}>
-            <svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg><span>Overview</span>
+    <div class="app-body" data-side-open="false">
+      <aside class="app-side" id="docs-nav">
+        <div class="side-top">
+          <a class="side-brand" href="/" aria-label={`${site.name} home`}>
+            <svg class="logotype" viewBox="0 0 82 17" aria-hidden="true"><use href="#logotype"></use></svg>
           </a>
+          <span class="side-kind">Docs</span>
+        </div>
+        <nav class="side-scroll" aria-label="Documentation">
+          <div class="side-group">
+            <a href="/docs" class:list={["side-row", { "is-selected": current === "__index" }]} aria-current={current === "__index" ? "page" : undefined}>
+              <svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg><span>Overview</span>
+            </a>
+          </div>
           {sections.map((section) => (
             <div class="side-group">
               <p class="side-head">{section.name}</p>
@@ -53,6 +62,7 @@ const depth = (id: string) => id.split("/").length - 1;
                 <a
                   href={`/docs/${doc.id}`}
                   class:list={["side-row", { "is-selected": current === doc.id, "is-nested": depth(doc.id) > 0 }]}
+                  aria-current={current === doc.id ? "page" : undefined}
                   style={`--depth:${depth(doc.id)}`}
                 >
                   <svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg><span>{doc.data.title}</span>
@@ -61,24 +71,45 @@ const depth = (id: string) => id.split("/").length - 1;
             </div>
           ))}
         </nav>
+        <div class="side-foot">
+          <a class="side-row" href="/"><svg class="icon" aria-hidden="true"><use href="#i-arrow-left"></use></svg><span>{site.name}.app</span></a>
+        </div>
       </aside>
       <main id="main" class="app-main">
-        <div class="app-page">
-          <slot />
+        <header class="panel-bar">
+          <button class="panel-toggle" type="button" aria-controls="docs-nav" aria-expanded="false" aria-label="Show the contents">
+            <svg class="icon" aria-hidden="true"><use href="#i-panel-left"></use></svg>
+          </button>
+          <p class="panel-where">
+            {page ? (
+              <>
+                <span class="panel-crumb">{page.data.section}</span>
+                <span class="panel-sep" aria-hidden="true">›</span>
+                <span class="panel-now">{page.data.title}</span>
+              </>
+            ) : (
+              <span class="panel-now">Overview</span>
+            )}
+          </p>
+          <a class="panel-cta" href="/download">Download</a>
+        </header>
+        <div class="panel-scroll">
+          <div class="app-page">
+            <slot />
+          </div>
         </div>
       </main>
     </div>
-    <StatusBar />
     <script>
       import "../landing/site.js";
-      // The overview's cards: the light under the pointer follows it.
-      for (const card of document.querySelectorAll<HTMLElement>(".dcard")) {
-        card.addEventListener("pointermove", (e) => {
-          const r = card.getBoundingClientRect();
-          card.style.setProperty("--mx", `${e.clientX - r.left}px`);
-          card.style.setProperty("--my", `${e.clientY - r.top}px`);
-        });
-      }
+      // A narrow window: the panel's button shows and hides the rail.
+      const body = document.querySelector<HTMLElement>(".app-body");
+      const toggle = document.querySelector<HTMLButtonElement>(".panel-toggle");
+      toggle?.addEventListener("click", () => {
+        const open = body?.dataset.sideOpen !== "true";
+        if (body) body.dataset.sideOpen = String(open);
+        toggle.setAttribute("aria-expanded", String(open));
+      });
     </script>
   </body>
 </html>
