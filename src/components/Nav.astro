@@ -1,0 +1,23 @@
+---
+// The header, as resend.com's: the logotype on the left, the page's
+// sections in the middle, Docs and Download on the right. Clear over the
+// page, blurred behind; a hairline under it once the page scrolls (site.js).
+import { nav, site } from "../site";
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+const middle = nav.filter((item) => item.href !== "/docs");
+---
+
+<header class="titlebar" data-topbar>
+  <a class="tb-brand" href="/" aria-label={`${site.name} home`}>
+    <svg class="logotype" viewBox="0 0 82 17" aria-hidden="true"><use href="#logotype"></use></svg>
+  </a>
+  <nav class="tb-nav" aria-label="Main">
+    {middle.map((item) => (
+      <a class="tb-link" href={item.href}>{item.label}</a>
+    ))}
+  </nav>
+  <div class="tb-end">
+    <a class="tb-link" href="/docs" aria-current={path.startsWith("/docs") ? "page" : undefined}>Docs</a>
+    <a class="tb-cta" href="/download">Download</a>
+  </div>
+</header>

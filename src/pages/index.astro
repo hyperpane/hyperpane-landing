@@ -1,0 +1,14 @@
+---
+// The landing, as it was built (src/landing/home.html: the sections inside
+// <main>), in the site's frame.
+import Base from "../layouts/Base.astro";
+import home from "../landing/home.html?raw";
+---
+
+<Base>
+  <Fragment set:html={home} />
+</Base>
+
+<script>
+  import "../landing/interact.js";
+</script>

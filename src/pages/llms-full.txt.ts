@@ -1,0 +1,11 @@
+import type { APIRoute } from "astro";
+import { getCollection } from "astro:content";
+import { site } from "../site";
+
+// /llms-full.txt: every doc in one file, in order, for LLMs.
+export const GET: APIRoute = async () => {
+  const docs = (await getCollection("docs")).sort((a, b) => a.data.order - b.data.order);
+  const parts = docs.map((d) => `# ${d.data.title}\n\nSource: ${site.url}/docs/${d.id}\n\n> ${d.data.description}\n\n${d.body ?? ""}`);
+  const body = `# ${site.name}\n\n> ${site.description}\n\n${parts.join("\n\n---\n\n")}\n`;
+  return new Response(body, { headers: { "Content-Type": "text/plain; charset=utf-8" } });
+};

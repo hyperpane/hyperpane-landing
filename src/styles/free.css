@@ -1,0 +1,154 @@
+/* An open page: no grid drawn. The cells keep their places, but without the
+   outlines, the rails down the page, the lines across each section and the
+   crosses where they meet; space does the separating. Cards only where
+   there's something to press (a role, a platform, a download's choices),
+   and the pictures of the canvas as the app draws it: a dotted ground with
+   soft corners. Loaded after the rest, so the landing's own sheets stay as
+   they were under it. */
+
+/* No lines -------------------------------------------------------------- */
+.frame { border-inline: 0; width: min(100% - 2 * var(--gutter), var(--container)); }
+.band::before,
+.band::after { display: none; }
+.cells { gap: var(--space-6) var(--space-8); }
+.cell { outline: 0; overflow: visible; }
+.band { margin-top: clamp(var(--space-16), 9vw, var(--space-32)); }
+.band-hero { margin-top: 0; }
+
+/* A section's head: the title, and what it means beside it. */
+.head-main { padding: 0 var(--cell-pad) 0 0; }
+.head-side { padding: 0 0 0 var(--cell-pad); }
+@media (min-width: 1024px) {
+  .head-main { padding-top: 0; }
+}
+.cells > .cell { padding-inline: 0; }
+.band-hero .hero-main { padding-left: 0; }
+
+/* The hero ------------------------------------------------------------- */
+.band-hero > .cells { padding-top: clamp(var(--space-12), 6vw, var(--space-24)); }
+.shot-cell {
+  /* The canvas: the page's whole width, no frame; the windows go anywhere
+     across it. */
+  width: 100vw;
+  margin: var(--space-8) calc(50% - 50vw) 0;
+  height: clamp(560px, 70vh, 760px);
+  background-color: var(--color-canvas);
+  background-image: radial-gradient(var(--color-dots) 1px, transparent 1.2px);
+  background-size: 20px 20px;
+  overflow: hidden;
+}
+.shot-cell::before { display: none; }
+.shot-cell .shot { inset: var(--space-12) var(--gutter) var(--space-6); }
+.shot-tools { padding-inline: var(--gutter); height: var(--space-12); justify-content: flex-start; }
+.spec { padding: var(--space-6) 0 0; }
+
+/* Roles: the roles as soft rows, their windows on a canvas --------------- */
+.roles { gap: var(--space-8); align-items: stretch; }
+.role-tabs { border: 0; gap: var(--space-1); }
+.role-tab {
+  border: 0;
+  border-radius: var(--radius-panel);
+  padding: var(--space-4) var(--space-5);
+}
+.role-tab[aria-selected="true"] { background: var(--color-surface); box-shadow: inset 0 0 0 1px var(--color-border); }
+.role-stage {
+  border-radius: var(--radius-frame);
+  box-shadow: inset 0 0 0 1px var(--color-hairline);
+  min-height: 420px;
+}
+@media (max-width: 899px) {
+  .role-tabs { border: 0; }
+}
+
+/* Windows: the plugins, open, no boxes ---------------------------------- */
+.mini-head { padding: var(--space-8) 0 0; }
+.mini-head:first-of-type { padding-top: var(--space-4); }
+.mini { padding: var(--space-4) var(--space-4) var(--space-4) 0; border-radius: var(--radius-panel); }
+.mini h3 { font-size: var(--text-base); }
+.mini p { font-size: 14px; }
+
+/* Always on: three points, side by side, no dividers. */
+.facts.facts-row { gap: var(--space-8); }
+.facts.facts-row li,
+.facts li { padding: 0; }
+.facts.facts-row li + li { border: 0; }
+.facts li + li { border-top: 0; }
+
+/* Download: the call, then the platforms as soft cards ------------------ */
+.cta { padding: var(--space-12) 0 var(--space-8); }
+.platform {
+  min-height: 0;
+  padding: var(--space-6);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+a.platform:hover { background: var(--color-card); box-shadow: inset 0 0 0 1px var(--color-border-2); }
+.platform .status { margin-top: var(--space-4); }
+
+/* Three across stays three across until a phone (it went two and one). */
+@media (min-width: 720px) and (max-width: 1023px) {
+  .cells > .span-4.platform,
+  .cells > .span-4.dl-list { grid-column: span 4; }
+}
+
+/* The footer: columns on the page, no frame. */
+.footer { margin-top: clamp(var(--space-16), 8vw, var(--space-24)); padding-bottom: var(--space-8); }
+.footer .cell { padding-inline: 0; }
+.footer-mark-cell { display: none; }
+
+/* The download page ------------------------------------------------------ */
+.dl {
+  padding: var(--space-8);
+  border-radius: var(--radius-frame);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+.dl-go { border-top: 0; padding-top: var(--space-2); }
+.dl-list { padding: var(--space-2) 0; }
+.dl-list li { border-top: 0; padding: var(--space-1) 0; }
+
+/* Download's call: a glow with no edges, no grid behind it. */
+.cta {
+  background: radial-gradient(40% 55% at 50% 45%, var(--color-glow-faint), transparent 75%);
+}
+.cta::before { display: none; }
+
+/* A platform: its name, and Soon beside it, on one line. */
+.platform { flex-direction: row; align-items: center; justify-content: space-between; }
+.platform .platform-name { margin: 0; }
+.platform .status { margin-top: 0; }
+
+/* The footer: the logotype and its line on the left, the links in a row on
+   the right, the year under them. */
+.footer .cells { align-items: start; row-gap: var(--space-4); }
+.footer-col { flex-direction: row; flex-wrap: wrap; gap: var(--space-2) var(--space-5); justify-content: flex-end; align-content: flex-start; }
+.footer-col h3 { display: none; }
+.footer-col a { padding: 0; }
+@media (max-width: 1023px) {
+  .footer-col { justify-content: flex-start; }
+}
+
+/* The full-width canvas is 100vw, which counts the scroll bar: nothing
+   scrolls sideways for it. */
+html,
+body { overflow-x: clip; }
+
+/* The canvas's ground fades in and out with the page: no edge above or
+   below it. The windows aren't faded, only what's behind them. */
+.shot-cell { background: none; isolation: isolate; }
+.shot-cell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--color-canvas);
+  background-image: radial-gradient(var(--color-dots) 1px, transparent 1.2px);
+  background-size: 20px 20px;
+  -webkit-mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent);
+  mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent);
+  pointer-events: none;
+}
+
+/* Dragging on the canvas moves windows; it never selects the page. */
+.shot-cell { user-select: none; -webkit-user-select: none; }

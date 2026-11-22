@@ -1,0 +1,86 @@
+---
+// Downloads, as a manager: a system picked by its logo (this computer's
+// first, or ?os=), then every file for it, the one for this computer marked
+// Recommended; and the server for the other machines. Nothing is out yet, so
+// every button says "Soon".
+import Base from "../layouts/Base.astro";
+import { platforms, ready, servers, version } from "../downloads";
+---
+
+<Base title="Download" description="Download hyperpane for macOS, Windows or Linux.">
+  <section class="band band-hero dl-page" aria-labelledby="dl-title">
+    <div class="cells">
+      <header class="cell span-12 head-main">
+        <p class="label">Download</p>
+        <h1 id="dl-title" class="h2">Get hyperpane.</h1>
+      </header>
+      <div class="cell span-12 head-side">
+        <p>Version {version} for macOS, Windows and Linux. {ready ? "Out now." : "The first builds are almost here: the buttons turn on the day they ship."}</p>
+      </div>
+
+      <div class="cell span-12 dlm" data-dl>
+        <div class="dlm-systems" role="radiogroup" aria-label="System">
+          {platforms.map((p, i) => (
+            <label class="dlm-os" data-os={p.id}>
+              <input type="radio" name="os" value={p.id} checked={i === 0} />
+              <svg class="dlm-logo" aria-hidden="true"><use href={`#${p.icon}`}></use></svg>
+              <span class="dlm-os-name">{p.label}</span>
+              <span class="dlm-os-sub">{p.archs.map((a) => a.label).join(" · ")}</span>
+              <em class="dlm-mine" hidden>This computer</em>
+            </label>
+          ))}
+        </div>
+
+        {platforms.map((p, i) => (
+          <div class="dlm-files" data-files={p.id} hidden={i !== 0}>
+            {p.archs.flatMap((a, ai) => p.formats.map((f, fi) => (
+              <div class="dlm-file" data-arch={a.id} data-first={fi === 0 ? "" : undefined} data-order={ai * 10 + fi}>
+                <svg class="dlm-file-logo" aria-hidden="true"><use href={`#${p.icon}`}></use></svg>
+                <div class="dlm-what">
+                  <p class="dlm-name">{f.label} <span class="dlm-arch">{a.label}</span><span class="dlm-rec" hidden>Recommended</span></p>
+                  <p class="dlm-note">{f.note}</p>
+                </div>
+                <code class="dlm-path">{f.file(a.id)}</code>
+                <button type="button" class={`btn btn-sm ${ai === 0 && fi === 0 ? "btn-primary" : "btn-secondary"} dlm-btn`} disabled={!ready} aria-disabled={!ready}>
+                  <svg class="icon" aria-hidden="true"><use href="#i-download"></use></svg>{ready ? "Download" : "Soon"}
+                </button>
+              </div>
+            )))}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="band" aria-labelledby="server-title">
+    <div class="cells">
+      <header class="cell span-12 head-main">
+        <p class="label">Server</p>
+        <h2 id="server-title" class="h2">For your other machines.</h2>
+      </header>
+      <div class="cell span-12 head-side">
+        <p>Put it on a machine you reach over the network, and the app on your computer opens projects there.</p>
+      </div>
+      <div class="cell span-12 dlm">
+        <div class="dlm-files">
+          {servers.map((s) => (
+            <div class="dlm-file">
+              <svg class="dlm-file-logo" aria-hidden="true"><use href={`#${s.icon}`}></use></svg>
+              <div class="dlm-what">
+                <p class="dlm-name">{s.os} <span class="dlm-arch">{s.arch}</span></p>
+              </div>
+              <code class="dlm-path">{s.file}</code>
+              <button type="button" class="btn btn-sm btn-secondary dlm-btn" disabled={!ready} aria-disabled={!ready}>
+                <svg class="icon" aria-hidden="true"><use href="#i-download"></use></svg>{ready ? "Download" : "Soon"}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import "../landing/download.js";
+</script>

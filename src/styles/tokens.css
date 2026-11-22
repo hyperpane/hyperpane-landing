@@ -1,0 +1,208 @@
+/* Hallmark · tokens · theme: custom (Tokyo Night, as hyperpane derives it)
+ * The app's own derivations (client/ui/src/themes.ts) from the Tokyo Night
+ * terminal palette (#1a1b26 / #c0caf5 + ANSI), computed once; geometry from
+ * the engine (client/engine/src/canvas.rs) and sdk/js/ui/astralyx.css.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* Grounds --------------------------------------------------------------- */
+  --color-page: #101017;            /* bg mixed 40% to black: behind everything */
+  --color-canvas: #13131b;          /* the canvas: bg mixed 28% to black */
+  --color-sidebar: #111219;         /* page tokens: --sidebar */
+  --color-surface: #15161e;         /* page tokens: --background; tiles */
+  --color-card: #1a1b26;            /* a window's body, a terminal's ground */
+  --color-popover: #1e1f2b;         /* page tokens: --popover */
+  --color-header: #242632;
+  --color-header-focused: #2c2e3d;
+  --color-veil: #13131bb0;
+
+  /* Tokyo Night Day: the web page inside the Browser window */
+  --color-day-page: #e1e2e7;
+  --color-day-card: #f2f3f7;
+  --color-day-line: #c4c8da;
+  --color-day-ink: #3760bf;
+  --color-day-muted: #6172b0;
+  --color-day-blue: #2e7de9;
+  --color-day-violet: #9854f1;
+  --color-day-green: #587539;
+  --color-day-amber: #8c6c3e;
+
+  /* Ink ------------------------------------------------------------------- */
+  --color-ink-strong: #d9dff9;      /* display type: the ink, 40% toward white */
+  --color-ink: #c0caf5;
+  --color-ink-2: #a9b1d6;
+  --color-ink-3: #8188a6;
+  --color-ink-4: #737aa2;           /* the quiet half of a heading */
+  --color-title: #9195ad;
+  --color-gutter: #3b4261;
+  --color-comment: #565f89;
+  --color-on-primary: #15161e;
+
+  /* Lines and veils -------------------------------------------------------- */
+  --color-dots: #c0caf51c;
+  --color-dots-faint: #c0caf512;
+  --color-hairline: #c0caf514;
+  --color-border: #c0caf51f;
+  --color-border-2: #c0caf52e;
+  --color-border-strong: #c0caf566;
+  --color-input: #c0caf526;
+  --color-hover: #c0caf50f;
+  --color-pressed: #c0caf517;
+  --color-selected: #c0caf51c;
+  --color-highlight: #ffffff0d;     /* the top edge of a raised surface */
+  --color-shadow: #0000008c;
+  --color-shadow-soft: #00000059;
+  --color-shadow-deep: #000000b3;
+  --color-line: #22232d;            /* the grid's lines: ink at 10% over the page, opaque */
+  --color-line-strong: #3a3c4f;     /* the + where lines cross */
+  --color-grid: #c0caf50a;          /* the faint square grid behind pictures */
+  --color-mask: #000;               /* mask alpha only */
+  --color-mark-bg: #000;            /* the brand mark: black square, white square */
+  --color-mark-fg: #fff;
+  --color-wordmark: #c0caf50b;      /* the footer's oversized logotype */
+
+  /* Accents: Tokyo Night ANSI -------------------------------------------- */
+  --color-blue: #7aa2f7;
+  --color-cyan: #7dcfff;
+  --color-green: #9ece6a;
+  --color-amber: #e0af68;
+  --color-violet: #bb9af7;
+  --color-rose: #f7768e;
+  --color-orange: #ff9e64;
+  --color-teal: #73daca;
+  --color-type: #2ac3de;
+  --color-operator: #89ddff;
+  --color-green-soft: #9ece6a24;
+  --color-rose-soft: #f7768e24;
+  --color-blue-soft: #7aa2f72e;
+  --color-violet-soft: #bb9af724;
+  --color-glow-blue: #7aa2f72b;
+  --color-glow-violet: #bb9af71f;
+  --color-glow-faint: #7aa2f714;
+  --color-primary: #c0caf5;
+  --color-primary-hover: #d9dff9;
+  --color-select: #3082f6;          /* the engine's selection ring */
+  --color-focus: #85a8f7;
+
+  /* Inside plugin windows: the --node-* colours hyperpane gives a plugin's
+     frame (client/ui/src/Nodes.tsx), at their Tokyo Night values. */
+  --color-node-muted: #9195ad;
+  --color-node-hover: #c0caf512;    /* fg at 7% */
+  --color-node-sel: #7aa2f733;      /* selection, list focused */
+  --color-node-sel-idle: #c0caf51c; /* fg at 11% */
+  --color-node-line: #c0caf50a;     /* the editor's current line: fg at 4% */
+  --color-node-fold: #c0caf508;     /* folded lines: fg at 3% */
+  --color-node-check: #c0caf566;    /* an empty checkbox: fg at 40% */
+  --color-hunk: #7aa2f714;          /* a diff's hunk header: accent at 8% */
+  --color-add-line: #9ece6a21;      /* ansi 2 at 13% */
+  --color-add-gutter: #9ece6a38;    /* ansi 2 at 22% */
+  --color-add-word: #9ece6a57;      /* ansi 2 at 34% */
+  --color-del-line: #f7768e21;
+  --color-del-gutter: #f7768e38;
+  --color-del-word: #f7768e57;
+  --color-tint-amber: #e0af6829;    /* status letters: 16% */
+  --color-tint-green: #9ece6a29;
+  --color-tint-blue: #7aa2f733;     /* avatar: 20% */
+
+  /* Type ------------------------------------------------------------------ */
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* Plugins' frames: the system UI font, and the code views' mono stack
+     (sdk/js/code/setup.ts). The engine's own text is JetBrains Mono. */
+  --font-ui: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-code: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+  --text-2xs: 11px;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-ui: 14px;
+  --text-base: 16px;
+  --text-md: 18px;
+  --text-lg: 20px;
+  --text-h3: 17px;
+  --text-h2: clamp(2rem, 1.3rem + 2.2vw, 3.25rem);
+  --text-display: clamp(2.75rem, 1.4rem + 5.4vw, 5.75rem);
+
+  --leading-term: 17px;
+
+  /* Space: the 4px grid -------------------------------------------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-32: 128px;
+  --space-40: 160px;
+
+  /* Corners ---------------------------------------------------------------- */
+  --radius-chip: 4px;
+  --radius-control: 6px;
+  --radius-surface: 8px;
+  --radius-panel: 12px;
+  --radius-frame: 14px;
+  --radius-pill: 999px;
+
+  /* Window geometry (canvas.rs) ------------------------------------------ */
+  --win-header: 32px;
+  --win-pad: 8px;
+  --win-icon: 16px;
+  --win-button: 24px;
+  --win-glyph: 14px;
+  --win-dot: 6px;
+
+  /* Controls -------------------------------------------------------------- */
+  --control-xs: 24px;
+  --control-sm: 28px;
+  --control-md: 32px;
+  --control-lg: 40px;
+
+  /* Elevation ------------------------------------------------------------- */
+  --shadow-win: 0 2px 5px var(--color-shadow-soft), 0 5px 14px -4px var(--color-shadow);
+  --shadow-win-focused: 0 4px 12px var(--color-shadow-soft), 0 14px 34px -8px var(--color-shadow);
+  --shadow-popover: 0 8px 24px -6px var(--color-shadow), 0 2px 6px -2px var(--color-shadow-soft);
+  --shadow-frame: 0 0 0 1px var(--color-shadow-soft), 0 30px 80px -20px var(--color-shadow-deep), 0 12px 32px -12px var(--color-shadow);
+
+  /* Motion: the app's numbers -------------------------------------------- */
+  --dur-fast: 100ms;
+  --dur-base: 150ms;
+  --dur-slow: 200ms;
+  --dur-scene: 360ms;
+  --dur-reveal: 600ms;
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout ----------------------------------------------------------------- */
+  --container: 1200px;
+  --container-wide: 1280px;
+  --gutter: 16px;
+  --nav-h: 64px;                    /* the header */
+  --cell-pad: 20px;                 /* every cell's inset: text lines up across the grid */
+  --band-gap: 40px;                 /* empty rails between sections */
+}
+
+@media (min-width: 720px) {
+  :root {
+    --gutter: 24px;
+    --cell-pad: 24px;
+    --band-gap: 56px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 32px;
+    --cell-pad: 32px;
+    --band-gap: 72px;
+  }
+}

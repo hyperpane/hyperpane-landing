@@ -1,0 +1,84 @@
+---
+// The docs, laid out as the app is: the title bar, a sidebar styled as the
+// app's (section heads, rows with icons, tree lines for pages inside
+// others), the page on the app's ground, and the status bar. Full width, on
+// their own: none of the landing's frame.
+import { getCollection } from "astro:content";
+import Head from "../components/Head.astro";
+import Nav from "../components/Nav.astro";
+import Sprite from "../components/Sprite.astro";
+import StatusBar from "../components/StatusBar.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  /** The page shown (a doc's id; "__index" for the overview). */
+  current?: string;
+}
+const { title, description, jsonLd, current } = Astro.props;
+
+const docs = (await getCollection("docs")).sort((a, b) => a.data.order - b.data.order);
+
+// By section, in the order they first come; a page in a folder sits under
+// the page named for the folder (plugins/writing under plugins).
+const sections: { name: string; items: typeof docs }[] = [];
+for (const doc of docs) {
+  let group = sections.find((s) => s.name === doc.data.section);
+  if (!group) sections.push((group = { name: doc.data.section, items: [] }));
+  group.items.push(doc);
+}
+const depth = (id: string) => id.split("/").length - 1;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <Head title={title} description={description} jsonLd={jsonLd} type="article" />
+  </head>
+  <body class="app">
+    <Sprite />
+    <a class="skip" href="#main">Skip to content</a>
+    <Nav />
+    <div class="app-body">
+      <aside class="app-side">
+        <nav aria-label="Documentation">
+          <a href="/docs" class:list={["side-row", { "is-selected": current === "__index" }]}>
+            <svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg><span>Overview</span>
+          </a>
+          {sections.map((section) => (
+            <div class="side-group">
+              <p class="side-head">{section.name}</p>
+              {section.items.map((doc) => (
+                <a
+                  href={`/docs/${doc.id}`}
+                  class:list={["side-row", { "is-selected": current === doc.id, "is-nested": depth(doc.id) > 0 }]}
+                  style={`--depth:${depth(doc.id)}`}
+                >
+                  <svg class="icon" aria-hidden="true"><use href="#i-file-text"></use></svg><span>{doc.data.title}</span>
+                </a>
+              ))}
+            </div>
+          ))}
+        </nav>
+      </aside>
+      <main id="main" class="app-main">
+        <div class="app-page">
+          <slot />
+        </div>
+      </main>
+    </div>
+    <StatusBar />
+    <script>
+      import "../landing/site.js";
+      // The overview's cards: the light under the pointer follows it.
+      for (const card of document.querySelectorAll<HTMLElement>(".dcard")) {
+        card.addEventListener("pointermove", (e) => {
+          const r = card.getBoundingClientRect();
+          card.style.setProperty("--mx", `${e.clientX - r.left}px`);
+          card.style.setProperty("--my", `${e.clientY - r.top}px`);
+        });
+      }
+    </script>
+  </body>
+</html>

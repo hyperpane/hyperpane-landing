@@ -1,0 +1,16 @@
+---
+// The status bar, as the app's footer: what's live on the left, the links on
+// the right.
+import { site } from "../site";
+import { ready, version } from "../downloads";
+---
+
+<footer class="statusbar">
+  <span class="sb-item"><i class="sb-dot" aria-hidden="true"></i>{site.name}</span>
+  <span class="sb-item sb-quiet">v{version}{ready ? "" : " · soon"}</span>
+  <span class="sb-gap"></span>
+  <a class="sb-item" href="/docs">Docs</a>
+  <a class="sb-item" href="/download">Download</a>
+  <a class="sb-item" href="/llms.txt">llms.txt</a>
+  <span class="sb-item sb-quiet">© {new Date().getFullYear()}</span>
+</footer>

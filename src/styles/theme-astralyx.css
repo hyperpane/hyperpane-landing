@@ -1,0 +1,88 @@
+/* Astralyx Dark: the app's own default theme (client/ui/src/themes.ts,
+   sdk/js/ui/astralyx.css), in place of Tokyo Night. Black grounds,
+   neutral greys, white borders at low alpha, Astralyx's ANSI accents. The
+   web page inside the Browser window keeps its light "day" colours. */
+
+:root {
+  /* Grounds */
+  --color-page: #050505;
+  --color-canvas: #0e0e0e;          /* the canvas */
+  --color-sidebar: #090909;
+  --color-surface: #0d0d0d;
+  --color-card: #020202;            /* a window's body, a terminal's ground */
+  --color-popover: #141414;
+  --color-header: #141414;          /* a window's header */
+  --color-header-focused: #1b1b1b;
+  --color-veil: #0e0e0eb0;
+
+  /* Ink */
+  --color-ink-strong: #fafafa;
+  --color-ink: #e5e5e5;
+  --color-ink-2: #b4b4b4;
+  --color-ink-3: #8a8a8a;
+  --color-ink-4: #6b6b6b;
+  --color-title: #8a8a8a;
+  --color-gutter: #3a3a3a;
+  --color-comment: #6b6b6b;
+  --color-on-primary: #0a0a0a;
+
+  /* Lines and veils */
+  --color-dots: #ffffff1c;
+  --color-dots-faint: #ffffff10;
+  --color-hairline: #ffffff12;
+  --color-border: #ffffff1f;
+  --color-border-2: #ffffff2e;
+  --color-border-strong: #ffffff66;
+  --color-input: #ffffff2b;
+  --color-hover: #ffffff0f;
+  --color-pressed: #ffffff17;
+  --color-selected: #ffffff1c;
+  --color-highlight: #ffffff0d;
+  --color-line: #1a1a1a;
+  --color-line-strong: #2e2e2e;
+  --color-grid: #ffffff08;
+  --color-wordmark: #ffffff0b;
+
+  /* Accents: Astralyx's ANSI */
+  --color-blue: #5c9eff;
+  --color-cyan: #63ccde;
+  --color-green: #45b164;
+  --color-amber: #f5ae39;
+  --color-violet: #ae8aff;
+  --color-rose: #ff6568;
+  --color-orange: #ff8b5c;
+  --color-teal: #39b7cb;
+  --color-type: #39b7cb;
+  --color-operator: #63ccde;
+  --color-green-soft: #45b1642e;
+  --color-rose-soft: #ff65682e;
+  --color-blue-soft: #3082f62e;
+  --color-violet-soft: #9c6aff2e;
+  /* A neutral glow: the theme has no colour cast. */
+  --color-glow-blue: #ffffff0f;
+  --color-glow-violet: #ffffff0a;
+  --color-glow-faint: #ffffff08;
+  --color-primary: #ebebeb;
+  --color-primary-hover: #fafafa;
+  --color-select: #3082f6;
+  --color-focus: #5c9eff;
+
+  /* Inside plugin windows */
+  --color-node-muted: #858585;
+  --color-node-hover: #ffffff12;
+  --color-node-sel: #3082f633;
+  --color-node-sel-idle: #ffffff1c;
+  --color-node-line: #ffffff0a;
+  --color-node-fold: #ffffff08;
+  --color-node-check: #ffffff66;
+  --color-hunk: #3082f614;
+  --color-add-line: #45b16421;
+  --color-add-gutter: #45b16438;
+  --color-add-word: #45b16457;
+  --color-del-line: #ff656821;
+  --color-del-gutter: #ff656838;
+  --color-del-word: #ff656857;
+  --color-tint-amber: #f5ae3929;
+  --color-tint-green: #45b16429;
+  --color-tint-blue: #3082f633;
+}

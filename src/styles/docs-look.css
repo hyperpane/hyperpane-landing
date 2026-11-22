@@ -1,0 +1,205 @@
+/* The docs in the landing's look (resend.css, cards.css): grey-to-white
+   headings, plain labels, cards with an accent, no rules between things.
+   Their layout stays: the sidebar and the page beside it (app.css). */
+
+/* Labels: plain words, as the landing's. */
+.doc-eyebrow,
+.cards__h {
+  font: 500 var(--text-sm) / 1 var(--font-sans);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-ink-3);
+}
+.doc-eyebrow::before { display: none; }
+
+/* Headings: white fading to grey. */
+.doc-head h1,
+.prose h1,
+.prose h2 {
+  background: linear-gradient(180deg, var(--color-ink-strong) 30%, #8f8f8f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.doc-head h1,
+.prose h1 { font-size: clamp(2.4rem, 1.7rem + 2.4vw, 3.4rem); letter-spacing: -0.04em; line-height: 1.02; }
+.doc-head .lead { color: var(--color-ink-3); }
+.prose h2 { border-top: 0; padding-top: 0; margin-top: 3rem; letter-spacing: -0.03em; }
+
+/* The page: a little light at its top, the dots of the canvas faint there. */
+.app-main {
+  background:
+    radial-gradient(70% 320px at 50% 0%, var(--color-glow-blue), transparent 80%),
+    var(--color-page);
+}
+
+/* The sidebar: as the landing's quiet rows. */
+.app-side { background: var(--color-page); border-right-color: var(--color-hairline); }
+.side-head { color: var(--color-ink-4); font-size: var(--text-xs); padding-top: var(--space-2); }
+.side-row { height: 30px; border-radius: 10px; color: var(--color-ink-3); }
+.side-row:hover { color: var(--color-ink-strong); background: var(--color-hover); }
+.side-row.is-selected {
+  color: var(--color-ink-strong);
+  background: linear-gradient(180deg, #ffffff0d, #ffffff05), var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border), inset 0 1px 0 #ffffff12;
+}
+
+/* Overview cards: the landing's cards, an accent for each section. */
+.cards__grid { gap: var(--space-4); }
+.dcard[data-section="0"] { --accent: var(--color-green); }
+.dcard[data-section="1"] { --accent: var(--color-blue); }
+.dcard[data-section="2"] { --accent: var(--color-violet); }
+.dcard {
+  --accent: var(--color-cyan);
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-height: 200px;
+  padding: var(--space-6);
+  border: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 80% at 0% 0%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 55%),
+    linear-gradient(180deg, #ffffff06, transparent 40%),
+    var(--color-surface);
+  box-shadow: 0 1px 0 #ffffff08 inset, 0 24px 48px -32px #000;
+  transition: transform var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.dcard::before,
+.pager a::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent, #fff) 45%, #ffffff30), #ffffff12 35%, #ffffff0a 70%, #ffffff14);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+.dcard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease-out);
+  pointer-events: none;
+}
+.dcard:hover { border: 0; transform: translateY(-2px); box-shadow: 0 1px 0 #ffffff0d inset, 0 30px 60px -30px #000; }
+.dcard:hover::after { opacity: 1; }
+.dcard:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.dcard .fact-icon {
+  box-sizing: content-box;
+  width: 20px;
+  height: 20px;
+  margin: 0 0 var(--space-4);
+  padding: 11px;
+  border-radius: 12px;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 22%, transparent), color-mix(in srgb, var(--accent) 8%, transparent));
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent),
+    inset 0 1px 0 #ffffff1f,
+    0 8px 24px -8px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+.dcard h3 { font-size: 17px; font-weight: 600; letter-spacing: -0.015em; }
+.dcard p { margin: 0; font-size: 14.5px; line-height: 1.55; }
+.dcard__go {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: auto;
+  padding-top: var(--space-4);
+  font: 500 var(--text-sm) / 1 var(--font-sans);
+  color: var(--color-ink-2);
+}
+.dcard:hover .dcard__go { color: var(--color-ink-strong); }
+.dcard__go .icon { width: 14px; height: 14px; }
+
+/* Previous and next: quiet cards. */
+.pager a {
+  position: relative;
+  border: 0;
+  border-radius: 16px;
+  padding: var(--space-5) var(--space-6);
+  background: linear-gradient(180deg, #ffffff08, transparent 60%), var(--color-surface);
+  transition: transform var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out);
+}
+.pager a:hover { border: 0; background: linear-gradient(180deg, #ffffff10, transparent 60%), var(--color-surface); transform: translateY(-2px); }
+.pager .dir { font: 500 var(--text-xs) / 1 var(--font-sans); letter-spacing: 0; text-transform: none; color: var(--color-ink-4); }
+.pager .ttl { font-weight: 600; margin-top: var(--space-2); }
+
+/* Under a page: no rule, plain words. */
+.doc-meta { border-top: 0; padding-top: 0; font-family: var(--font-sans); }
+
+/* Text: code and quotes as cards, links white with a line. */
+.prose a { color: var(--color-ink-strong); border-bottom-color: var(--color-border-2); }
+.prose a:hover { border-bottom-color: var(--color-ink-strong); }
+.prose pre {
+  border: 0;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 1px var(--color-border), inset 0 1px 0 #ffffff10;
+  background: var(--color-card) !important;
+}
+.prose :not(pre) > code { border-radius: 6px; background: var(--color-surface); }
+.prose blockquote {
+  border-left: 0;
+  padding: var(--space-4) var(--space-5);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #ffffff08, transparent), var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+.prose table { border-collapse: separate; border-spacing: 0; border-radius: 14px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--color-border); }
+.prose th,
+.prose td { border: 0; border-bottom: 1px solid var(--color-hairline); }
+.prose tr:last-child td { border-bottom: 0; }
+.prose th { font: 600 var(--text-sm) / 1.3 var(--font-sans); letter-spacing: 0; text-transform: none; }
+.prose hr { border-top-color: var(--color-hairline); }
+
+/* The sidebar's tree, as the app's (client/ui/src/kit.tsx): rows 28 tall and
+   2 apart, each level 24 in (a child's icon under its parent's label); one
+   solid line down the parent's icon column, 9 in from it, that turns with a
+   6px radius into its last child's middle. */
+.app-side { --tree-line: color-mix(in oklab, var(--color-page), var(--color-ink-strong) 16%); }
+.side-row { height: 28px; padding-left: calc(8px + var(--depth, 0) * 24px); }
+.side-row + .side-row { margin-top: 2px; }
+.side-row.is-nested::before {
+  content: "";
+  position: absolute;
+  left: calc(8px + (var(--depth) - 1) * 24px + 9px);
+  top: -2px;
+  bottom: 0;
+  width: 1px;
+  border: 0;
+  background: var(--tree-line);
+  pointer-events: none;
+}
+/* The last child: the line stops above its middle and turns into it. */
+.side-row.is-nested:not(:has(+ .side-row.is-nested))::before { bottom: auto; height: calc(50% - 6px + 2px); }
+.side-row.is-nested:not(:has(+ .side-row.is-nested))::after {
+  content: "";
+  position: absolute;
+  left: calc(8px + (var(--depth) - 1) * 24px + 9px);
+  top: calc(50% - 6px);
+  width: 7px;
+  height: 7px;
+  border-left: 1px solid var(--tree-line);
+  border-bottom: 1px solid var(--tree-line);
+  border-bottom-left-radius: 6px;
+  pointer-events: none;
+}
+/* The selected row's card doesn't cover the line. */
+.side-row.is-nested.is-selected::before,
+.side-row.is-nested.is-selected::after { z-index: 1; }

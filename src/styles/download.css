@@ -1,0 +1,94 @@
+/* The download page: the choice (segmented rows), the file it gets, and
+   every download listed. And the landing's platforms, as links there. */
+
+a.platform { color: inherit; text-decoration: none; transition: background var(--dur-base) var(--ease-out); }
+a.platform:hover { background: var(--color-hover); }
+.platform { min-height: 120px; }
+
+.dl { display: grid; gap: var(--space-6); padding: var(--space-8) var(--cell-pad); }
+.dl-row { margin: 0; padding: 0; border: 0; min-width: 0; }
+.dl-row legend {
+  margin-bottom: var(--space-3);
+  font: 500 var(--text-2xs) / 1 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-4);
+}
+.seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+}
+.seg-opt { position: relative; }
+.seg-opt input { position: absolute; opacity: 0; pointer-events: none; }
+.seg-opt span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-sm);
+  padding: 0 var(--space-3);
+  border-radius: calc(var(--radius-control) - 2px);
+  color: var(--color-ink-3);
+  font: 500 var(--text-sm) / 1 var(--font-sans);
+  cursor: pointer;
+  transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out);
+}
+.seg-opt span .icon { width: 15px; height: 15px; }
+.seg-opt:hover span { color: var(--color-ink-strong); background: var(--color-hover); }
+.seg-opt input:checked + span { background: var(--color-header-focused); color: var(--color-ink-strong); box-shadow: inset 0 1px 0 var(--color-highlight); }
+.seg-opt input:focus-visible + span { outline: 2px solid var(--color-focus); outline-offset: 1px; }
+.dl-mine {
+  padding: 1px 6px;
+  border-radius: var(--radius-chip);
+  background: var(--color-blue-soft);
+  color: var(--color-blue);
+  font: 400 var(--text-2xs) / 1.4 var(--font-mono);
+  font-style: normal;
+}
+.dl-note { margin: var(--space-2) 0 0; color: var(--color-ink-4); font-size: var(--text-sm); }
+
+.dl-go {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-line);
+}
+.dl-file { display: flex; align-items: center; gap: var(--space-2); min-width: 0; color: var(--color-ink-3); }
+.dl-file code { font: 400 var(--text-sm) / 1.4 var(--font-mono); color: var(--color-ink-2); overflow-wrap: anywhere; }
+.dl-btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+
+.dl-list { padding: var(--space-6) var(--cell-pad); }
+.dl-list h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 var(--space-3);
+  color: var(--color-ink-strong);
+  font-size: var(--text-h3);
+  font-weight: 500;
+}
+.dl-list h3 .icon { color: var(--color-ink-3); }
+.dl-sub { color: var(--color-ink-4); font-size: var(--text-sm); font-weight: 400; }
+.dl-list ul { list-style: none; margin: 0; padding: 0; }
+.dl-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--color-line);
+  color: var(--color-ink-3);
+  font-size: var(--text-ui);
+}
+.dl-list li b { color: var(--color-ink-2); font-weight: 500; }
+.dl-list .status { margin-top: 0; }
+.dl-server ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); column-gap: var(--space-8); }
+.mini-head h2.label { margin: 0; }

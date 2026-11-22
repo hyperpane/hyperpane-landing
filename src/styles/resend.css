@@ -1,0 +1,215 @@
+/* The landing in the manner of resend.com: centred, black, quiet. Headlines
+   in a white-to-grey gradient, a short line under each, a white button and a
+   quiet one; features as cards with a hairline edge and a soft light from
+   the top; nothing but faint monochrome glows. Our type, our theme
+   (theme-astralyx.css), our words. Loaded last. */
+
+/* Headlines: white fading to grey. */
+.display,
+.h2 {
+  background: linear-gradient(180deg, var(--color-ink-strong) 30%, #8f8f8f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.display .quiet,
+.h2 .quiet { color: transparent; }
+
+/* The hero, centred ----------------------------------------------------- */
+.band-hero > .cells { padding-top: clamp(var(--space-10), 5vw, var(--space-16)); }
+.cells > .hero-main,
+.cells > .hero-side {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0;
+}
+.hero-main .display { max-width: 14ch; margin-top: var(--space-6); font-size: clamp(2.75rem, 1.2rem + 5.4vw, 5.75rem); }
+.hero-side { gap: var(--space-8); }
+.hero-side .lede { max-width: 46ch; margin: 0 auto; font-size: var(--text-md); color: var(--color-ink-3); }
+.cta-row { justify-content: center; }
+.announce { margin-inline: auto; }
+
+/* The canvas: full width, the windows gathered in the middle, its height
+   their height. They still go anywhere across it. */
+.shot-cell { height: 700px; margin-top: var(--space-4); }
+.shot-cell .shot { inset: var(--space-12) max(var(--gutter), calc(50% - 680px)) var(--space-6); }
+.shot-tools { justify-content: center; }
+.shot-hint { font-family: var(--font-sans); font-size: var(--text-sm); color: var(--color-ink-4); }
+
+/* Under it: four facts, centred. */
+.spec { text-align: center; padding: var(--space-4) 0 0; }
+.spec-k {
+  font: 500 var(--text-sm) / 1.4 var(--font-sans);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-ink-4);
+  margin: 0 0 var(--space-1);
+}
+.spec-v { color: var(--color-ink-strong); font-size: var(--text-base); font-weight: 500; }
+
+/* A section's head, centred: its label, its title, one line. ------------ */
+.cells > .head-main,
+.cells > .head-side {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0;
+}
+.head-main .h2 { max-width: 18ch; }
+.head-side { margin-top: calc(-1 * var(--space-2)); }
+.head-side p { max-width: 52ch; margin: 0 auto var(--space-6); font-size: var(--text-md); }
+.label {
+  justify-content: center;
+  font: 500 var(--text-sm) / 1 var(--font-sans);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-ink-3);
+  margin-bottom: var(--space-4);
+}
+.label::before { display: none; }
+
+/* Cards: a hairline edge, light from the top, a little brighter under the
+   pointer. ---------------------------------------------------------------- */
+.mini,
+.facts.facts-row li,
+.platform,
+.role-stage,
+.dl {
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, #ffffff0a, transparent 60%),
+    var(--color-surface);
+  box-shadow:
+    inset 0 0 0 1px var(--color-border),
+    inset 0 1px 0 #ffffff14;
+}
+.mini,
+.facts.facts-row li { padding: var(--space-6); transition: box-shadow var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out); }
+.mini:hover,
+a.platform:hover {
+  background:
+    linear-gradient(180deg, #ffffff10, transparent 60%),
+    var(--color-surface);
+  box-shadow:
+    inset 0 0 0 1px var(--color-border-2),
+    inset 0 1px 0 #ffffff1f;
+}
+.mini-head { justify-content: center; text-align: center; padding: var(--space-10) 0 var(--space-2); }
+.mini-head .label { margin: 0; }
+.mini-soon { background: none; box-shadow: inset 0 0 0 1px var(--color-border); }
+.mini-soon:hover { background: none; }
+
+/* Always on: three cards under its title. */
+.facts.facts-row { gap: var(--space-4); }
+.facts.facts-row li { align-content: start; }
+.facts.facts-row li + li { border: 0; }
+
+/* Roles: the roles as quiet rows, their windows on a card. */
+.role-tab { border-radius: 12px; }
+.role-tab[aria-selected="true"] {
+  background: linear-gradient(180deg, #ffffff0a, transparent), var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border), inset 0 1px 0 #ffffff14;
+}
+.role-stage { min-height: 440px; background-color: var(--color-canvas); }
+.role-scene .rw-a { width: 58%; height: 74%; }
+
+/* Download: the call and the platforms, close together. ------------------ */
+.cta { padding: var(--space-16) 0 var(--space-4); }
+.cta-mark { border-radius: 14px; }
+
+/* The footer: one line of links and the year, quiet. */
+.footer { padding-bottom: var(--space-6); }
+.footer-brand p { color: var(--color-ink-4); }
+.footer-fine { color: var(--color-ink-4); }
+
+/* Cards keep their inset (a cell's side padding is otherwise none). */
+.cells > .cell.mini { padding: var(--space-6); }
+.cells > .cell.platform { padding: var(--space-5) var(--space-6); }
+
+/* A plugin's GitHub link: the logo stays still under the pointer (the
+   nudge is for arrows). */
+.mini-gh .icon,
+.mini-gh:hover .icon { transform: none; transition: none; }
+.mini-gh:hover { color: var(--color-ink-strong); }
+
+/* The download choice: its inset, and its labels as the page's others. */
+.cells > .cell.dl { padding: var(--space-8); }
+.dl-row legend { font: 500 var(--text-sm) / 1 var(--font-sans); letter-spacing: 0; text-transform: none; color: var(--color-ink-3); }
+.mini-head h2.label { font-size: var(--text-sm); }
+
+/* No hint above the canvas: its windows start near its top. */
+.shot-cell .shot { top: var(--space-6); }
+
+/* The canvas: taller, and its windows can be taken up over the hero's
+   words (they pass above them, never under). */
+.shot-cell { height: clamp(720px, 86vh, 940px); overflow: visible; z-index: 2; }
+.band-hero { overflow: visible; }
+
+/* The canvas's ground under the whole hero: one dotted canvas from the
+   header down, the hero's words on it, fading out only at its foot. */
+.shot-cell::after { display: none; }
+.band-hero { position: relative; isolation: isolate; }
+.band-hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: calc(-1 * var(--nav-h));
+  bottom: 0;
+  left: calc(50% - 50vw);
+  width: 100vw;
+  background-color: var(--color-canvas);
+  background-image: radial-gradient(var(--color-dots) 1px, transparent 1.2px);
+  background-size: 20px 20px;
+  -webkit-mask-image: linear-gradient(#000 88%, transparent);
+  mask-image: linear-gradient(#000 88%, transparent);
+  pointer-events: none;
+}
+/* The words stay readable on the dots. */
+.hero-main,
+.hero-side { position: relative; }
+.band-hero::before { display: block; border: 0; }
+
+/* The hero's words and buttons always above the windows: a window taken up
+   there passes under them, and is still taken by its header between them. */
+.band-hero > .cells > .hero-main,
+.band-hero > .cells > .hero-side { z-index: 3; pointer-events: none; }
+.hero-main a,
+.hero-main button,
+.hero-side a,
+.hero-side button { pointer-events: auto; }
+
+/* More on the way: the words on the left, empty places for plugins on the
+   right, on a dashed card over the canvas's dots. */
+.cells > .cell.mini.mini-soon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  background:
+    radial-gradient(var(--color-dots) 1px, transparent 1.2px) 0 0 / 16px 16px,
+    transparent;
+  box-shadow: none;
+  border: 1px dashed var(--color-border-2);
+}
+.mini-soon:hover { background: radial-gradient(var(--color-dots) 1px, transparent 1.2px) 0 0 / 16px 16px; box-shadow: none; }
+.mini-soon h3 { color: var(--color-ink-strong); }
+.soon-text { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); min-width: 0; }
+.soon-text p { margin: 0; max-width: 34ch; }
+.soon-slots { display: flex; gap: var(--space-2); flex: none; }
+.soon-slots span {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px dashed var(--color-border-2);
+  background: var(--color-page);
+}
+.soon-slots .is-plus { border-style: solid; border-color: var(--color-border-strong); color: var(--color-ink-strong); }
+.soon-slots .icon { width: 18px; height: 18px; }
+@media (max-width: 559px) { .soon-slots { display: none; } }

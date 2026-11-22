@@ -1,0 +1,25 @@
+---
+import { site } from "../site";
+---
+
+<footer class="band footer">
+  <div class="cells">
+    <div class="cell span-6 footer-brand">
+      <svg class="logotype" viewBox="0 0 82 17" role="img" aria-label={site.name}><use href="#logotype"></use></svg>
+      <p>{site.tagline}</p>
+    </div>
+    <nav class="cell span-6 footer-col" aria-label="Product">
+      <h3>Product</h3>
+      <a href="/#roles">Roles</a>
+      <a href="/#plugins">Windows</a>
+      <a href="/#detach">Always on</a>
+      <a href="/docs">Docs</a>
+      <a href="/download">Download</a>
+      <a href="/llms.txt">llms.txt</a>
+    </nav>
+    <p class="cell span-12 footer-fine">© {new Date().getFullYear()} {site.name}</p>
+    <div class="cell span-12 footer-mark-cell" aria-hidden="true">
+      <svg class="footer-mark" viewBox="22.6 2.6 59.6 11.6"><use href="#logotype" x="0" y="0" width="82" height="17"></use></svg>
+    </div>
+  </div>
+</footer>

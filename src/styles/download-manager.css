@@ -1,0 +1,87 @@
+/* The download manager: three systems by their logos, then a list of files. */
+
+.dlm { display: grid; gap: var(--space-4); padding: 0 !important; margin-top: var(--space-4); }
+.dlm-systems { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+.dlm-os {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-1);
+  padding: var(--space-8) var(--space-4) var(--space-6);
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff08, transparent 60%), var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border), inset 0 1px 0 #ffffff10;
+  color: var(--color-ink-3);
+  cursor: pointer;
+  text-align: center;
+  transition: box-shadow var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out);
+}
+.dlm-os input { position: absolute; opacity: 0; pointer-events: none; }
+.dlm-os:hover { color: var(--color-ink-2); box-shadow: inset 0 0 0 1px var(--color-border-2), inset 0 1px 0 #ffffff14; }
+.dlm-os:has(input:checked) {
+  color: var(--color-ink-strong);
+  background: linear-gradient(180deg, #ffffff12, transparent 70%), var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border-strong), inset 0 1px 0 #ffffff24, 0 12px 40px -16px #000;
+}
+.dlm-os:has(input:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.dlm-logo { width: 40px; height: 40px; margin-bottom: var(--space-3); }
+.dlm-os-name { font: 600 var(--text-md) / 1.2 var(--font-sans); color: inherit; }
+.dlm-os-sub { font-size: var(--text-sm); color: var(--color-ink-4); }
+.dlm-mine {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-hover);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  color: var(--color-ink-2);
+  font: 500 var(--text-2xs) / 1.4 var(--font-sans);
+  font-style: normal;
+}
+
+.dlm-files {
+  display: grid;
+  border-radius: 16px;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+  overflow: hidden;
+}
+.dlm-files[hidden] { display: none; }
+.dlm-file {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+}
+.dlm-file + .dlm-file { box-shadow: inset 0 1px 0 var(--color-hairline); }
+.dlm-file:hover { background: var(--color-highlight); }
+.dlm-file-logo { width: 20px; height: 20px; color: var(--color-ink-3); }
+.dlm-what { min-width: 0; }
+.dlm-name { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin: 0; color: var(--color-ink-strong); font-weight: 500; }
+.dlm-arch { color: var(--color-ink-3); font-weight: 400; }
+.dlm-rec {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--color-green-soft);
+  color: var(--color-green);
+  font-size: var(--text-2xs);
+  font-weight: 500;
+}
+.dlm-rec[hidden] { display: none; }
+.dlm-note { margin: 2px 0 0; color: var(--color-ink-4); font-size: var(--text-sm); }
+.dlm-path { color: var(--color-ink-4); font: 400 var(--text-xs) / 1 var(--font-mono); white-space: nowrap; }
+.dlm-btn { min-width: 104px; justify-content: center; }
+.dlm-btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+
+@media (max-width: 899px) {
+  .dlm-path { display: none; }
+  .dlm-file { grid-template-columns: auto minmax(0, 1fr) auto; }
+}
+@media (max-width: 559px) {
+  .dlm-systems { gap: var(--space-2); }
+  .dlm-os { padding: var(--space-5) var(--space-2) var(--space-4); }
+  .dlm-os-sub, .dlm-mine { display: none; }
+  .dlm-logo { width: 28px; height: 28px; }
+}
