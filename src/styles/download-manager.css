@@ -8,20 +8,20 @@
   justify-items: center;
   gap: var(--space-1);
   padding: var(--space-8) var(--space-4) var(--space-6);
-  border-radius: 16px;
-  background: linear-gradient(180deg, #ffffff08, transparent 60%), var(--color-surface);
-  box-shadow: inset 0 0 0 1px var(--color-border), inset 0 1px 0 #ffffff10;
+  border-radius: var(--radius-surface);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border);
   color: var(--color-ink-3);
   cursor: pointer;
   text-align: center;
   transition: box-shadow var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out);
 }
 .dlm-os input { position: absolute; opacity: 0; pointer-events: none; }
-.dlm-os:hover { color: var(--color-ink-2); box-shadow: inset 0 0 0 1px var(--color-border-2), inset 0 1px 0 #ffffff14; }
+.dlm-os:hover { color: var(--color-ink-2); box-shadow: inset 0 0 0 1px var(--color-border-2); }
 .dlm-os:has(input:checked) {
   color: var(--color-ink-strong);
-  background: linear-gradient(180deg, #ffffff12, transparent 70%), var(--color-surface);
-  box-shadow: inset 0 0 0 1px var(--color-border-strong), inset 0 1px 0 #ffffff24, 0 12px 40px -16px #000;
+  background: oklch(0.2 0 0);
+  box-shadow: inset 0 0 0 1px var(--color-border-strong);
 }
 .dlm-os:has(input:focus-visible) { outline: 2px solid var(--color-focus); outline-offset: 2px; }
 .dlm-logo { width: 40px; height: 40px; margin-bottom: var(--space-3); }
@@ -42,7 +42,7 @@
 
 .dlm-files {
   display: grid;
-  border-radius: 16px;
+  border-radius: var(--radius-surface);
   background: var(--color-surface);
   box-shadow: inset 0 0 0 1px var(--color-border);
   overflow: hidden;

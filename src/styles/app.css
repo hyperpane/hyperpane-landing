@@ -15,12 +15,10 @@
   height: var(--nav-h);
   padding: 0 max(var(--gutter), calc(50% - 600px));
   border-bottom: 1px solid transparent;
-  background: color-mix(in srgb, var(--color-page) 72%, transparent);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  background: var(--color-page);
   transition: border-color var(--dur-slow) var(--ease-out), background var(--dur-slow) var(--ease-out);
 }
-.titlebar[data-scrolled] { border-bottom-color: var(--color-border); background: color-mix(in srgb, var(--color-page) 82%, transparent); }
+.titlebar[data-scrolled] { border-bottom-color: var(--color-border); background: var(--color-page); }
 .tb-brand { display: inline-flex; align-items: center; justify-self: start; color: var(--color-ink-strong); }
 .tb-brand .logotype { height: 18px; width: auto; }
 .tb-nav { display: flex; align-items: center; gap: var(--space-1); }
@@ -29,7 +27,7 @@
   align-items: center;
   height: 32px;
   padding: 0 var(--space-3);
-  border-radius: 10px;
+  border-radius: var(--radius-control);
   color: var(--color-ink-3);
   font: 500 var(--text-ui) / 1 var(--font-sans);
   text-decoration: none;
@@ -42,14 +40,13 @@
 .tb-cta {
   display: inline-flex;
   align-items: center;
-  height: 32px;
-  padding: 0 var(--space-4);
-  border-radius: 10px;
+  height: var(--control-sm);
+  padding: 0 14px;
+  border-radius: var(--radius-control);
   background: var(--color-primary);
   color: var(--color-on-primary);
-  font: 600 var(--text-ui) / 1 var(--font-sans);
+  font: 600 var(--text-xs) / 1 var(--font-sans);
   text-decoration: none;
-  box-shadow: inset 0 1px 0 #ffffff80, 0 0 0 1px #ffffff1a;
   transition: background var(--dur-base) var(--ease-out);
 }
 .tb-cta:hover { background: var(--color-primary-hover); }

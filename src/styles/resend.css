@@ -1,19 +1,17 @@
-/* The landing in the manner of resend.com: centred, black, quiet. Headlines
-   in a white-to-grey gradient, a short line under each, a white button and a
-   quiet one; features as cards with a hairline edge and a soft light from
-   the top; nothing but faint monochrome glows. Our type, our theme
-   (theme-astralyx.css), our words. Loaded last. */
+/* The landing's layout: centred, black, quiet. Headlines in solid ink with
+   their quiet half in the muted ink, a short line under each, a light button
+   and a quiet one; features as flat cards with a hairline border. Astralyx's
+   look (theme-astralyx.css): no gradients, glows or shadows. */
 
-/* Headlines: white fading to grey. */
+/* Headlines: solid ink, the quiet half muted. */
 .display,
 .h2 {
-  background: linear-gradient(180deg, var(--color-ink-strong) 30%, #8f8f8f);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  background: none;
+  color: var(--color-ink-strong);
+  font-weight: 600;
 }
 .display .quiet,
-.h2 .quiet { color: transparent; }
+.h2 .quiet { color: var(--color-ink-3); }
 
 /* The hero, centred ----------------------------------------------------- */
 .band-hero > .cells { padding-top: clamp(var(--space-10), 5vw, var(--space-16)); }
@@ -73,31 +71,23 @@
 }
 .label::before { display: none; }
 
-/* Cards: a hairline edge, light from the top, a little brighter under the
+/* Cards: a flat surface with a hairline border; a step lighter under the
    pointer. ---------------------------------------------------------------- */
 .mini,
 .facts.facts-row li,
 .platform,
 .role-stage,
 .dl {
-  border-radius: 16px;
-  background:
-    linear-gradient(180deg, #ffffff0a, transparent 60%),
-    var(--color-surface);
-  box-shadow:
-    inset 0 0 0 1px var(--color-border),
-    inset 0 1px 0 #ffffff14;
+  border-radius: var(--radius-surface);
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border);
 }
 .mini,
 .facts.facts-row li { padding: var(--space-6); transition: box-shadow var(--dur-base) var(--ease-out), background var(--dur-base) var(--ease-out); }
 .mini:hover,
 a.platform:hover {
-  background:
-    linear-gradient(180deg, #ffffff10, transparent 60%),
-    var(--color-surface);
-  box-shadow:
-    inset 0 0 0 1px var(--color-border-2),
-    inset 0 1px 0 #ffffff1f;
+  background: oklch(0.16 0 0);
+  box-shadow: inset 0 0 0 1px var(--color-border-2);
 }
 .mini-head { justify-content: center; text-align: center; padding: var(--space-10) 0 var(--space-2); }
 .mini-head .label { margin: 0; }
@@ -110,17 +100,17 @@ a.platform:hover {
 .facts.facts-row li + li { border: 0; }
 
 /* Roles: the roles as quiet rows, their windows on a card. */
-.role-tab { border-radius: 12px; }
+.role-tab { border-radius: var(--radius-control); }
 .role-tab[aria-selected="true"] {
-  background: linear-gradient(180deg, #ffffff0a, transparent), var(--color-surface);
-  box-shadow: inset 0 0 0 1px var(--color-border), inset 0 1px 0 #ffffff14;
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px var(--color-border);
 }
 .role-stage { min-height: 440px; background-color: var(--color-canvas); }
 .role-scene .rw-a { width: 58%; height: 74%; }
 
 /* Download: the call and the platforms, close together. ------------------ */
 .cta { padding: var(--space-16) 0 var(--space-4); }
-.cta-mark { border-radius: 14px; }
+.cta-mark { border-radius: var(--radius-control); }
 
 /* The footer: one line of links and the year, quiet. */
 .footer { padding-bottom: var(--space-6); }
@@ -206,7 +196,7 @@ a.platform:hover {
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: var(--radius-control);
   border: 1px dashed var(--color-border-2);
   background: var(--color-page);
 }

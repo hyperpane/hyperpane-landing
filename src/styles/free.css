@@ -108,9 +108,9 @@ a.platform:hover { background: var(--color-card); box-shadow: inset 0 0 0 1px va
 .dl-list { padding: var(--space-2) 0; }
 .dl-list li { border-top: 0; padding: var(--space-1) 0; }
 
-/* Download's call: a glow with no edges, no grid behind it. */
+/* Download's call: plain, no grid behind it. */
 .cta {
-  background: radial-gradient(40% 55% at 50% 45%, var(--color-glow-faint), transparent 75%);
+  background: none;
 }
 .cta::before { display: none; }
 

@@ -106,14 +106,14 @@ a {
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  /* The app's buttons (sdk/js/ui/lib/styles.ts): lg 36, sm 28, xs 24; text
-     13px, a control's corners. */
-  height: 36px;
-  padding: 0 var(--space-4);
+  /* Astralyx's buttons: h-9 (36), 18 in from each side, semibold 12px
+     text, the control's corners; sm 32, xs 28. */
+  height: var(--control-md);
+  padding: 0 18px;
   border: 1px solid transparent;
   border-radius: var(--radius-control);
-  font: 500 var(--text-sm)/1 var(--font-sans);
-  letter-spacing: -0.005em;
+  font: 600 var(--text-xs)/1 var(--font-sans);
+  letter-spacing: 0;
   white-space: nowrap;
   text-decoration: none;
   cursor: pointer;
@@ -125,12 +125,14 @@ a {
 }
 
 .btn:active {
-  transform: translateY(1px);
+  transition-duration: 0ms;
 }
+.btn-primary:active { background: color-mix(in oklab, var(--color-primary-hover), white 10%); }
+.btn-secondary:active { background: oklch(0.26 0 0); }
 
 .btn-sm {
   height: var(--control-sm);
-  padding: 0 var(--space-3);
+  padding: 0 14px;
 }
 
 .btn-xs {
@@ -142,7 +144,6 @@ a {
 .btn-primary {
   background: var(--color-primary);
   color: var(--color-on-primary);
-  box-shadow: inset 0 1px 0 var(--color-highlight);
 }
 
 .btn-primary:hover {
@@ -150,15 +151,14 @@ a {
 }
 
 .btn-secondary {
-  background: var(--color-surface);
-  border-color: var(--color-border-2);
-  color: var(--color-ink);
-  box-shadow: inset 0 1px 0 var(--color-highlight);
+  background: oklch(0.18 0 0);
+  border-color: transparent;
+  color: var(--color-ink-strong);
 }
 
 .btn-secondary:hover {
-  background: var(--color-header);
-  border-color: var(--color-border-strong);
+  background: oklch(0.24 0 0);
+  border-color: transparent;
 }
 
 .chip {
@@ -350,9 +350,7 @@ a {
   top: 0;
   z-index: 20;
   border-bottom: 1px solid var(--color-line);
-  background: color-mix(in srgb, var(--color-page) 80%, transparent);
-  backdrop-filter: saturate(150%) blur(14px);
-  -webkit-backdrop-filter: saturate(150%) blur(14px);
+  background: var(--color-page);
 }
 
 .topbar-inner {
@@ -439,16 +437,7 @@ a {
 
 /* Hero ================================================================== */
 
-.glow {
-  position: absolute;
-  inset: 0 0 auto;
-  z-index: -1;
-  height: 1000px;
-  background:
-    radial-gradient(42% 46% at 30% 0%, var(--color-glow-blue), transparent 72%),
-    radial-gradient(30% 34% at 72% 6%, var(--color-glow-violet), transparent 70%);
-  pointer-events: none;
-}
+.glow { display: none; }
 
 .hero-main {
   display: flex;
@@ -494,7 +483,6 @@ a {
   flex: none;
   border-radius: 50%;
   background: var(--color-green);
-  box-shadow: 0 0 0 3px var(--color-green-soft);
 }
 
 .announce-sep {
@@ -558,7 +546,7 @@ a {
 .shot-cell {
   isolation: isolate;
   height: 580px;
-  background: radial-gradient(50% 60% at 50% 0%, var(--color-glow-faint), transparent 75%);
+  background: none;
 }
 
 .shot-cell::before {
@@ -1029,7 +1017,7 @@ a {
   position: relative;
   height: 300px;
   overflow: clip;
-  background: radial-gradient(90% 70% at 0% 0%, var(--color-glow-faint), transparent 70%);
+  background: none;
 }
 
 .tile-shot > .win {
@@ -1117,7 +1105,7 @@ a {
 .stage {
   isolation: isolate;
   height: 540px;
-  background: radial-gradient(70% 60% at 30% 0%, var(--color-glow-faint), transparent 70%);
+  background: none;
 }
 
 .stage::before {
@@ -1628,7 +1616,7 @@ a {
 
 /* The paid plan carries the light. */
 .plan-pro {
-  background: radial-gradient(90% 55% at 50% 0%, var(--color-glow-blue), transparent 72%);
+  background: none;
 }
 
 .plan-free .plan-list .icon {
@@ -1645,7 +1633,7 @@ a {
 .cta {
   isolation: isolate;
   padding: var(--space-24) var(--cell-pad) var(--space-20);
-  background: radial-gradient(46% 70% at 50% 0%, var(--color-glow-blue), transparent 72%);
+  background: none;
   text-align: center;
 }
 
@@ -1669,13 +1657,9 @@ a {
   width: 72px;
   height: 72px;
   margin: 0 auto var(--space-8);
-  border-radius: 16px;
+  border-radius: var(--radius-control);
   background: var(--color-mark-bg);
-  box-shadow:
-    0 0 0 1px var(--color-border-2),
-    inset 0 1px 0 var(--color-highlight),
-    0 24px 48px -16px var(--color-shadow-deep),
-    0 0 64px var(--color-glow-blue);
+  box-shadow: inset 0 0 0 1px var(--color-border-2);
 }
 
 .cta-mark i {

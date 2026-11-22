@@ -1,88 +1,118 @@
-/* Astralyx Dark: the app's own default theme (client/ui/src/themes.ts,
-   sdk/js/ui/astralyx.css), in place of Tokyo Night. Black grounds,
-   neutral greys, white borders at low alpha, Astralyx's ANSI accents. The
-   web page inside the Browser window keeps its light "day" colours. */
+/* Astralyx (ui.astralyx.dev), dark: the site's whole look, over tokens.css.
+   Flat. Depth comes from lightness alone, a ladder of neutral surfaces
+   (page 0.08, card 0.13, header 0.19, group 0.23), never from shadows,
+   glows, blurs or gradients. Lines are white at a low alpha; colour comes
+   from the six named sets (solid, and soft: the colour at 18%). Inter, at
+   Astralyx's sizes. Values are astralyx-ui's theme (styles/astralyx.css). */
 
 :root {
-  /* Grounds */
-  --color-page: #050505;
-  --color-canvas: #0e0e0e;          /* the canvas */
-  --color-sidebar: #090909;
-  --color-surface: #0d0d0d;
-  --color-card: #020202;            /* a window's body, a terminal's ground */
-  --color-popover: #141414;
-  --color-header: #141414;          /* a window's header */
-  --color-header-focused: #1b1b1b;
-  --color-veil: #0e0e0eb0;
+  color-scheme: dark;
+
+  /* Grounds: the lightness ladder */
+  --color-page: oklch(0.08 0 0);
+  --color-canvas: oklch(0.1 0 0);
+  --color-sidebar: oklch(0.08 0 0);
+  --color-surface: oklch(0.13 0 0); /* --card */
+  --color-card: oklch(0.11 0 0); /* a window's body, a terminal's ground */
+  --color-popover: oklch(0.13 0 0);
+  --color-header: oklch(0.19 0 0); /* --card-header */
+  --color-header-focused: oklch(0.23 0 0); /* --group */
+  --color-veil: oklch(0.08 0 0 / 92%);
 
   /* Ink */
-  --color-ink-strong: #fafafa;
-  --color-ink: #e5e5e5;
-  --color-ink-2: #b4b4b4;
-  --color-ink-3: #8a8a8a;
-  --color-ink-4: #6b6b6b;
-  --color-title: #8a8a8a;
-  --color-gutter: #3a3a3a;
-  --color-comment: #6b6b6b;
-  --color-on-primary: #0a0a0a;
+  --color-ink-strong: oklch(0.985 0 0); /* --foreground */
+  --color-ink: oklch(0.92 0 0);
+  --color-ink-2: oklch(0.82 0 0);
+  --color-ink-3: oklch(0.708 0 0); /* --muted-foreground */
+  --color-ink-4: oklch(0.6 0 0);
+  --color-title: oklch(0.708 0 0);
+  --color-gutter: oklch(0.35 0 0);
+  --color-comment: oklch(0.55 0 0);
+  --color-on-primary: oklch(0.13 0 0); /* --primary-foreground */
 
-  /* Lines and veils */
-  --color-dots: #ffffff1c;
-  --color-dots-faint: #ffffff10;
-  --color-hairline: #ffffff12;
-  --color-border: #ffffff1f;
-  --color-border-2: #ffffff2e;
-  --color-border-strong: #ffffff66;
-  --color-input: #ffffff2b;
-  --color-hover: #ffffff0f;
-  --color-pressed: #ffffff17;
-  --color-selected: #ffffff1c;
-  --color-highlight: #ffffff0d;
-  --color-line: #1a1a1a;
-  --color-line-strong: #2e2e2e;
-  --color-grid: #ffffff08;
-  --color-wordmark: #ffffff0b;
+  /* Lines and states */
+  --color-dots: oklch(1 0 0 / 10%);
+  --color-dots-faint: oklch(1 0 0 / 6%);
+  --color-hairline: oklch(1 0 0 / 8%);
+  --color-border: oklch(1 0 0 / 12%); /* --border */
+  --color-border-2: oklch(1 0 0 / 18%);
+  --color-border-strong: oklch(1 0 0 / 40%); /* --border-active */
+  --color-input: oklch(1 0 0 / 15%); /* --input */
+  --color-hover: oklch(1 0 0 / 6%);
+  --color-pressed: oklch(1 0 0 / 9%);
+  --color-selected: oklch(1 0 0 / 11%);
+  --color-highlight: transparent; /* no glossy top edges */
+  --color-line: oklch(0.15 0 0);
+  --color-line-strong: oklch(0.27 0 0);
+  --color-grid: oklch(1 0 0 / 4%);
+  --color-wordmark: oklch(1 0 0 / 4%);
+  --color-shadow: transparent;
+  --color-shadow-soft: transparent;
+  --color-shadow-deep: transparent;
 
-  /* Accents: Astralyx's ANSI */
-  --color-blue: #5c9eff;
-  --color-cyan: #63ccde;
-  --color-green: #45b164;
-  --color-amber: #f5ae39;
-  --color-violet: #ae8aff;
-  --color-rose: #ff6568;
-  --color-orange: #ff8b5c;
-  --color-teal: #39b7cb;
-  --color-type: #39b7cb;
-  --color-operator: #63ccde;
-  --color-green-soft: #45b1642e;
-  --color-rose-soft: #ff65682e;
-  --color-blue-soft: #3082f62e;
-  --color-violet-soft: #9c6aff2e;
-  /* A neutral glow: the theme has no colour cast. */
-  --color-glow-blue: #ffffff0f;
-  --color-glow-violet: #ffffff0a;
-  --color-glow-faint: #ffffff08;
-  --color-primary: #ebebeb;
-  --color-primary-hover: #fafafa;
-  --color-select: #3082f6;
-  --color-focus: #5c9eff;
+  /* The colour sets (dark): solid, and soft at 18% */
+  --color-blue: oklch(0.62 0.19 258);
+  --color-cyan: oklch(0.72 0.11 210);
+  --color-green: oklch(0.68 0.15 150);
+  --color-amber: oklch(0.8 0.15 75);
+  --color-violet: oklch(0.65 0.22 295);
+  --color-rose: oklch(0.68 0.2 15);
+  --color-orange: oklch(0.72 0.16 50);
+  --color-teal: oklch(0.72 0.11 185);
+  --color-type: oklch(0.72 0.11 185);
+  --color-operator: oklch(0.72 0.11 210);
+  --color-green-soft: oklch(0.68 0.15 150 / 18%);
+  --color-rose-soft: oklch(0.68 0.2 15 / 18%);
+  --color-blue-soft: oklch(0.62 0.19 258 / 18%);
+  --color-violet-soft: oklch(0.65 0.22 295 / 18%);
+  /* No glows. */
+  --color-glow-blue: transparent;
+  --color-glow-violet: transparent;
+  --color-glow-faint: transparent;
+  --color-primary: oklch(0.922 0 0); /* --primary */
+  --color-primary-hover: oklch(0.82 0 0); /* --primary-hover */
+  --color-select: oklch(0.62 0.19 258);
+  --color-focus: oklch(0.556 0 0); /* --ring */
 
   /* Inside plugin windows */
-  --color-node-muted: #858585;
-  --color-node-hover: #ffffff12;
-  --color-node-sel: #3082f633;
-  --color-node-sel-idle: #ffffff1c;
-  --color-node-line: #ffffff0a;
-  --color-node-fold: #ffffff08;
-  --color-node-check: #ffffff66;
-  --color-hunk: #3082f614;
-  --color-add-line: #45b16421;
-  --color-add-gutter: #45b16438;
-  --color-add-word: #45b16457;
-  --color-del-line: #ff656821;
-  --color-del-gutter: #ff656838;
-  --color-del-word: #ff656857;
-  --color-tint-amber: #f5ae3929;
-  --color-tint-green: #45b16429;
-  --color-tint-blue: #3082f633;
+  --color-node-muted: oklch(0.65 0 0);
+  --color-node-hover: oklch(1 0 0 / 7%);
+  --color-node-sel: oklch(0.62 0.19 258 / 20%);
+  --color-node-sel-idle: oklch(1 0 0 / 11%);
+  --color-node-line: oklch(1 0 0 / 4%);
+  --color-node-fold: oklch(1 0 0 / 3%);
+  --color-node-check: oklch(1 0 0 / 40%);
+  --color-hunk: oklch(0.62 0.19 258 / 8%);
+  --color-add-line: oklch(0.68 0.15 150 / 13%);
+  --color-add-gutter: oklch(0.68 0.15 150 / 22%);
+  --color-add-word: oklch(0.68 0.15 150 / 34%);
+  --color-del-line: oklch(0.68 0.2 15 / 13%);
+  --color-del-gutter: oklch(0.68 0.2 15 / 22%);
+  --color-del-word: oklch(0.68 0.2 15 / 34%);
+  --color-tint-amber: oklch(0.8 0.15 75 / 16%);
+  --color-tint-green: oklch(0.68 0.15 150 / 16%);
+  --color-tint-blue: oklch(0.62 0.19 258 / 20%);
+
+  /* Type: Inter */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Corners: Astralyx's scale with circular corners (its own values for
+     browsers without squircles), so dots and pills stay round. */
+  --radius-chip: 6px;
+  --radius-control: 11px; /* h-9 */
+  --radius-surface: 18px; /* cards: rounded-2xl */
+  --radius-panel: 24px; /* dialogs, panels: rounded-3xl */
+  --radius-frame: 24px;
+
+  /* Controls: Astralyx's heights */
+  --control-xs: 28px;
+  --control-sm: 32px;
+  --control-md: 36px;
+  --control-lg: 40px;
+
+  /* No elevation: flat */
+  --shadow-win: none;
+  --shadow-win-focused: none;
+  --shadow-popover: none;
+  --shadow-frame: none;
 }

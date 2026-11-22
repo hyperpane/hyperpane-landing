@@ -209,7 +209,7 @@
   overflow: hidden;
   border-radius: var(--radius-chip);
   background: var(--color-day-page);
-  box-shadow: 0 0 0 1px var(--color-border), var(--shadow-popover);
+  box-shadow: 0 0 0 1px var(--color-border);
 }
 
 /* The page in the phone: the app's board list, at a phone's size. */
