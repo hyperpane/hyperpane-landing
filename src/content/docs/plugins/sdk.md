@@ -162,6 +162,8 @@ A call to a plugin in `uses` that isn't installed fails with a message saying so
 |---|---|
 | `setData(key, value \| null)` | Sets a key of the window's shared data, saved in the project. `null` removes it. Keys starting with `hyperpane.` are the app's. |
 | `setTitle(title)` | Sets its title. A name the user gave it stays. |
+| `setHeaderColor(color \| null)` | Its header's color (`#rrggbb`): the header, its icon's tile and its focused border. `null`: the theme's. |
+| `setDescription(text \| null)` | A line under its title in the window's header: where it points, what it shows. `null` removes it. |
 | `setIcon(svg \| null)` | An SVG icon for this window (at most 64 KB). `null` goes back to the type's icon. |
 | `setMenu(items: MenuItem[])` | Items shown above the app's own in the window's menu. Choosing one sends a `menu` event. |
 | `setCloseQuestion(question \| null)` | A question asked before the window closes (unsaved changes). |
@@ -323,11 +325,13 @@ useEffect(
 
 | Component | What it is |
 |---|---|
-| `ToolButton` | A 24px square icon button for a window's toolbar: `label`, `icon` (a Lucide icon), `onClick`, `active`, `disabled`. |
-| `NodeButton` | A 24px text button. `variant`: `default`, `primary`, `ghost`, `danger`. |
-| `NodeInput` | A text field that fits a toolbar. |
+| `ToolButton` | A 28px square icon button for a window's toolbar: `label`, `icon` (a Lucide icon), `onClick`, `active`, `disabled`. |
+| `NodeButton` | A 28px text button. `variant`: `default`, `primary`, `ghost`, `danger`. |
+| `NodeInput` | A text field that fits a toolbar. `icon` puts one inside at the start, for a search field. |
+| `NodeTextarea` | A field of several lines that looks like `NodeInput`: a description, a message, a body. |
 | `NodeSelect` | A choice that fits a toolbar: `value`, `options`, `onChange`. |
 | `NodeMessage` | A message in the middle of a window (empty, loading, failed). `error` turns it red. |
+| `Empty` | An empty state: `icon`, `title`, `description`, `action`. `size="compact"` for a pane inside a window: smaller, and no border. |
 | `useMenu()` | A right-click menu at the pointer: `menu.open(e, items)`, and render `menu.element`. In a frame, the app draws it. `null` items are separators. |
 | `ContextMenu` | Its children, with a right-click menu (`items`). |
 | `useAsync(load, deps)` | `{ value, error, loading, reload }` for a promise. |

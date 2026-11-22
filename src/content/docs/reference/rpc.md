@@ -294,6 +294,8 @@ The app checks every request before acting on it. "Own window" means the frame's
 |---|---|---|
 | `window.setData` | `{key, value: string \| null}` | Own window. `null` removes the key. Keys starting with `hyperpane.` are reserved for the app. |
 | `window.setTitle` | `{title}` | Own window. A name the user gave the window stays. |
+| `window.setDescription` | `{description: string \| null}` | Own window. A line under its title in the window's header (at most 200 characters); `null` removes it. |
+| `window.setHeaderColor` | `{color: string \| null}` | Own window. `#rrggbb`: its header tinted with it, its icon's tile and its border while focused too; `null`: the theme's. The user can pick another in the window's menu. |
 | `window.setIcon` | `{svg: string \| null}` | An SVG (24-unit box, stroked), at most 64 KB. `null` restores the type's icon. |
 | `window.setMenu` | `{items: MenuItem[]}` | Items shown above the app's own in the window's menu. Choosing one sends a `menu` event. |
 | `window.setCloseQuestion` | `{question: string \| null}` | Asked before the window closes. While set, the frame is kept alive. |
