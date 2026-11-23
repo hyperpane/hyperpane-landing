@@ -1,0 +1,14 @@
+---
+// An isometric drawing (src/iso.ts): a scene by name, as inline SVG.
+import { drawing } from "../iso";
+interface Props {
+  kind: string;
+  /** Without its callout, framed round the thing (a small card). */
+  compact?: boolean;
+  class?: string;
+}
+const { kind, compact = false, class: cls } = Astro.props;
+const d = drawing(kind, compact);
+---
+
+<svg class:list={["iso", cls]} viewBox={d.view} aria-hidden="true" set:html={d.svg} />

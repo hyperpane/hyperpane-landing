@@ -1,0 +1,90 @@
+/* Isometric drawings (src/iso.ts): shaded faces, grey edges, one lit part
+ * with its glow, a callout, readouts. */
+
+.iso { display: block; width: 100%; height: auto; overflow: visible; --acc: oklch(0.72 0.17 48); --acc-d: oklch(0.42 0.12 42); }
+.iso :is(polygon, path, ellipse) { stroke-linejoin: round; }
+
+/* Faces: top lightest, front-right, front-left darkest; edges grey */
+.iso .iso-t { fill: oklch(0.235 0.004 270); stroke: oklch(0.47 0.006 270); stroke-width: 1.3; }
+.iso .iso-r { fill: oklch(0.185 0.004 270); stroke: oklch(0.47 0.006 270); stroke-width: 1.3; }
+.iso .iso-l { fill: oklch(0.155 0.004 270); stroke: oklch(0.47 0.006 270); stroke-width: 1.3; }
+.iso .iso-tk { fill: oklch(0.175 0.003 270); stroke: oklch(0.36 0.005 270); stroke-width: 1.2; }
+.iso .iso-rk { fill: oklch(0.14 0.003 270); stroke: oklch(0.36 0.005 270); stroke-width: 1.2; }
+.iso .iso-lk { fill: oklch(0.12 0.003 270); stroke: oklch(0.36 0.005 270); stroke-width: 1.2; }
+.iso .iso-ta { fill: oklch(0.43 0.125 44); stroke: var(--acc); stroke-width: 1.6; }
+.iso .iso-ra { fill: oklch(0.34 0.1 42); stroke: var(--acc); stroke-width: 1.6; }
+.iso .iso-la { fill: oklch(0.28 0.08 40); stroke: var(--acc); stroke-width: 1.6; }
+.iso .iso-lit { filter: drop-shadow(0 0 14px oklch(0.72 0.17 48 / 0.45)); }
+
+/* Things drawn on faces */
+.iso .iso-face { fill: oklch(0.27 0.004 270); stroke: oklch(0.4 0.005 270); stroke-width: 1; }
+.iso .iso-face-a { fill: oklch(0.43 0.125 44); stroke: var(--acc); stroke-width: 1.2; }
+.iso .iso-screen { fill: oklch(0.13 0.003 270); stroke: oklch(0.42 0.005 270); stroke-width: 1; }
+.iso .iso-head { fill: oklch(0.27 0.004 270); stroke: none; }
+.iso .iso-head-a { fill: oklch(0.52 0.15 46); stroke: none; }
+.iso .iso-bar { stroke: oklch(1 0 0 / 0.2); stroke-width: 2.4; stroke-linecap: round; fill: none; }
+.iso .iso-bar-on { stroke: oklch(0.86 0.09 55); stroke-width: 2.4; stroke-linecap: round; fill: none; }
+.iso .iso-faint { opacity: 0.55; }
+.iso .iso-bar-lit { stroke: var(--acc); stroke-width: 3; stroke-linecap: round; }
+.iso .iso-cursor { fill: var(--acc); animation: iso-blink 1.1s steps(1) infinite; }
+.iso .iso-ln { stroke: oklch(1 0 0 / 0.28); stroke-width: 1.2; fill: none; }
+.iso .iso-rail { stroke: oklch(1 0 0 / 0.35); stroke-width: 2; fill: none; }
+.iso .iso-rail-a { stroke: var(--acc); stroke-width: 2; fill: none; stroke-dasharray: 1 0; }
+.iso .iso-rib { stroke: oklch(0.82 0.1 55 / 0.5); stroke-width: 1; }
+.iso .iso-unit { fill: oklch(0.13 0.003 270); stroke: oklch(0.38 0.005 270); stroke-width: 1; }
+.iso .iso-led { fill: oklch(0.78 0.16 150); animation: iso-blink 1.6s steps(2) infinite; }
+.iso .iso-cable { stroke: oklch(1 0 0 / 0.25); stroke-width: 2; fill: none; stroke-dasharray: 5 5; animation: iso-dash 1.2s linear infinite; }
+.iso .iso-shadow { fill: oklch(0 0 0 / 0.45); }
+.iso .iso-drop { stroke: oklch(0.72 0.17 48 / 0.5); stroke-width: 1; stroke-dasharray: 3 3; }
+.iso .iso-grid { fill: oklch(1 0 0 / 0.14); }
+.iso .iso-dot { fill: oklch(0.8 0 0); }
+
+/* Type in perspective */
+.iso .iso-tx { font-family: var(--font-sans); fill: oklch(1 0 0 / 0.58); font-weight: 500; }
+.iso .iso-tx-on { fill: oklch(0.98 0.02 60); }
+.iso .iso-edge { fill: oklch(1 0 0 / 0.75); }
+.iso .iso-k { fill: oklch(1 0 0 / 0.42); }
+.iso .iso-big { font-weight: 650; fill: var(--c-ink); letter-spacing: -0.04em; }
+.iso .iso-unit-t { fill: oklch(1 0 0 / 0.55); font-size: 0.45em; }
+.iso .iso-rl2 { fill: oklch(1 0 0 / 0.5); }
+.iso .iso-z { fill: oklch(1 0 0 / 0.5); animation: iso-zz 3s var(--ease-in-out) infinite; }
+.iso .iso-z2 { animation-delay: 1.5s; }
+
+/* The callout: flat, as a spec sheet */
+.iso .iso-lead { fill: none; stroke: oklch(1 0 0 / 0.45); stroke-width: 1; }
+.iso .iso-pin { fill: var(--acc); stroke: oklch(0.13 0 0); stroke-width: 2; }
+.iso .iso-ct { font: 600 13px var(--font-sans); fill: var(--c-ink); letter-spacing: -0.01em; }
+.iso .iso-code { font: 500 11px var(--font-mono); fill: var(--acc); }
+.iso .iso-ck { font: 400 11.5px var(--font-sans); fill: oklch(1 0 0 / 0.42); }
+.iso .iso-cv { font: 400 11.5px var(--font-sans); fill: oklch(1 0 0 / 0.82); }
+
+/* A readout */
+.iso .iso-rl { font: 400 12px var(--font-sans); fill: oklch(1 0 0 / 0.5); }
+.iso .iso-rv { font: 650 44px var(--font-sans); fill: var(--c-ink); letter-spacing: -0.045em; }
+.iso .iso-ru { font: 500 18px var(--font-sans); fill: oklch(1 0 0 / 0.55); letter-spacing: 0; }
+.iso .iso-rn { font: 400 11.5px var(--font-sans); fill: oklch(1 0 0 / 0.5); }
+
+/* Motion: in, once in view; the lit part breathes; a request travels */
+.iso .iso-call, .iso .iso-read { opacity: 0; transition: opacity 700ms var(--ease-out) 500ms; }
+:is(.is-in, [data-on]) .iso .iso-call, :is(.is-in, [data-on]) .iso .iso-read { opacity: 1; }
+.iso .iso-hi { transform: translateY(6px); opacity: 0.4; transition: transform 900ms var(--ease-out) 200ms, opacity 700ms var(--ease-out) 200ms; }
+:is(.is-in, [data-on]) .iso .iso-hi { transform: none; opacity: 1; }
+:is(.is-in, [data-on]) .iso .iso-lit { animation: iso-glow 3.2s var(--ease-in-out) 1.2s infinite; }
+.iso .iso-move { animation: iso-move 3s var(--ease-in-out) infinite; }
+@keyframes iso-glow { 50% { filter: drop-shadow(0 0 22px oklch(0.72 0.17 48 / 0.7)); } }
+@keyframes iso-move { 0%, 100% { transform: translate(-30px, -17px); } 50% { transform: translate(40px, 23px); } }
+@keyframes iso-blink { 50% { opacity: 0.25; } }
+@keyframes iso-dash { to { stroke-dashoffset: -10; } }
+@keyframes iso-zz { 0% { opacity: 0; transform: translateY(6px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px); } }
+
+/* The always-on scene: the lid */
+.iso .lid-open, .iso .lid-shut { transition: opacity 600ms var(--ease-in-out); }
+.iso .lid-shut { opacity: 0; }
+.detach[data-phase="closed"] .iso .lid-open { opacity: 0; }
+.detach[data-phase="closed"] .iso .lid-shut { opacity: 1; }
+.detach[data-phase="closed"] .iso .iso-cable { animation-play-state: paused; opacity: 0.35; }
+
+@media (prefers-reduced-motion: reduce) {
+  .iso .iso-hi, .iso .iso-call, .iso .iso-read { transform: none; opacity: 1; }
+  .iso .iso-move { animation: none; }
+}

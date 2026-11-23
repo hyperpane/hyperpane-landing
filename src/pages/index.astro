@@ -3,7 +3,7 @@
 // it is the real app (public/shots: captured from a running build, private
 // details blurred); around them, the page's words, as they were.
 import Base from "../layouts/Base.astro";
-import Draw from "../components/Draw.astro";
+import Iso from "../components/Iso.astro";
 
 const shot = (name: string) => `/shots/${name}.webp`;
 
@@ -180,7 +180,7 @@ const systems = [
       <div class="roles-canvas" id="roles-canvas" role="tabpanel" aria-live="polite" data-reveal>
         {roles.map((r, i) => (
           <div class="rset" data-set={r.id} data-on={i === 0 ? "" : undefined} aria-hidden={i === 0 ? undefined : "true"}>
-            <Draw kind={`role-${r.id}`} hue={r.hue} />
+            <Iso kind={`role-${r.id}`} />
           </div>
         ))}
       </div>
@@ -199,7 +199,7 @@ const systems = [
       <div class="builtin">
         {builtIn.map((b, i) => (
           <article class="bi" data-reveal style={`--d:${i * 80}ms`}>
-            <div class="bi-shot"><Draw kind={b.kind} hue={b.hue} /></div>
+            <div class="bi-shot"><Iso kind={b.kind} compact /></div>
             <div class="bi-copy">
               <span class="tile-icon" aria-hidden="true"><svg class="icon"><use href={`#${b.icon}`}></use></svg></span>
               <h4>{b.name}</h4>
@@ -233,7 +233,7 @@ const systems = [
               </a>
             </header>
             <p>{p.text}</p>
-            <div class="pl-art-box"><Draw kind={p.kind ?? "pets"} hue={p.hue} /></div>
+            <div class="pl-art-box"><Iso kind={p.kind ?? "pets"} compact={p.size !== "wide"} /></div>
           </article>
         ))}
         <a class="pl pl-more" href="/docs/plugins/writing" data-reveal style="--d:140ms">
@@ -258,36 +258,7 @@ const systems = [
     </header>
 
     <div class="detach" data-detach data-reveal>
-      <svg class="scene" viewBox="0 0 760 300" aria-hidden="true">
-        <!-- the app: a laptop whose lid closes -->
-        <g class="scene-lid">
-          <rect class="bp-l" pathLength="1" x="60" y="40" width="250" height="160" rx="10" />
-          <g class="screen-glow">
-            <rect class="bp-l" pathLength="1" x="84" y="66" width="96" height="64" rx="5" />
-            <rect class="bp-a" pathLength="1" x="192" y="66" width="96" height="40" rx="5" />
-            <rect class="bp-l" pathLength="1" x="192" y="116" width="96" height="62" rx="5" />
-            <path class="bp-a" pathLength="1" d="M204 80l9 7-9 7M220 94h18" />
-          </g>
-        </g>
-        <path class="bp-l" pathLength="1" d="M40 206h290l-14 18H54z" />
-        <text class="bp-t" x="60" y="252">app</text>
-        <text class="bp-t" x="60" y="268" data-app-state>open</text>
-
-        <!-- the link -->
-        <path class="link" id="detach-link" d="M330 140 C 400 140, 420 140, 480 140" />
-        <circle class="packet" r="3.5"><animateMotion dur="1.6s" repeatCount="indefinite" path="M330 140 C 400 140, 420 140, 480 140" /></circle>
-
-        <!-- the server, running -->
-        <rect class="bp-l" pathLength="1" x="480" y="50" width="220" height="56" rx="8" />
-        <rect class="bp-l" pathLength="1" x="480" y="116" width="220" height="56" rx="8" />
-        <rect class="bp-l" pathLength="1" x="480" y="182" width="220" height="56" rx="8" />
-        <circle class="led" cx="500" cy="78" r="3.5" /><circle class="led" cx="500" cy="144" r="3.5" /><circle class="led" cx="500" cy="210" r="3.5" />
-        <path class="bp-c" d="M520 78h120M520 144h90M520 210h140" />
-        <path class="prog-track" d="M480 262h220" />
-        <path class="prog" pathLength="1" d="M480 262h220" />
-        <text class="bp-t" x="480" y="286" data-uptime>build · 0%</text>
-        <text class="bp-t done" x="700" y="286" text-anchor="end">✓ done</text>
-      </svg>
+      <Iso kind="always" />
       <p class="detach-caption" data-caption>The app is open: the build runs on your server.</p>
     </div>
 

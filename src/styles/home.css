@@ -159,14 +159,6 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
   border-radius: var(--r-panel); overflow: hidden;
   border: 1px solid var(--c-line-2);
   background-color: oklch(0.105 0 0);
-  /* A plan's grid: fine lines, a stronger one every fifth */
-  background-image:
-    linear-gradient(oklch(1 0 0 / 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(1 0 0 / 0.045) 1px, transparent 1px),
-    linear-gradient(oklch(1 0 0 / 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, oklch(1 0 0 / 0.02) 1px, transparent 1px);
-  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
-  background-position: -1px -1px;
 }
 .rset {
   position: absolute; inset: 0; display: grid; place-items: center; padding: 5% 4%; pointer-events: none;
@@ -194,11 +186,9 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
 .bi-shot {
   position: relative; height: 210px; overflow: hidden; border-bottom: 1px solid var(--c-line);
   background-color: oklch(0.11 0 0);
-  background-image: linear-gradient(oklch(1 0 0 / 0.035) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 0.035) 1px, transparent 1px);
-  background-size: 24px 24px;
 }
 .bi-shot { display: grid; place-items: center; padding: 18px 24px; }
-.bi-shot .bp { max-height: 100%; }
+.bi-shot .iso { width: 100%; height: 100%; }
 .bi-copy { display: flex; flex-direction: column; gap: 10px; padding: var(--s-6); }
 .bi-copy h4 { font-size: var(--text-xl); letter-spacing: -0.02em; }
 .bi-copy p { color: var(--c-ink-3); font-size: var(--text-sm); }
@@ -235,8 +225,8 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
 .pl > p { color: var(--c-ink-3); font-size: var(--text-sm); max-width: 34ch; }
 .pl-shot { position: relative; flex: 1; min-height: 170px; margin: 6px -20px -20px; overflow: hidden; }
 .pl-art-box { flex: 1; display: grid; place-items: center; min-height: 150px; padding: 8px 4px 0; }
-.pl-art-box .bp { max-width: 300px; }
-.pl-wide .pl-art-box .bp { max-width: 340px; }
+.pl-art-box .iso { max-height: 220px; }
+.pl-wide .pl-art-box .iso, .pl-tall .pl-art-box .iso { max-height: none; }
 .pl-draw { margin: auto -20px -20px; width: calc(100% + 40px); height: auto; }
 .pl-activity { color: var(--hue); }
 .pl-activity .grid { stroke: var(--c-line); stroke-width: 1; fill: none; }
@@ -268,8 +258,6 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
   display: block;
   padding: clamp(24px, 4vw, 56px); border-radius: var(--r-stage);
   background-color: var(--c-ground); border: 1px solid var(--c-line);
-  background-image: linear-gradient(oklch(1 0 0 / 0.04) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 0.04) 1px, transparent 1px);
-  background-size: 24px 24px;
 }
 .detach-wire { position: relative; height: 2px; margin-inline: 10px; background: repeating-linear-gradient(90deg, var(--c-line-3) 0 6px, transparent 6px 12px); }
 .detach-wire .pulse { position: absolute; top: -3px; left: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--h-green); animation: travel 1.8s var(--ease-in-out) infinite; }

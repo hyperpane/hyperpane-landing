@@ -84,35 +84,30 @@
   // Always on: the app closes, the server keeps building, the app comes back
   const scene = document.querySelector('[data-detach]');
   if (scene) {
-    const prog = scene.querySelector('.prog');
-    const state = scene.querySelector('[data-app-state]');
-    const label = scene.querySelector('[data-uptime]');
+    const pct = scene.querySelector('[data-pct]');
+    const left = scene.querySelector('[data-left]');
+    const app = scene.querySelector('[data-app]');
     const caption = scene.querySelector('[data-caption]');
     let p = 0;
+    let secs = 0;
     let tick = null;
     const say = (text) => {
       caption.style.opacity = '0';
       setTimeout(() => { caption.textContent = text; caption.style.opacity = '1'; }, 200);
     };
-    const set = (v) => {
-      p = v;
-      prog.style.strokeDashoffset = String(1 - p);
-      label.textContent = `build · ${Math.round(p * 100)}%`;
-    };
+    const phase = (ph, text) => { scene.dataset.phase = ph; app.textContent = ph; say(text); };
     const step = () => {
-      if (p >= 1) {
-        // A pause on the result, then again.
-        scene.removeAttribute('data-done');
-        set(0);
-        scene.dataset.phase = 'open'; state.textContent = 'open';
-        say('The app is open: the build runs on your server.');
-        return;
+      if (p >= 100) { p = 0; secs = 0; phase('open', 'The app is open: the build runs on your server.'); }
+      else {
+        p = Math.min(100, p + 4);
+        secs += 11;
+        if (p === 20) phase('closed', 'You quit hyperpane. The build doesn’t notice.');
+        if (p === 100) phase('open', 'Open it again: same windows, with everything they printed meanwhile.');
       }
-      set(Math.min(1, p + 0.08));
-      if (p > 0.2 && p < 0.25) { scene.dataset.phase = 'closed'; state.textContent = 'closed'; say('You quit hyperpane. The build doesn’t notice.'); }
-      if (p >= 1) { scene.dataset.phase = 'open'; scene.setAttribute('data-done', ''); state.textContent = 'open'; say('Open it again: same windows, with everything they printed meanwhile.'); }
+      pct.textContent = String(p);
+      left.textContent = p >= 100 ? 'done · ✓ 24 tests passed' : `running · ${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
     };
-    const start = () => { if (tick) return; scene.dataset.phase = 'open'; say('The app is open: the build runs on your server.'); tick = setInterval(step, reduce ? 1600 : 700); };
+    const start = () => { if (tick) return; phase('open', 'The app is open: the build runs on your server.'); tick = setInterval(step, reduce ? 900 : 260); };
     const pause = () => { clearInterval(tick); tick = null; };
     new IntersectionObserver(([e]) => (e.isIntersecting ? start() : pause()), { threshold: 0.3 }).observe(scene);
   }
