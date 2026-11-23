@@ -159,10 +159,20 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
   border-radius: var(--r-panel); overflow: hidden;
   border: 1px solid var(--c-line-2);
   background-color: oklch(0.105 0 0);
-  background-image: radial-gradient(oklch(1 0 0 / 0.08) 1px, transparent 1.4px);
-  background-size: 22px 22px;
+  /* A plan's grid: fine lines, a stronger one every fifth */
+  background-image:
+    linear-gradient(oklch(1 0 0 / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 0.045) 1px, transparent 1px),
+    linear-gradient(oklch(1 0 0 / 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 0.02) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+  background-position: -1px -1px;
 }
-.rset { position: absolute; inset: 0; pointer-events: none; }
+.rset {
+  position: absolute; inset: 0; display: grid; place-items: center; padding: 5% 4%; pointer-events: none;
+  opacity: 0; transition: opacity 420ms var(--ease-out);
+}
+.rset[data-on] { opacity: 1; }
 .rw {
   position: absolute; left: var(--x); top: var(--y); width: var(--w);
   opacity: 0; transform: translateY(1.6cqw);
@@ -181,8 +191,14 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
   transition: border-color var(--dur-2) var(--ease-out), transform var(--dur-3) var(--ease-out);
 }
 .bi:hover { border-color: var(--c-line-2); background: var(--c-card); }
-.bi-shot { position: relative; height: 210px; overflow: hidden; background: oklch(0.105 0 0); border-bottom: 1px solid var(--c-line); }
-.bi-shot .mw { position: absolute; left: 22px; top: 22px; width: 380px; }
+.bi-shot {
+  position: relative; height: 210px; overflow: hidden; border-bottom: 1px solid var(--c-line);
+  background-color: oklch(0.11 0 0);
+  background-image: linear-gradient(oklch(1 0 0 / 0.035) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 0.035) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.bi-shot { display: grid; place-items: center; padding: 18px 24px; }
+.bi-shot .bp { max-height: 100%; }
 .bi-copy { display: flex; flex-direction: column; gap: 10px; padding: var(--s-6); }
 .bi-copy h4 { font-size: var(--text-xl); letter-spacing: -0.02em; }
 .bi-copy p { color: var(--c-ink-3); font-size: var(--text-sm); }
@@ -218,12 +234,9 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
 .pl-gh:hover { color: var(--c-ink); background: var(--c-hover); }
 .pl > p { color: var(--c-ink-3); font-size: var(--text-sm); max-width: 34ch; }
 .pl-shot { position: relative; flex: 1; min-height: 170px; margin: 6px -20px -20px; overflow: hidden; }
-.pl-shot .mw {
-  /* One size on every card, running off its edge as a window off a screen */
-  position: absolute; left: 20px; top: 0; width: 400px;
-}
-.pl-wide .pl-shot .mw { width: 460px; }
-.pl-tall .pl-shot .mw { width: 440px; }
+.pl-art-box { flex: 1; display: grid; place-items: center; min-height: 150px; padding: 8px 4px 0; }
+.pl-art-box .bp { max-width: 300px; }
+.pl-wide .pl-art-box .bp { max-width: 340px; }
 .pl-draw { margin: auto -20px -20px; width: calc(100% + 40px); height: auto; }
 .pl-activity { color: var(--hue); }
 .pl-activity .grid { stroke: var(--c-line); stroke-width: 1; fill: none; }
@@ -252,37 +265,12 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
 .always { margin-top: var(--section); }
 .detach {
   position: relative; margin-top: var(--s-16);
-  display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(40px, 0.25fr) minmax(0, 1fr); align-items: center; gap: 0;
+  display: block;
   padding: clamp(24px, 4vw, 56px); border-radius: var(--r-stage);
-  background: var(--c-ground); border: 1px solid var(--c-line);
-  background-image: radial-gradient(oklch(1 0 0 / 0.06) 1px, transparent 1.4px); background-size: 22px 22px;
+  background-color: var(--c-ground); border: 1px solid var(--c-line);
+  background-image: linear-gradient(oklch(1 0 0 / 0.04) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
-.detach-app { position: relative; perspective: 1400px; }
-.lid {
-  position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--c-line-2);
-  aspect-ratio: 2880 / 1730; transform-origin: 50% 100%;
-  transition: transform 900ms var(--ease-in-out), opacity 700ms var(--ease-in-out), filter 700ms var(--ease-in-out);
-  box-shadow: 0 30px 80px -40px oklch(0 0 0 / 0.9);
-}
-.lid { display: grid; grid-template-columns: 22% minmax(0, 1fr); gap: 2%; padding: 2.4%; background: var(--c-frame); }
-.lid-side { display: flex; flex-direction: column; gap: 7%; padding-top: 10%; }
-.lid-side i { display: block; height: 5%; border-radius: 4px; background: oklch(1 0 0 / 0.07); }
-.lid-side i:first-child { width: 60%; }
-.lid-side i.on { background: oklch(1 0 0 / 0.14); }
-.lid-canvas {
-  position: relative; border-radius: 10px; border: 1px solid var(--c-line); background-color: oklch(0.105 0 0);
-  background-image: radial-gradient(oklch(1 0 0 / 0.08) 1px, transparent 1.4px); background-size: 14px 14px; overflow: hidden;
-}
-.lid-win { position: absolute; transition: opacity 500ms var(--ease-out); }
-.lid-win-1 { left: 5%; top: 7%; width: 52%; }
-.lid-win-2 { left: 40%; top: 42%; width: 56%; }
-.detach-state {
-  position: absolute; left: 50%; bottom: -14px; transform: translate(-50%, 100%);
-  padding: 6px 12px; border-radius: 999px; border: 1px solid var(--c-line-2); background: var(--c-panel);
-  font: 500 var(--text-xs) / 1 var(--font-sans); color: var(--c-ink-2); white-space: nowrap;
-}
-.detach[data-phase="closed"] .lid { transform: rotateX(-82deg); opacity: 0.25; filter: brightness(0.4); }
-.detach[data-phase="closed"] .lid-win { opacity: 0.2; }
 .detach-wire { position: relative; height: 2px; margin-inline: 10px; background: repeating-linear-gradient(90deg, var(--c-line-3) 0 6px, transparent 6px 12px); }
 .detach-wire .pulse { position: absolute; top: -3px; left: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--h-green); animation: travel 1.8s var(--ease-in-out) infinite; }
 .detach[data-phase="closed"] .detach-wire .pulse { background: var(--c-ink-4); animation-play-state: paused; }

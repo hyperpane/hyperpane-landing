@@ -81,61 +81,39 @@
 
   // Plugins' drawings start as they come into view (data-reveal adds is-in).
 
-  // Always on: the app closes, the server keeps going, the app comes back --
+  // Always on: the app closes, the server keeps building, the app comes back
   const scene = document.querySelector('[data-detach]');
   if (scene) {
-    const log = scene.querySelector('[data-log]');
-    const meter = scene.querySelector('[data-meter]');
-    const uptime = scene.querySelector('[data-uptime]');
+    const prog = scene.querySelector('.prog');
     const state = scene.querySelector('[data-app-state]');
+    const label = scene.querySelector('[data-uptime]');
     const caption = scene.querySelector('[data-caption]');
-    const lines = [
-      '<i>$</i> npm run build',
-      'vite v7.1.4 building for production…',
-      'transforming (184) src/routes/orders.ts',
-      'transforming (412) src/server.ts',
-      '<b>✓</b> 412 modules transformed.',
-      'rendering chunks (12)…',
-      'computing gzip size…',
-      'dist/server.js   48.21 kB │ gzip: 14.02 kB',
-      '<i>$</i> npm test',
-      '<b>✓</b> orders › creates an order (12 ms)',
-      '<b>✓</b> products › lists products (8 ms)',
-      '<b>✓</b> health › answers ok (2 ms)',
-      'Tests  <b>24 passed</b> (24)',
-      '<b>✓</b> built in 41.8s',
-    ];
-    let step = 0;
-    let seconds = 0;
-    let running = false;
+    let p = 0;
     let tick = null;
-    const phase = (p, text, label) => {
-      scene.dataset.phase = p;
+    const say = (text) => {
       caption.style.opacity = '0';
       setTimeout(() => { caption.textContent = text; caption.style.opacity = '1'; }, 200);
-      state.textContent = label;
     };
-    const add = () => {
-      const span = document.createElement('span');
-      span.innerHTML = lines[step % lines.length];
-      log.append(span);
-      while (log.children.length > 9) log.firstElementChild.remove();
-      meter.style.width = `${((step % lines.length) + 1) / lines.length * 100}%`;
-      step++;
-      if (step % lines.length === 3) phase('closed', 'You quit hyperpane. The build doesn’t notice.', 'App closed');
-      if (step % lines.length === 0) {
-        phase('open', 'Open it again: same windows, with everything they printed meanwhile.', 'App open');
-        setTimeout(() => { log.textContent = ''; }, 2600);
+    const set = (v) => {
+      p = v;
+      prog.style.strokeDashoffset = String(1 - p);
+      label.textContent = `build · ${Math.round(p * 100)}%`;
+    };
+    const step = () => {
+      if (p >= 1) {
+        // A pause on the result, then again.
+        scene.removeAttribute('data-done');
+        set(0);
+        scene.dataset.phase = 'open'; state.textContent = 'open';
+        say('The app is open: the build runs on your server.');
+        return;
       }
+      set(Math.min(1, p + 0.08));
+      if (p > 0.2 && p < 0.25) { scene.dataset.phase = 'closed'; state.textContent = 'closed'; say('You quit hyperpane. The build doesn’t notice.'); }
+      if (p >= 1) { scene.dataset.phase = 'open'; scene.setAttribute('data-done', ''); state.textContent = 'open'; say('Open it again: same windows, with everything they printed meanwhile.'); }
     };
-    const loop = () => {
-      seconds += 7;
-      const m = Math.floor(seconds / 60);
-      uptime.textContent = `running · ${m}:${String(seconds % 60).padStart(2, '0')}`;
-      add();
-    };
-    const start = () => { if (running) return; running = true; phase('open', 'The app is open: the build runs on your server.', 'App open'); tick = setInterval(loop, reduce ? 2200 : 1300); loop(); };
-    const pause = () => { running = false; clearInterval(tick); };
+    const start = () => { if (tick) return; scene.dataset.phase = 'open'; say('The app is open: the build runs on your server.'); tick = setInterval(step, reduce ? 1600 : 700); };
+    const pause = () => { clearInterval(tick); tick = null; };
     new IntersectionObserver(([e]) => (e.isIntersecting ? start() : pause()), { threshold: 0.3 }).observe(scene);
   }
 

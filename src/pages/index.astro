@@ -3,7 +3,7 @@
 // it is the real app (public/shots: captured from a running build, private
 // details blurred); around them, the page's words, as they were.
 import Base from "../layouts/Base.astro";
-import Win from "../components/Win.astro";
+import Draw from "../components/Draw.astro";
 
 const shot = (name: string) => `/shots/${name}.webp`;
 
@@ -45,36 +45,36 @@ type Tint = "green" | "blue" | "violet" | "amber" | "rose";
 const w = (kind: Kind, x: number, y: number, width: number, tint?: Tint) => ({ kind, x, y, w: width, tint });
 const roles = [
   {
-    id: "engineers", name: "Engineers", icon: "i-code",
+    id: "engineers", hue: "green" as const, name: "Engineers", icon: "i-code",
     text: "Editor, terminal and Git side by side: laid out like a desk, not hidden in tabs.",
     wins: [w("editor", 3, 6, 44), w("terminal", 50, 6, 46, "green"), w("git", 54, 52, 40, "blue")],
   },
   {
-    id: "frontend", name: "Frontend & design", icon: "i-browser",
+    id: "frontend", hue: "cyan" as const, name: "Frontend & design", icon: "i-browser",
     text: "Your app in a real browser window, phone and desktop sizes, next to the code that draws it.",
     wins: [w("browser", 3, 6, 55), w("editor", 61, 6, 36), w("explorer", 61, 48, 36)],
   },
   {
-    id: "devops", name: "DevOps & SRE", icon: "i-server",
+    id: "devops", hue: "teal" as const, name: "DevOps & SRE", icon: "i-server",
     text: "Terminals on every machine you run, with containers and live activity, in one place.",
     wins: [w("containers", 3, 6, 52), w("tunnels", 58, 6, 39), w("terminal", 38, 50, 48, "green")],
   },
   {
-    id: "data", name: "Backend & data", icon: "i-database",
+    id: "data", hue: "violet" as const, name: "Backend & data", icon: "i-database",
     text: "Your databases and APIs next to the code that uses them: query, call, compare.",
     wins: [w("data", 3, 6, 54), w("editor", 62, 4, 34), w("requests", 48, 42, 46)],
   },
   {
-    id: "agents", name: "AI agents", icon: "i-bot",
+    id: "agents", hue: "violet" as const, name: "AI agents", icon: "i-bot",
     text: "Agents open terminals, type and read the screen, while you watch every window they touch.",
     wins: [w("agent", 3, 6, 50, "violet"), w("terminal", 56, 6, 40, "green"), w("browser", 44, 48, 44)],
   },
 ];
 
 const builtIn = [
-  { name: "Terminal", icon: "i-terminal", kind: "terminal" as Kind, tint: "green" as Tint, text: "Your shell, on any of your machines, that keeps running when you close the app." },
-  { name: "Editor", icon: "i-editor", kind: "editor" as Kind, tint: undefined, text: "Any file, with highlighting, find and replace and multiple cursors." },
-  { name: "Explorer", icon: "i-explorer", kind: "explorer" as Kind, tint: undefined, text: "Your folders as a list: sort, search, drag to move, open in the Editor." },
+  { name: "Terminal", icon: "i-terminal", kind: "terminal", hue: "green" as const, text: "Your shell, on any of your machines, that keeps running when you close the app." },
+  { name: "Editor", icon: "i-editor", kind: "editor", hue: "violet" as const, text: "Any file, with highlighting, find and replace and multiple cursors." },
+  { name: "Explorer", icon: "i-explorer", kind: "explorer", hue: "blue" as const, text: "Your folders as a list: sort, search, drag to move, open in the Editor." },
 ];
 
 const plugins = [
@@ -180,11 +180,7 @@ const systems = [
       <div class="roles-canvas" id="roles-canvas" role="tabpanel" aria-live="polite" data-reveal>
         {roles.map((r, i) => (
           <div class="rset" data-set={r.id} data-on={i === 0 ? "" : undefined} aria-hidden={i === 0 ? undefined : "true"}>
-            {r.wins.map((win, n) => (
-              <div class="rw" style={`--x:${win.x}%;--y:${win.y}%;--w:${win.w}%;--n:${n}`}>
-                <Win kind={win.kind} tint={win.tint} />
-              </div>
-            ))}
+            <Draw kind={`role-${r.id}`} hue={r.hue} />
           </div>
         ))}
       </div>
@@ -203,7 +199,7 @@ const systems = [
       <div class="builtin">
         {builtIn.map((b, i) => (
           <article class="bi" data-reveal style={`--d:${i * 80}ms`}>
-            <div class="bi-shot"><Win kind={b.kind} tint={b.tint} /></div>
+            <div class="bi-shot"><Draw kind={b.kind} hue={b.hue} /></div>
             <div class="bi-copy">
               <span class="tile-icon" aria-hidden="true"><svg class="icon"><use href={`#${b.icon}`}></use></svg></span>
               <h4>{b.name}</h4>
@@ -237,17 +233,7 @@ const systems = [
               </a>
             </header>
             <p>{p.text}</p>
-            {p.kind ? (
-              <div class="pl-shot"><Win kind={p.kind} tint={p.tint} /></div>
-            ) : (
-              <div class="pl-draw pl-pets" aria-hidden="true">
-                <svg viewBox="0 0 16 12" class="cat" shape-rendering="crispEdges">
-                  <path d="M2 2h1v1h1v1h4V3h1V2h1v3h1v1h1v1h1v4H2V7H1V5h1z" />
-                  <path class="eye" d="M4 6h1v1H4zM8 6h1v1H8z" />
-                </svg>
-                <span class="zz">z</span><span class="zz zz-2">z</span>
-              </div>
-            )}
+            <div class="pl-art-box"><Draw kind={p.kind ?? "pets"} hue={p.hue} /></div>
           </article>
         ))}
         <a class="pl pl-more" href="/docs/plugins/writing" data-reveal style="--d:140ms">
@@ -272,26 +258,36 @@ const systems = [
     </header>
 
     <div class="detach" data-detach data-reveal>
-      <div class="detach-app" aria-hidden="true">
-        <div class="lid">
-          <div class="lid-side"><i></i><i></i><i></i><i class="on"></i><i></i></div>
-          <div class="lid-canvas">
-            <div class="lid-win lid-win-1"><Win kind="editor" /></div>
-            <div class="lid-win lid-win-2"><Win kind="terminal" tint="green" /></div>
-          </div>
-        </div>
-        <span class="detach-state" data-app-state>App open</span>
-      </div>
-      <div class="detach-wire" aria-hidden="true"><span class="pulse"></span></div>
-      <div class="detach-server" aria-hidden="true">
-        <header>
-          <svg class="icon"><use href="#i-server"></use></svg>
-          <span>server</span>
-          <span class="live"><span class="pip"></span><span data-uptime>running · 0:00</span></span>
-        </header>
-        <pre data-log></pre>
-        <div class="meter"><span data-meter></span></div>
-      </div>
+      <svg class="scene" viewBox="0 0 760 300" aria-hidden="true">
+        <!-- the app: a laptop whose lid closes -->
+        <g class="scene-lid">
+          <rect class="bp-l" pathLength="1" x="60" y="40" width="250" height="160" rx="10" />
+          <g class="screen-glow">
+            <rect class="bp-l" pathLength="1" x="84" y="66" width="96" height="64" rx="5" />
+            <rect class="bp-a" pathLength="1" x="192" y="66" width="96" height="40" rx="5" />
+            <rect class="bp-l" pathLength="1" x="192" y="116" width="96" height="62" rx="5" />
+            <path class="bp-a" pathLength="1" d="M204 80l9 7-9 7M220 94h18" />
+          </g>
+        </g>
+        <path class="bp-l" pathLength="1" d="M40 206h290l-14 18H54z" />
+        <text class="bp-t" x="60" y="252">app</text>
+        <text class="bp-t" x="60" y="268" data-app-state>open</text>
+
+        <!-- the link -->
+        <path class="link" id="detach-link" d="M330 140 C 400 140, 420 140, 480 140" />
+        <circle class="packet" r="3.5"><animateMotion dur="1.6s" repeatCount="indefinite" path="M330 140 C 400 140, 420 140, 480 140" /></circle>
+
+        <!-- the server, running -->
+        <rect class="bp-l" pathLength="1" x="480" y="50" width="220" height="56" rx="8" />
+        <rect class="bp-l" pathLength="1" x="480" y="116" width="220" height="56" rx="8" />
+        <rect class="bp-l" pathLength="1" x="480" y="182" width="220" height="56" rx="8" />
+        <circle class="led" cx="500" cy="78" r="3.5" /><circle class="led" cx="500" cy="144" r="3.5" /><circle class="led" cx="500" cy="210" r="3.5" />
+        <path class="bp-c" d="M520 78h120M520 144h90M520 210h140" />
+        <path class="prog-track" d="M480 262h220" />
+        <path class="prog" pathLength="1" d="M480 262h220" />
+        <text class="bp-t" x="480" y="286" data-uptime>build · 0%</text>
+        <text class="bp-t done" x="700" y="286" text-anchor="end">✓ done</text>
+      </svg>
       <p class="detach-caption" data-caption>The app is open: the build runs on your server.</p>
     </div>
 
