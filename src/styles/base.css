@@ -50,7 +50,7 @@ code, kbd, pre { font-family: var(--font-mono); }
 
 .icon { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
 .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
-.logotype { width: 102px; height: auto; aspect-ratio: 82 / 17; fill: currentColor; color: var(--c-ink); }
+.logotype { width: 112px; height: auto; aspect-ratio: 624 / 117; fill: currentColor; color: var(--c-ink); }
 
 .skip {
   position: fixed; left: 12px; top: -48px; z-index: 100;
@@ -106,7 +106,7 @@ code, kbd, pre { font-family: var(--font-mono); }
   border-bottom-color: var(--c-line);
 }
 .hdr-brand { display: inline-flex; align-items: center; gap: 10px; justify-self: start; padding: 6px 4px; }
-.hdr-brand .logotype { width: 104px; }
+.hdr-brand .logotype { width: 112px; }
 .hdr-tag {
   font: 500 var(--text-xs) / 1 var(--font-sans); color: var(--c-ink-3);
   padding: 4px 8px; border-radius: var(--r-chip); border: 1px solid var(--c-line-2);
