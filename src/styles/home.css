@@ -303,7 +303,7 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
   animation: drift 16s var(--ease-in-out) infinite alternate;
 }
 @keyframes drift { to { transform: translate(4%, 6%) rotate(4deg); } }
-.get-art { position: relative; display: block; width: min(260px, 60vw); height: auto; margin: 0 auto var(--s-8); }
+.get-art { position: relative; display: block; width: min(440px, 84vw); height: auto; margin: 0 auto var(--s-8); }
 .get-title { font-size: var(--text-d1); letter-spacing: -0.045em; max-width: 14ch; }
 .get-text { margin-top: var(--s-5); color: var(--c-ink-3); font-size: var(--text-lg); }
 .get-systems { list-style: none; margin: var(--s-10) 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s-3); }

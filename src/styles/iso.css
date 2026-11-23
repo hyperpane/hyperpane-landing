@@ -95,6 +95,10 @@
 .iso .iso-pin { opacity: 0; transition: opacity 400ms var(--ease-out) 900ms; }
 :is(.is-in, [data-on]) .iso .iso-pin { opacity: 1; }
 :is(.is-in, [data-on]) .iso .iso-lit { animation: iso-glow 3.2s var(--ease-in-out) 1.2s infinite; }
+.iso .iso-belt { stroke: oklch(1 0 0 / 0.14); stroke-width: 1.5; fill: none; stroke-dasharray: 3 11; animation: iso-belt 0.48s linear infinite; }
+@keyframes iso-belt { to { stroke-dashoffset: -14; } }
+.iso .iso-ride { animation: iso-ride 7.5s linear infinite; }
+@keyframes iso-ride { 0% { transform: translate(0, 0); opacity: 0; } 7% { opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)); opacity: 1; } }
 .iso .iso-move { animation: iso-move 3s var(--ease-in-out) infinite; }
 @keyframes iso-glow { 50% { filter: drop-shadow(0 0 22px oklch(0.62 0.19 260 / 0.75)); } }
 @keyframes iso-move { 0%, 100% { transform: translate(-30px, -17px); } 50% { transform: translate(40px, 23px); } }
@@ -111,5 +115,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .iso .iso-box, .iso .iso-hi, .iso .iso-pin, .iso .iso-call, .iso .iso-read { transform: none; opacity: 1; }
-  .iso .iso-move { animation: none; }
+  .iso .iso-move, .iso .iso-ride, .iso .iso-belt { animation: none; }
+  .iso .iso-ride { transform: translate(calc(var(--dx) * var(--at)), calc(var(--dy) * var(--at))); }
 }

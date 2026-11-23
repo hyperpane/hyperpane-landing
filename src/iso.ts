@@ -662,21 +662,36 @@ const things: Record<string, () => { view: string; svg: string }> = {
     return out(s);
   },
   download() {
-    // the build arriving: a parcel on its pallet, an arrow coming down onto it
-    const s = make(170, 160);
-    plate(s, 200, 200);
-    // the pallet: three runners under a deck of slats
-    for (const y of [30, 82, 134]) s.box(30, y, 8, 120, 14, 8, "dark");
-    for (let i = 0; i < 6; i++) s.box(30 + i * 21, 30, 16, 16, 118, 3, "dark");
-    // the parcel, taped across its top
-    s.box(40, 40, 19, 100, 98, 62);
-    s.box(84, 40, 81, 12, 98, 1.2, "base", "iso-faint");
-    s.poly([[140.2, 72, 30], [140.2, 106, 30], [140.2, 106, 50], [140.2, 72, 50]], "iso-face");
-    // the arrow: a shaft, then a head stepping down to its point
-    s.box(84, 83, 114, 12, 12, 12, "hi", "iso-lit");
-    s.box(78, 77, 126, 24, 24, 12, "hi", "iso-lit");
-    s.box(72, 71, 138, 36, 36, 12, "hi", "iso-lit");
-    s.box(84, 83, 150, 12, 12, 46, "hi", "iso-lit");
+    // the conveyor: builds come out of the press, ride the belt, drop into your machine
+    const s = make(150, 90);
+    s.plateR(-96, 26, 400, 124, 0, 8, 16);
+    const len = 220;
+    // legs under the belt
+    for (const x of [14, 104, 194]) for (const y of [62, 102]) s.box(x, y, 8, 8, 8, 32, "dark");
+    // the press the builds come out of, its mouth on the near face
+    s.box(-70, 46, 8, 70, 78, 86);
+    s.poly([[0.2, 64, 48], [0.2, 106, 48], [0.2, 106, 78], [0.2, 64, 78]], "iso-screen");
+    for (let i = 0; i < 3; i++) s.poly([[-60 + i * 20, 124.2, 70], [-48 + i * 20, 124.2, 70], [-48 + i * 20, 124.2, 80], [-60 + i * 20, 124.2, 80]], "iso-face");
+    // the belt: its bed, the far rail, the moving surface
+    s.box(0, 60, 40, len, 52, 6, "dark");
+    s.box(0, 58, 46, len, 3, 8, "dark");
+    for (const y of [70, 86, 102]) s.line([2, y, 46.3], [len - 2, y, 46.3], "iso-belt");
+    // the builds, each riding the belt on its own loop
+    const dx = len * C;
+    const dy = len * S;
+    for (let i = 0; i < 3; i++) {
+      s.add(`<g class="iso-ride" style="--dx:${f(dx)}px;--dy:${f(dy)}px;--at:${(i + 0.3) / 3.4};animation-delay:${-(i + 0.3) * 2.2}s">`);
+      const lit = i === 1;
+      s.box(-4, 68, 46, 34, 34, 22, lit ? "hi" : "base", lit ? "iso-lit" : "");
+      s.box(9, 68, 68, 8, 34, 1, lit ? "hi" : "base", "iso-faint");
+      s.add(`</g>`);
+    }
+    // the near rail, in front of what rides
+    s.box(0, 110, 46, len, 3, 8, "dark");
+    // your machine, taking them in
+    s.box(len, 46, 8, 62, 78, 64);
+    s.poly([[len + 62.2, 60, 54], [len + 62.2, 110, 54], [len + 62.2, 110, 62], [len + 62.2, 60, 62]], "iso-head-a");
+    s.dot([len + 62.4, 66, 30], "iso-led", 2.4);
     return out(s);
   },
   agent() {
