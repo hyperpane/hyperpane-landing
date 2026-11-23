@@ -44,6 +44,11 @@
   --h-teal: oklch(0.74 0.11 185);
   --h-orange: oklch(0.74 0.15 52);
 
+  /* The Mac's window buttons */
+  --light-close: oklch(0.7 0.19 27);
+  --light-min: oklch(0.83 0.16 82);
+  --light-zoom: oklch(0.74 0.2 144);
+
   /* Code */
   --code-key: oklch(0.72 0.15 300);
   --code-str: oklch(0.78 0.12 150);

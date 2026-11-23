@@ -58,6 +58,7 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
 }
 .stage {
   --tilt: 0deg; --lift: 0px; --sc: 1;
+  backface-visibility: hidden;
   position: relative; margin: 0; aspect-ratio: 2880 / 1730;
   container-type: inline-size;
   border-radius: clamp(10px, 1.6cqw, 22px); overflow: hidden;
@@ -69,8 +70,15 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
   will-change: transform;
   opacity: 0; animation: stage-in 1400ms var(--ease-out) 380ms forwards;
 }
+.stage.is-flat { transform: none; will-change: auto; }
 @keyframes stage-in { from { opacity: 0; transform: rotateX(22deg) translateY(60px) scale(0.94); } to { opacity: 1; } }
 .stage-chrome { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* At the app's place for them: 14px in, 12px wide, 8px apart, in the 36px title bar */
+.stage-lights { position: absolute; left: 0.972cqw; top: 0.833cqw; display: flex; gap: 0.556cqw; z-index: 2; }
+.stage-lights i { display: block; width: 0.833cqw; height: 0.833cqw; border-radius: 50%; box-shadow: inset 0 0 0 0.04cqw oklch(0 0 0 / 0.25); }
+.stage-lights i:nth-child(1) { background: var(--light-close); }
+.stage-lights i:nth-child(2) { background: var(--light-min); }
+.stage-lights i:nth-child(3) { background: var(--light-zoom); }
 .stage-canvas {
   position: absolute; left: 23.19%; top: 4.162%; width: 76.25%; height: 95.26%;
   border-radius: 1.6cqw; overflow: hidden;
@@ -79,25 +87,26 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
   background-size: 1.667cqw 1.667cqw; background-position: 0.8cqw 0.8cqw;
 }
 .dw {
+  /* The capture has the window's own corners, cut at its radius: nothing
+     to round here. The shadow follows its outline. */
   position: absolute; left: var(--x); top: var(--y); width: var(--w); aspect-ratio: var(--ratio);
-  border-radius: 1.15cqw;
   cursor: grab; touch-action: none; user-select: none;
   translate: var(--dx, 0px) var(--dy, 0px);
-  opacity: 0; transform: translateY(5cqw) scale(0.94);
-  transition: transform 1100ms var(--ease-out), opacity 900ms var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
-  box-shadow: 0 1.2cqw 3cqw -1.2cqw oklch(0 0 0 / 0.7);
+  opacity: 0; transform: translateY(2.2cqw);
+  transition: transform 1000ms var(--ease-out), opacity 700ms var(--ease-out);
 }
 .stage.is-in .dw { opacity: 1; transform: none; }
 .stage.is-in .dw:nth-child(1) { transition-delay: 600ms; }
 .stage.is-in .dw:nth-child(2) { transition-delay: 720ms; }
 .stage.is-in .dw:nth-child(3) { transition-delay: 840ms; }
 .stage.is-in .dw:nth-child(4) { transition-delay: 960ms; }
-.dw img { width: 100%; height: 100%; border-radius: inherit; pointer-events: none; }
-.dw.is-drag { cursor: grabbing; transition: none; box-shadow: 0 2cqw 5cqw -1.5cqw oklch(0 0 0 / 0.85); }
-.dw.is-focus::after {
-  content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none;
-  box-shadow: 0 0 0 1px oklch(1 0 0 / 0.28);
+.dw img {
+  width: 100%; height: 100%; pointer-events: none;
+  filter: drop-shadow(0 0.5cqw 1.4cqw oklch(0 0 0 / 0.55));
+  transition: filter var(--dur-3) var(--ease-out);
 }
+.dw.is-drag { cursor: grabbing; transition: none; }
+.dw.is-drag img { filter: drop-shadow(0 1.4cqw 2.6cqw oklch(0 0 0 / 0.7)); }
 .stage-toolbar {
   position: absolute; left: 28.33%; bottom: 0; width: 43.26%; z-index: 20; pointer-events: none;
   opacity: 0; transform: translateY(100%);
@@ -105,7 +114,7 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
 }
 .stage.is-in .stage-toolbar { opacity: 1; transform: none; }
 .stage-hint {
-  position: absolute; right: 1.6cqw; top: 1.4cqw; z-index: 21;
+  position: absolute; left: 1.4cqw; bottom: 1.4cqw; z-index: 21;
   padding: 0.5cqw 0.9cqw; border-radius: 999px; background: oklch(0.2 0 0 / 0.9); border: 1px solid var(--c-line-2);
   color: var(--c-ink-2); font: 500 clamp(10px, 0.85cqw, 13px) / 1 var(--font-sans); white-space: nowrap;
   opacity: 0; transition: opacity var(--dur-3) var(--ease-out);
@@ -166,12 +175,11 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
 .rset { position: absolute; inset: 0; pointer-events: none; }
 .rw {
   position: absolute; left: var(--x); top: var(--y); width: var(--w); aspect-ratio: var(--ratio); height: auto;
-  border-radius: 1.3cqw;
-  box-shadow: 0 1.4cqw 3.2cqw -1.4cqw oklch(0 0 0 / 0.75);
-  opacity: 0; transform: translateY(4cqw) scale(0.96);
-  transition: opacity 500ms var(--ease-out), transform 800ms var(--ease-out);
+  filter: drop-shadow(0 0.6cqw 1.6cqw oklch(0 0 0 / 0.55));
+  opacity: 0; transform: translateY(1.6cqw);
+  transition: opacity 360ms var(--ease-out), transform 700ms var(--ease-out);
 }
-.rset[data-on] .rw { opacity: 1; transform: none; transition-delay: calc(var(--n) * 90ms + 120ms); }
+.rset[data-on] .rw { opacity: 1; transform: none; transition-delay: calc(var(--n) * 70ms + 80ms); }
 
 /* Windows ------------------------------------------------------------------- */
 .windows { margin-top: var(--section); }
@@ -183,14 +191,13 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
   border-radius: var(--r-panel); background: var(--c-panel); border: 1px solid var(--c-line);
   transition: border-color var(--dur-2) var(--ease-out), transform var(--dur-3) var(--ease-out);
 }
-.bi:hover { border-color: var(--c-line-2); }
+.bi:hover { border-color: var(--c-line-2); background: var(--c-card); }
 .bi-shot { position: relative; height: 210px; overflow: hidden; background: oklch(0.105 0 0); border-bottom: 1px solid var(--c-line); }
 .bi-shot img {
-  position: absolute; left: 18px; top: 18px; width: 150%; max-width: none; border-radius: 10px;
-  box-shadow: 0 14px 40px -18px oklch(0 0 0 / 0.8);
-  transition: transform 900ms var(--ease-out);
+  /* At 45% of its real size, as every window on the shelf */
+  position: absolute; left: 22px; top: 22px; width: calc(var(--nat) * 0.45px); max-width: none; height: auto;
+  filter: drop-shadow(0 10px 24px oklch(0 0 0 / 0.5));
 }
-.bi:hover .bi-shot img { transform: translate(-6%, -4%); }
 .bi-copy { display: flex; flex-direction: column; gap: 10px; padding: var(--s-6); }
 .bi-copy h4 { font-size: var(--text-xl); letter-spacing: -0.02em; }
 .bi-copy p { color: var(--c-ink-3); font-size: var(--text-sm); }
@@ -213,7 +220,7 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
   padding: 20px; border-radius: var(--r-panel); background: var(--c-panel); border: 1px solid var(--c-line);
   transition: border-color var(--dur-2) var(--ease-out), background var(--dur-2) var(--ease-out);
 }
-.pl:hover { border-color: var(--c-line-2); }
+.pl:hover { border-color: var(--c-line-2); background: var(--c-card); }
 .pl-wide { grid-column: span 2; }
 .pl-tall { grid-row: span 2; }
 .pl-head { display: flex; align-items: center; gap: 12px; }
@@ -227,14 +234,11 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
 .pl > p { color: var(--c-ink-3); font-size: var(--text-sm); max-width: 34ch; }
 .pl-shot { position: relative; flex: 1; min-height: 170px; margin: 6px -20px -20px; overflow: hidden; }
 .pl-shot img {
-  position: absolute; left: 20px; top: 0; width: calc(100% + 30%); max-width: none; height: auto;
-  border-radius: 12px 12px 0 0; border: 1px solid var(--c-line-2);
-  transform-origin: 0 0; transition: transform 900ms var(--ease-out);
+  /* Every plugin's window at 45% of its real size: the same scale on
+     every card, running off the card's edge as a window off a screen. */
+  position: absolute; left: 20px; top: 0; width: calc(var(--nat) * 0.45px); max-width: none; height: auto;
+  filter: drop-shadow(0 10px 24px oklch(0 0 0 / 0.5));
 }
-.pl-wide .pl-shot img { width: calc(100% - 40px); }
-.pl-tall .pl-shot img { width: 210%; }
-.pl:hover .pl-shot img { transform: translateY(-4%); }
-.pl-shot::after { content: ""; position: absolute; inset: auto 0 0; height: 40%; background: linear-gradient(transparent, var(--c-panel)); pointer-events: none; }
 .pl-draw { margin: auto -20px -20px; width: calc(100% + 40px); height: auto; }
 .pl-activity { color: var(--hue); }
 .pl-activity .grid { stroke: var(--c-line); stroke-width: 1; fill: none; }
@@ -393,7 +397,6 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
   .builtin, .shelf { grid-template-columns: minmax(0, 1fr); }
   .pl-wide { grid-column: auto; }
   .pl-tall { grid-row: auto; }
-  .pl-tall .pl-shot img { width: 140%; }
   .pl-more { min-height: 0; }
   .hero-pill { font-size: var(--text-xs); }
   .hero-pill-go { display: none; }

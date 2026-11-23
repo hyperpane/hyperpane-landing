@@ -6,13 +6,28 @@ import Base from "../layouts/Base.astro";
 
 const shot = (name: string) => `/shots/${name}.webp`;
 
-// The hero's desk: real windows over the real app, placed on its canvas (in
-// percents of the canvas panel). Each moves by its header.
+// Each window's real size in the app (css px; its capture is twice that).
+// Every window on the page is shown at one scale for the place it's in, so
+// they read as one app, not as pictures of different sizes.
+const size: Record<string, [number, number]> = {
+  agent: [762, 522], browser: [962, 602], codestats: [1002, 602], containers: [1002, 642],
+  data: [1002, 642], editor: [640, 561], editor2: [640, 561], env: [822, 482],
+  explorer: [762, 522], git: [962, 602], requests: [1002, 642], terminal: [882, 342], tunnels: [822, 562],
+};
+/** A window at (x, y) on a canvas of W × H, at scale k: as percents. */
+const place = (img: string, x: number, y: number, W: number, H: number, k: number) => {
+  const [w, h] = size[img];
+  return { img, x: (x / W) * 100, y: (y / H) * 100, w: ((w * k) / W) * 100, ratio: w / h };
+};
+
+// The hero's desk: real windows on the real app's canvas (its panel is
+// 1098 × 824 there), at 55%. Each moves by dragging.
+const DESK = [1098, 824, 0.55] as const;
 const desk = [
-  { id: "git", img: "git", label: "Git", x: 37.5, y: 3.2, w: 58.5, ratio: 1924 / 1204, z: 3 },
-  { id: "editor", img: "editor", label: "Editor", x: 2.6, y: 7.6, w: 41, ratio: 1280 / 1122, z: 2 },
-  { id: "browser", img: "browser", label: "Browser", x: 49, y: 46, w: 47.5, ratio: 1924 / 1204, z: 4 },
-  { id: "terminal", img: "terminal", label: "Terminal", x: 4.6, y: 58, w: 47.5, ratio: 1764 / 684, z: 5 },
+  { id: "editor", label: "Editor", z: 2, ...place("editor", 36, 56, ...DESK) },
+  { id: "git", label: "Git", z: 3, ...place("git", 414, 36, ...DESK) },
+  { id: "terminal", label: "Terminal", z: 4, ...place("terminal", 36, 404, ...DESK) },
+  { id: "browser", label: "Browser", z: 5, ...place("browser", 520, 388, ...DESK) },
 ];
 
 const facts = [
@@ -22,52 +37,34 @@ const facts = [
   { label: "Always on", value: "Keeps working when you quit" },
 ];
 
-// Roles: each with its words and three real windows on a small canvas.
+// Roles: each with its words and three real windows on a canvas of
+// 1700 × 1105, at their real size (some overlap, as on a real canvas).
+const R = [1700, 1105, 1] as const;
 const roles = [
   {
     id: "engineers", name: "Engineers", icon: "i-code",
     text: "Editor, terminal and Git side by side: laid out like a desk, not hidden in tabs.",
-    wins: [
-      { img: "editor2", x: 3, y: 6, w: 46, ratio: 1280 / 1122 },
-      { img: "terminal", x: 52, y: 6, w: 45, ratio: 1764 / 684 },
-      { img: "git", x: 52, y: 42, w: 45, ratio: 1924 / 1204 },
-    ],
+    wins: [place("editor2", 50, 60, ...R), place("terminal", 720, 60, ...R), place("git", 720, 440, ...R)],
   },
   {
     id: "frontend", name: "Frontend & design", icon: "i-browser",
     text: "Your app in a real browser window, phone and desktop sizes, next to the code that draws it.",
-    wins: [
-      { img: "browser", x: 3, y: 8, w: 58, ratio: 1924 / 1204 },
-      { img: "editor", x: 64, y: 6, w: 33, ratio: 1280 / 1122 },
-      { img: "explorer", x: 64, y: 54, w: 33, ratio: 1524 / 1044 },
-    ],
+    wins: [place("browser", 50, 60, ...R), place("editor", 1040, 60, ...R), place("explorer", 900, 560, ...R)],
   },
   {
     id: "devops", name: "DevOps & SRE", icon: "i-server",
     text: "Terminals on every machine you run, with containers and live activity, in one place.",
-    wins: [
-      { img: "containers", x: 3, y: 6, w: 55, ratio: 2004 / 1284 },
-      { img: "terminal", x: 61, y: 6, w: 36, ratio: 1764 / 684 },
-      { img: "tunnels", x: 61, y: 34, w: 36, ratio: 1644 / 1124 },
-    ],
+    wins: [place("containers", 50, 60, ...R), place("tunnels", 860, 40, ...R), place("terminal", 400, 730, ...R)],
   },
   {
     id: "data", name: "Backend & data", icon: "i-database",
     text: "Your databases and APIs next to the code that uses them: query, call, compare.",
-    wins: [
-      { img: "data", x: 3, y: 6, w: 55, ratio: 2004 / 1284 },
-      { img: "requests", x: 61, y: 6, w: 36, ratio: 2004 / 1284 },
-      { img: "editor2", x: 61, y: 46, w: 36, ratio: 1280 / 1122 },
-    ],
+    wins: [place("data", 50, 60, ...R), place("editor2", 1010, 40, ...R), place("requests", 620, 440, ...R)],
   },
   {
     id: "agents", name: "AI agents", icon: "i-bot",
     text: "Agents open terminals, type and read the screen, while you watch every window they touch.",
-    wins: [
-      { img: "agent", x: 3, y: 6, w: 50, ratio: 1524 / 1044 },
-      { img: "terminal", x: 56, y: 6, w: 41, ratio: 1764 / 684 },
-      { img: "browser", x: 56, y: 38, w: 41, ratio: 1924 / 1204 },
-    ],
+    wins: [place("agent", 50, 60, ...R), place("terminal", 790, 60, ...R), place("browser", 700, 440, ...R)],
   },
 ];
 
@@ -124,6 +121,8 @@ const systems = [
     <div class="stage-wrap" data-stage-wrap>
       <figure class="stage" data-stage aria-label="hyperpane with a project open: an editor, a terminal, Git and a browser as windows on one canvas">
         <img class="stage-chrome" src={shot("app-chrome")} width="2880" height="1730" alt="" decoding="async" fetchpriority="high" />
+        <!-- The Mac's window buttons: drawn by the system, so not in the capture. -->
+        <span class="stage-lights" aria-hidden="true"><i></i><i></i><i></i></span>
         <div class="stage-canvas" data-canvas>
           {desk.map((d) => (
             <div
@@ -208,7 +207,7 @@ const systems = [
       <div class="builtin">
         {builtIn.map((b, i) => (
           <article class="bi" data-reveal style={`--d:${i * 80}ms`}>
-            <div class="bi-shot"><img src={shot(b.img)} alt={`The ${b.name} window`} loading="lazy" decoding="async" /></div>
+            <div class="bi-shot"><img src={shot(b.img)} alt={`The ${b.name} window`} loading="lazy" decoding="async" style={`--nat:${size[b.img][0]}`} /></div>
             <div class="bi-copy">
               <span class="tile-icon" aria-hidden="true"><svg class="icon"><use href={`#${b.icon}`}></use></svg></span>
               <h4>{b.name}</h4>
@@ -243,7 +242,7 @@ const systems = [
             </header>
             <p>{p.text}</p>
             {p.img ? (
-              <div class="pl-shot"><img src={shot(p.img)} alt={`The ${p.name} window`} loading="lazy" decoding="async" /></div>
+              <div class="pl-shot"><img src={shot(p.img)} alt={`The ${p.name} window`} loading="lazy" decoding="async" style={`--nat:${size[p.img][0]}`} /></div>
             ) : p.name === "Activity" ? (
               <svg class="pl-draw pl-activity" viewBox="0 0 320 120" aria-hidden="true">
                 <path class="grid" d="M0 30H320M0 60H320M0 90H320" />

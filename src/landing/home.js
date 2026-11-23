@@ -23,6 +23,8 @@
         stage.style.setProperty('--tilt', `${(1 - t) * 16}deg`);
         stage.style.setProperty('--sc', String(0.94 + t * 0.06));
         stage.style.setProperty('--lift', `${(1 - t) * 20}px`);
+        // Flat, it's no layer of its own: the captures stay sharp.
+        stage.classList.toggle('is-flat', t >= 0.999);
       };
       addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(tilt); } }, { passive: true });
       addEventListener('resize', tilt);
