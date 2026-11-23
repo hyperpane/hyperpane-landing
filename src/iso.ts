@@ -362,17 +362,28 @@ const out = (s: Scene) => ({ view: s.tight(), svg: s.svg() });
 
 const things: Record<string, () => { view: string; svg: string }> = {
   terminal() {
+    // one shell, wired to the machines it runs on; no keyboard needed
     const s = make(200, 40);
     plate(s, 220, 220);
-    s.box(40, 20, 8, 120, 160, 6);
-    for (let r = 0; r < 7; r++) for (let k = 0; k < 10; k++) s.box(48 + r * 15, 28 + k * 15, 14, 11, 11, 2.4, r === 6 && k === 4 ? "hi" : "dark");
-    s.box(0, 10, 8, 12, 180, 120);
-    s.poly([[12.2, 182, 120], [12.2, 18, 120], [12.2, 18, 18], [12.2, 182, 18]], "iso-screen");
-    s.right(12.4, 172, 102, "~/api ❯ npm run dev", 10, "iso-tx iso-tx-on");
-    s.right(12.4, 172, 86, "VITE v7 ready in 284 ms", 9, "iso-tx");
-    s.right(12.4, 172, 72, "➜ localhost:5173", 9, "iso-tx");
-    s.right(12.4, 172, 58, "hmr update /src/App.tsx", 9, "iso-tx");
-    s.poly([[12.4, 172, 32], [12.4, 164, 32], [12.4, 164, 44], [12.4, 172, 44]], "iso-cursor");
+    // cables run from the terminal's foot out to each machine
+    s.path3([[16, 70, 8.2], [60, 70, 8.2], [60, 48, 8.2], [96, 48, 8.2]], "iso-cable");
+    s.path3([[16, 130, 8.2], [70, 130, 8.2], [70, 150, 8.2], [110, 150, 8.2]], "iso-cable");
+    // the terminal: a tall slab of screen
+    s.box(-4, 30, 8, 26, 140, 6, "dark");
+    s.box(0, 20, 14, 12, 160, 114);
+    s.poly([[12.2, 172, 122], [12.2, 28, 122], [12.2, 28, 22], [12.2, 172, 22]], "iso-screen");
+    s.right(12.4, 164, 104, "~/api ❯ npm run dev", 10, "iso-tx iso-tx-on");
+    s.right(12.4, 164, 88, "VITE v7 ready in 284 ms", 9, "iso-tx");
+    s.right(12.4, 164, 74, "➜ localhost:5173", 9, "iso-tx");
+    s.right(12.4, 164, 60, "hmr update /src/App.tsx", 9, "iso-tx");
+    s.poly([[12.4, 164, 34], [12.4, 156, 34], [12.4, 156, 46], [12.4, 164, 46]], "iso-cursor");
+    // a server, its drive bays
+    s.box(96, 26, 8, 54, 44, 52);
+    for (let i = 0; i < 3; i++) s.poly([[150.2, 32, 18 + i * 14], [150.2, 64, 18 + i * 14], [150.2, 64, 26 + i * 14], [150.2, 32, 26 + i * 14]], "iso-face");
+    s.dot([150.4, 60, 54], "iso-led", 2.2);
+    // the machine the shell is on right now
+    s.box(110, 126, 8, 54, 44, 34, "hi", "iso-lit");
+    s.poly([[164.2, 132, 18], [164.2, 164, 18], [164.2, 164, 30], [164.2, 132, 30]], "iso-head-a");
     return out(s);
   },
   editor() {
@@ -456,10 +467,11 @@ const things: Record<string, () => { view: string; svg: string }> = {
       s.poly([[x + 0.2, y1 - 4, z1 - 4], [x + 0.2, y0 + 4, z1 - 4], [x + 0.2, y0 + 4, z1 - 10], [x + 0.2, y1 - 4, z1 - 10]], lit ? "iso-head-a" : "iso-face");
       s.poly([[x + 0.2, y0 + w * 0.7, z1 - 18], [x + 0.2, y0 + w * 0.3, z1 - 18], [x + 0.2, y0 + w * 0.3, z1 - 18 - (z1 - z0) * 0.22], [x + 0.2, y0 + w * 0.7, z1 - 18 - (z1 - z0) * 0.22]], lit ? "iso-head-a" : "iso-face");
     };
-    s.box(10, 60, 8, 30, 50, 6, "dark");
-    s.box(20, 80, 14, 8, 10, 30, "dark");
-    s.box(0, 10, 44, 10, 150, 96);
-    screen(10.2, 16, 154, 50, 134);
+    // the stand sits behind the screen: a foot under it, the neck at its back
+    s.box(0, 60, 8, 34, 50, 6, "dark");
+    s.box(6, 80, 14, 8, 10, 32, "dark");
+    s.box(14, 10, 44, 10, 150, 96);
+    screen(24.2, 16, 154, 50, 134);
     s.box(70, 40, 8, 24, 70, 4, "dark");
     s.box(80, 44, 12, 6, 62, 82);
     screen(86.2, 48, 102, 16, 90);
@@ -499,12 +511,13 @@ const things: Record<string, () => { view: string; svg: string }> = {
         for (let k = 0; k < Math.floor(d / 14); k++)
           s.poly([[x + w + 0.2, y + 5 + k * 14, 16 + fl * 18], [x + w + 0.2, y + 13 + k * 14, 16 + fl * 18], [x + w + 0.2, y + 13 + k * 14, 26 + fl * 18], [x + w + 0.2, y + 5 + k * 14, 26 + fl * 18]], "iso-face");
     };
+    // the tube leaves your desk's front face and enters the api's back one,
+    // so the api tower is drawn last and hides where it goes in
     tower(0, 40, 50, 56, 70);
-    tower(196, 20, 64, 84, 130);
+    s.box(44, 58, 52, 8, 20, 24, "dark");
     s.box(50, 62, 58, 146, 12, 12, "base", "iso-glass");
     s.box(80, 63, 60, 24, 10, 8, "hi", "iso-lit iso-move");
-    s.box(44, 58, 52, 8, 20, 24, "dark");
-    s.box(192, 58, 52, 8, 20, 24, "dark");
+    tower(196, 20, 64, 84, 130);
     return out(s);
   },
   containers() {
@@ -521,7 +534,29 @@ const things: Record<string, () => { view: string; svg: string }> = {
     s.box(20, 40, 42, 80, 50, 34);
     s.line([105, 70, 158], [105, 70, 116], "iso-cable");
     s.line([105, 86, 168], [105, 86, 116], "iso-cable");
+    // a painted mark on each container's long side (u along x, v up)
+    const mark = (x: number, yf: number, z: number, kind: number, cls = "iso-face") => {
+      const at = (u: number, v: number): V3 => [x + u, yf + 0.2, z + v];
+      const shape = (pts: [number, number][]) => s.poly(pts.map(([u, v]) => at(u, v)), cls);
+      if (kind === 0) {
+        // a cube
+        shape([[40, 26], [50, 21], [50, 11], [40, 6], [30, 11], [30, 21]]);
+      } else if (kind === 1) {
+        // a stack of three discs
+        for (const v of [7, 14, 21]) shape([[30, v], [50, v], [50, v + 5], [30, v + 5]]);
+      } else if (kind === 2) {
+        // a bolt
+        shape([[44, 28], [32, 15], [40, 15], [36, 4], [48, 18], [40, 18]]);
+      } else {
+        // a ring of four squares
+        for (const [u, v] of [[32, 7], [42, 7], [32, 17], [42, 17]] as const) shape([[u, v], [u + 7, v], [u + 7, v + 7], [u, v + 7]]);
+      }
+    };
+    mark(20, 90, 42, 1);
+    mark(20, 150, 8, 0);
+    mark(110, 150, 8, 3);
     s.box(64, 52, 82, 80, 50, 34, "hi", "iso-lit");
+    mark(64, 102, 82, 2, "iso-head-a");
     for (let i = 0; i < 5; i++) s.line([72 + i * 16, 102.1, 86], [72 + i * 16, 102.1, 112], "iso-rib");
     s.box(92, 10, 168, 30, 160, 10, "base");
     s.box(-6, 170, 8, 8, 8, 150, "dark");
@@ -599,17 +634,49 @@ const things: Record<string, () => { view: string; svg: string }> = {
     return out(s);
   },
   pets() {
+    // a voxel cat curled up asleep on the window you're working in
     const s = make(190, 80);
     plate(s, 200, 150);
-    s.box(20, 30, 8, 140, 90, 8, "dark");
-    s.box(60, 60, 16, 50, 28, 22, "hi", "iso-lit");
-    s.box(100, 62, 16, 26, 24, 30, "hi", "iso-lit");
-    s.box(102, 62, 46, 6, 6, 8, "hi");
-    s.box(118, 62, 46, 6, 6, 8, "hi");
-    s.box(40, 70, 16, 22, 6, 6, "hi");
-    s.cyl(140, 40, 16, 10, 16, "base");
-    s.top(130, 40, 70, "z", 12, "iso-tx iso-z");
-    s.top(140, 30, 86, "z", 9, "iso-tx iso-z iso-z2");
+    // the window: a slab with its header bar and three lights
+    s.box(10, 20, 8, 180, 120, 8, "dark");
+    s.box(10, 20, 16, 180, 16, 2, "base");
+    for (let i = 0; i < 3; i++) s.box(18 + i * 10, 25, 18, 5, 5, 1.2, "base", "iso-faint");
+    // the tail: round the back, then along the near side
+    s.box(44, 60, 16, 10, 40, 7, "hi");
+    // the body, lying long
+    s.box(54, 54, 16, 58, 38, 20, "hi", "iso-lit");
+    s.box(54, 92, 16, 54, 8, 7, "hi");
+    // the head, big and resting low, ears up
+    s.box(112, 50, 16, 34, 46, 32, "hi", "iso-lit");
+    s.box(114, 52, 48, 10, 10, 11, "hi");
+    s.box(114, 84, 48, 10, 10, 11, "hi");
+    // the paws tucked out in front, a nose between them
+    s.box(146, 54, 16, 12, 12, 6, "hi");
+    s.box(146, 80, 16, 12, 12, 6, "hi");
+    s.box(146, 68, 24, 4, 10, 7, "hi");
+    // its eyes, shut: two dark strokes on the face
+    for (const y of [56, 82]) s.poly([[146.2, y, 38], [146.2, y + 8, 38], [146.2, y + 8, 40.5], [146.2, y, 40.5]], "iso-screen");
+    s.cyl(170, 40, 18, 10, 6, "base");
+    s.top(150, 40, 70, "z", 12, "iso-tx iso-z");
+    s.top(160, 30, 86, "z", 9, "iso-tx iso-z iso-z2");
+    return out(s);
+  },
+  download() {
+    // the build arriving: a parcel on its pallet, an arrow coming down onto it
+    const s = make(170, 160);
+    plate(s, 200, 200);
+    // the pallet: three runners under a deck of slats
+    for (const y of [30, 82, 134]) s.box(30, y, 8, 120, 14, 8, "dark");
+    for (let i = 0; i < 6; i++) s.box(30 + i * 21, 30, 16, 16, 118, 3, "dark");
+    // the parcel, taped across its top
+    s.box(40, 40, 19, 100, 98, 62);
+    s.box(84, 40, 81, 12, 98, 1.2, "base", "iso-faint");
+    s.poly([[140.2, 72, 30], [140.2, 106, 30], [140.2, 106, 50], [140.2, 72, 50]], "iso-face");
+    // the arrow: a shaft, then a head stepping down to its point
+    s.box(84, 83, 114, 12, 12, 12, "hi", "iso-lit");
+    s.box(78, 77, 126, 24, 24, 12, "hi", "iso-lit");
+    s.box(72, 71, 138, 36, 36, 12, "hi", "iso-lit");
+    s.box(84, 83, 150, 12, 12, 46, "hi", "iso-lit");
     return out(s);
   },
   agent() {

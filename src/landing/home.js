@@ -136,4 +136,68 @@
   const ipad = /Mac/i.test(plat) && navigator.maxTouchPoints > 1;
   const os = /Mac/i.test(plat) && !ipad ? 'mac' : /Win/i.test(plat) ? 'win' : /Linux/i.test(plat) && !/Android/i.test(navigator.userAgent) ? 'linux' : null;
   if (os) document.querySelector(`.get-systems [data-os="${os}"]`)?.classList.add('is-mine');
+
+  // One swipe, one block. A block taller than the screen (the hero, the
+  // plugins) scrolls normally until its edge, then the next swipe pages on.
+  const paged = matchMedia('(min-width: 900px) and (min-height: 640px) and (prefers-reduced-motion: no-preference)');
+  const blocks = [...document.querySelectorAll('.hero, .roles, .windows, .always, .get, .ftr')];
+  if (blocks.length) {
+    let busy = false;
+    const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    const glide = (to) => {
+      const from = scrollY;
+      const max = document.documentElement.scrollHeight - innerHeight;
+      to = Math.max(0, Math.min(max, Math.round(to)));
+      if (Math.abs(to - from) < 2) return;
+      busy = true;
+      const html = document.documentElement;
+      const prev = html.style.scrollBehavior;
+      html.style.scrollBehavior = 'auto';
+      const t0 = performance.now();
+      const dur = 760;
+      const step = (now) => {
+        const t = Math.min(1, (now - t0) / dur);
+        scrollTo(0, from + (to - from) * ease(t));
+        if (t < 1) requestAnimationFrame(step);
+        else { html.style.scrollBehavior = prev; busy = false; }
+      };
+      requestAnimationFrame(step);
+    };
+    addEventListener('wheel', (e) => {
+      if (!paged.matches || e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
+      // inside a running glide
+      if (busy) { e.preventDefault(); return; }
+      const down = e.deltaY > 0;
+      const vh = innerHeight;
+      // the block that holds the middle of the screen
+      let i = blocks.findIndex((b) => { const r = b.getBoundingClientRect(); return r.top <= vh / 2 && r.bottom > vh / 2; });
+      if (i < 0) return;
+      const r = blocks[i].getBoundingClientRect();
+      // still more of this block to see: scroll it normally
+      if (down && r.bottom > vh + 4) return;
+      if (!down && r.top < -4) return;
+      const j = i + (down ? 1 : -1);
+      if (j < 0 || j >= blocks.length) return;
+      e.preventDefault();
+      const next = blocks[j];
+      const top = next.getBoundingClientRect().top + scrollY;
+      const tall = next.offsetHeight > vh + 4;
+      // going up into a tall block lands on its end, not its start
+      glide(down || !tall ? top : top + next.offsetHeight - vh);
+      swallowUntilQuiet();
+    }, { passive: false });
+    // eat the rest of this swipe's momentum so it doesn't carry on a page
+    let quiet = 0;
+    const swallowUntilQuiet = () => {
+      const eat = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        clearTimeout(quiet);
+        quiet = setTimeout(() => removeEventListener('wheel', eat, { capture: true }), 220);
+      };
+      clearTimeout(quiet);
+      addEventListener('wheel', eat, { capture: true, passive: false });
+      quiet = setTimeout(() => removeEventListener('wheel', eat, { capture: true }), 900);
+    };
+  }
 })();
