@@ -1,5 +1,5 @@
-// The landing's live parts: the stage (the real app's windows fly in, tilt
-// flat as the page scrolls, and move by dragging), Roles (each role's
+// The landing's live parts: the stage (the real app's windows fly in and
+// tilt flat as the page scrolls), Roles (each role's
 // windows; they turn over on their own until someone picks one), the
 // always-on scene, and the section dock.
 
@@ -31,41 +31,6 @@
       tilt();
     }
 
-    // Windows move by dragging, in the canvas's bounds, and come forward.
-    const canvas = stage.querySelector('[data-canvas]');
-    const wins = [...canvas.querySelectorAll('.dw')];
-    let top = 10;
-    for (const w of wins) {
-      let start = null;
-      w.addEventListener('pointerdown', (e) => {
-        if (e.button !== 0) return;
-        const c = canvas.getBoundingClientRect();
-        const r = w.getBoundingClientRect();
-        start = {
-          x: e.clientX, y: e.clientY,
-          dx: parseFloat(w.style.getPropertyValue('--dx')) || 0,
-          dy: parseFloat(w.style.getPropertyValue('--dy')) || 0,
-          // How far it may go each way, in px.
-          minX: c.left - r.left, maxX: c.right - r.right,
-          minY: c.top - r.top, maxY: c.bottom - r.bottom - 0,
-        };
-        for (const o of wins) o.classList.toggle('is-focus', o === w);
-        w.style.zIndex = String(++top);
-        w.classList.add('is-drag');
-        w.setPointerCapture(e.pointerId);
-      });
-      w.addEventListener('pointermove', (e) => {
-        if (!start) return;
-        const mx = clamp(e.clientX - start.x, start.minX, start.maxX);
-        const my = clamp(e.clientY - start.y, start.minY, start.maxY);
-        w.style.setProperty('--dx', `${start.dx + mx}px`);
-        w.style.setProperty('--dy', `${start.dy + my}px`);
-        if (Math.abs(mx) + Math.abs(my) > 6) stage.classList.add('was-dragged');
-      });
-      const end = () => { start = null; w.classList.remove('is-drag'); };
-      w.addEventListener('pointerup', end);
-      w.addEventListener('pointercancel', end);
-    }
   }
 
   // Roles -------------------------------------------------------------------

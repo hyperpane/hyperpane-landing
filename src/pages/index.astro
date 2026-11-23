@@ -3,6 +3,7 @@
 // it is the real app (public/shots: captured from a running build, private
 // details blurred); around them, the page's words, as they were.
 import Base from "../layouts/Base.astro";
+import Win from "../components/Win.astro";
 
 const shot = (name: string) => `/shots/${name}.webp`;
 
@@ -37,53 +38,55 @@ const facts = [
   { label: "Always on", value: "Keeps working when you quit" },
 ];
 
-// Roles: each with its words and three real windows on a canvas of
-// 1700 × 1105, at their real size (some overlap, as on a real canvas).
-const R = [1700, 1105, 1] as const;
+// Roles: each with its words and three drawn windows on a canvas (x, y and
+// width in percents of it; some overlap, as on a real canvas).
+type Kind = "terminal" | "editor" | "explorer" | "git" | "browser" | "data" | "requests" | "containers" | "tunnels" | "env" | "codestats" | "activity" | "agent";
+type Tint = "green" | "blue" | "violet" | "amber" | "rose";
+const w = (kind: Kind, x: number, y: number, width: number, tint?: Tint) => ({ kind, x, y, w: width, tint });
 const roles = [
   {
     id: "engineers", name: "Engineers", icon: "i-code",
     text: "Editor, terminal and Git side by side: laid out like a desk, not hidden in tabs.",
-    wins: [place("editor2", 50, 60, ...R), place("terminal", 720, 60, ...R), place("git", 720, 440, ...R)],
+    wins: [w("editor", 3, 6, 44), w("terminal", 50, 6, 46, "green"), w("git", 54, 52, 40, "blue")],
   },
   {
     id: "frontend", name: "Frontend & design", icon: "i-browser",
     text: "Your app in a real browser window, phone and desktop sizes, next to the code that draws it.",
-    wins: [place("browser", 50, 60, ...R), place("editor", 1040, 60, ...R), place("explorer", 900, 560, ...R)],
+    wins: [w("browser", 3, 6, 55), w("editor", 61, 6, 36), w("explorer", 61, 48, 36)],
   },
   {
     id: "devops", name: "DevOps & SRE", icon: "i-server",
     text: "Terminals on every machine you run, with containers and live activity, in one place.",
-    wins: [place("containers", 50, 60, ...R), place("tunnels", 860, 40, ...R), place("terminal", 400, 730, ...R)],
+    wins: [w("containers", 3, 6, 52), w("tunnels", 58, 6, 39), w("terminal", 38, 50, 48, "green")],
   },
   {
     id: "data", name: "Backend & data", icon: "i-database",
     text: "Your databases and APIs next to the code that uses them: query, call, compare.",
-    wins: [place("data", 50, 60, ...R), place("editor2", 1010, 40, ...R), place("requests", 620, 440, ...R)],
+    wins: [w("data", 3, 6, 54), w("editor", 62, 4, 34), w("requests", 48, 42, 46)],
   },
   {
     id: "agents", name: "AI agents", icon: "i-bot",
     text: "Agents open terminals, type and read the screen, while you watch every window they touch.",
-    wins: [place("agent", 50, 60, ...R), place("terminal", 790, 60, ...R), place("browser", 700, 440, ...R)],
+    wins: [w("agent", 3, 6, 50, "violet"), w("terminal", 56, 6, 40, "green"), w("browser", 44, 48, 44)],
   },
 ];
 
 const builtIn = [
-  { name: "Terminal", icon: "i-terminal", img: "terminal", text: "Your shell, on any of your machines, that keeps running when you close the app." },
-  { name: "Editor", icon: "i-editor", img: "editor", text: "Any file, with highlighting, find and replace and multiple cursors." },
-  { name: "Explorer", icon: "i-explorer", img: "explorer", text: "Your folders as a list: sort, search, drag to move, open in the Editor." },
+  { name: "Terminal", icon: "i-terminal", kind: "terminal" as Kind, tint: "green" as Tint, text: "Your shell, on any of your machines, that keeps running when you close the app." },
+  { name: "Editor", icon: "i-editor", kind: "editor" as Kind, tint: undefined, text: "Any file, with highlighting, find and replace and multiple cursors." },
+  { name: "Explorer", icon: "i-explorer", kind: "explorer" as Kind, tint: undefined, text: "Your folders as a list: sort, search, drag to move, open in the Editor." },
 ];
 
 const plugins = [
-  { name: "Git", icon: "i-git", hue: "blue", img: "git", repo: "hp-git", size: "wide", text: "Commit, branch and sync, laid out like GitHub Desktop." },
-  { name: "Browser", icon: "i-browser", hue: "cyan", img: "browser", repo: "hp-browser", size: "wide", text: "A real web page in a window, at phone, tablet or desktop size." },
-  { name: "Data", icon: "i-database", hue: "violet", img: "data", repo: "hp-data", size: "tall", text: "Every database you use, from Postgres to Redis and S3." },
-  { name: "Requests", icon: "i-arrows", hue: "amber", img: "requests", repo: "hp-requests", text: "Try any API, with your saved requests and their history." },
-  { name: "Containers", icon: "i-box", hue: "teal", img: "containers", repo: "hp-containers", text: "Your containers and services at a glance, with their logs." },
-  { name: "Tunnels", icon: "i-link", hue: "green", img: "tunnels", repo: "hp-tunnels", text: "Share something running on your machine with a link." },
-  { name: "Activity", icon: "i-activity", hue: "rose", repo: "hp-activity", text: "What your machine is doing: CPU, memory, disk and network." },
-  { name: "Env", icon: "i-key", hue: "orange", img: "env", repo: "hp-env", text: "Your project’s settings and secrets, hidden until you look." },
-  { name: "Code Stats", icon: "i-chart", hue: "blue", img: "codestats", repo: "hp-codestats", text: "Your code counted, by language and by folder." },
+  { name: "Git", icon: "i-git", hue: "blue", kind: "git" as Kind, tint: "blue" as Tint, repo: "hp-git", size: "wide", text: "Commit, branch and sync, laid out like GitHub Desktop." },
+  { name: "Browser", icon: "i-browser", hue: "cyan", kind: "browser" as Kind, repo: "hp-browser", size: "wide", text: "A real web page in a window, at phone, tablet or desktop size." },
+  { name: "Data", icon: "i-database", hue: "violet", kind: "data" as Kind, repo: "hp-data", size: "tall", text: "Every database you use, from Postgres to Redis and S3." },
+  { name: "Requests", icon: "i-arrows", hue: "amber", kind: "requests" as Kind, repo: "hp-requests", text: "Try any API, with your saved requests and their history." },
+  { name: "Containers", icon: "i-box", hue: "teal", kind: "containers" as Kind, repo: "hp-containers", text: "Your containers and services at a glance, with their logs." },
+  { name: "Tunnels", icon: "i-link", hue: "green", kind: "tunnels" as Kind, repo: "hp-tunnels", text: "Share something running on your machine with a link." },
+  { name: "Activity", icon: "i-activity", hue: "rose", kind: "activity" as Kind, repo: "hp-activity", text: "What your machine is doing: CPU, memory, disk and network." },
+  { name: "Env", icon: "i-key", hue: "orange", kind: "env" as Kind, repo: "hp-env", text: "Your project’s settings and secrets, hidden until you look." },
+  { name: "Code Stats", icon: "i-chart", hue: "blue", kind: "codestats" as Kind, repo: "hp-codestats", text: "Your code counted, by language and by folder." },
   { name: "Pets", icon: "i-cat", hue: "rose", repo: "hp-pets", text: "A little pixel cat that naps on the window you’re working in." },
 ];
 
@@ -131,11 +134,9 @@ const systems = [
               style={`--x:${d.x}%;--y:${d.y}%;--w:${d.w}%;--ratio:${d.ratio};z-index:${d.z}`}
             >
               <img src={shot(d.img)} alt={`The ${d.label} window`} decoding="async" draggable="false" />
-              <span class="dw-grip" aria-hidden="true"></span>
             </div>
           ))}
           <img class="stage-toolbar" src={shot("toolbar")} alt="" decoding="async" draggable="false" />
-          <span class="stage-hint" aria-hidden="true">Drag a window by its header</span>
         </div>
       </figure>
     </div>
@@ -179,15 +180,10 @@ const systems = [
       <div class="roles-canvas" id="roles-canvas" role="tabpanel" aria-live="polite" data-reveal>
         {roles.map((r, i) => (
           <div class="rset" data-set={r.id} data-on={i === 0 ? "" : undefined} aria-hidden={i === 0 ? undefined : "true"}>
-            {r.wins.map((w, n) => (
-              <img
-                class="rw"
-                src={shot(w.img)}
-                alt=""
-                loading="lazy"
-                decoding="async"
-                style={`--x:${w.x}%;--y:${w.y}%;--w:${w.w}%;--ratio:${w.ratio};--n:${n}`}
-              />
+            {r.wins.map((win, n) => (
+              <div class="rw" style={`--x:${win.x}%;--y:${win.y}%;--w:${win.w}%;--n:${n}`}>
+                <Win kind={win.kind} tint={win.tint} />
+              </div>
             ))}
           </div>
         ))}
@@ -207,7 +203,7 @@ const systems = [
       <div class="builtin">
         {builtIn.map((b, i) => (
           <article class="bi" data-reveal style={`--d:${i * 80}ms`}>
-            <div class="bi-shot"><img src={shot(b.img)} alt={`The ${b.name} window`} loading="lazy" decoding="async" style={`--nat:${size[b.img][0]}`} /></div>
+            <div class="bi-shot"><Win kind={b.kind} tint={b.tint} /></div>
             <div class="bi-copy">
               <span class="tile-icon" aria-hidden="true"><svg class="icon"><use href={`#${b.icon}`}></use></svg></span>
               <h4>{b.name}</h4>
@@ -232,7 +228,7 @@ const systems = [
       <h3 class="shelf-title" data-reveal>Plugins</h3>
       <div class="shelf">
         {plugins.map((p, i) => (
-          <article class:list={["pl", p.size && `pl-${p.size}`, !p.img && "pl-art"]} style={`--hue:var(--h-${p.hue});--d:${(i % 4) * 70}ms`} data-reveal>
+          <article class:list={["pl", p.size && `pl-${p.size}`, !p.kind && "pl-art"]} style={`--hue:var(--h-${p.hue});--d:${(i % 4) * 70}ms`} data-reveal>
             <header class="pl-head">
               <span class="pl-tile" aria-hidden="true"><svg class="icon"><use href={`#${p.icon}`}></use></svg></span>
               <h4>{p.name}</h4>
@@ -241,14 +237,8 @@ const systems = [
               </a>
             </header>
             <p>{p.text}</p>
-            {p.img ? (
-              <div class="pl-shot"><img src={shot(p.img)} alt={`The ${p.name} window`} loading="lazy" decoding="async" style={`--nat:${size[p.img][0]}`} /></div>
-            ) : p.name === "Activity" ? (
-              <svg class="pl-draw pl-activity" viewBox="0 0 320 120" aria-hidden="true">
-                <path class="grid" d="M0 30H320M0 60H320M0 90H320" />
-                <path class="area" d="M0 96 L24 88 L48 92 L72 70 L96 76 L120 52 L144 62 L168 40 L192 48 L216 30 L240 44 L264 26 L288 38 L320 22 L320 120 L0 120Z" />
-                <path class="line" d="M0 96 L24 88 L48 92 L72 70 L96 76 L120 52 L144 62 L168 40 L192 48 L216 30 L240 44 L264 26 L288 38 L320 22" />
-              </svg>
+            {p.kind ? (
+              <div class="pl-shot"><Win kind={p.kind} tint={p.tint} /></div>
             ) : (
               <div class="pl-draw pl-pets" aria-hidden="true">
                 <svg viewBox="0 0 16 12" class="cat" shape-rendering="crispEdges">
@@ -268,6 +258,7 @@ const systems = [
       </div>
 
       <figure class="page-shot" data-reveal>
+        <span class="stage-lights" aria-hidden="true"><i></i><i></i><i></i></span>
         <img src={shot("page-plugins")} width="2400" height="1444" alt="The Plugins page: what’s in the project, what’s available and updates" loading="lazy" decoding="async" />
       </figure>
     </div>
@@ -283,8 +274,11 @@ const systems = [
     <div class="detach" data-detach data-reveal>
       <div class="detach-app" aria-hidden="true">
         <div class="lid">
-          <img src={shot("app-chrome")} alt="" loading="lazy" decoding="async" />
-          <img class="lid-win" src={shot("terminal")} alt="" loading="lazy" decoding="async" />
+          <div class="lid-side"><i></i><i></i><i></i><i class="on"></i><i></i></div>
+          <div class="lid-canvas">
+            <div class="lid-win lid-win-1"><Win kind="editor" /></div>
+            <div class="lid-win lid-win-2"><Win kind="terminal" tint="green" /></div>
+          </div>
         </div>
         <span class="detach-state" data-app-state>App open</span>
       </div>

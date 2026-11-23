@@ -1,0 +1,272 @@
+---
+// A drawn window of the app: its header (an icon in a tile, the title, ⋯)
+// over a body drawn in SVG for its kind, in the app's colours. It scales
+// with its width (container units); its insides move once it's in view
+// (a parent with .is-in, or [data-live]).
+interface Props {
+  kind:
+    | "terminal" | "editor" | "explorer" | "git" | "browser" | "data" | "requests"
+    | "containers" | "tunnels" | "env" | "codestats" | "activity" | "agent";
+  title?: string;
+  sub?: string;
+  /** The header's colour (the app's header colours). */
+  tint?: "green" | "blue" | "violet" | "amber" | "rose";
+  class?: string;
+  style?: string;
+}
+const { kind, title, sub, tint, class: cls, style } = Astro.props;
+
+const icons: Record<Props["kind"], string> = {
+  terminal: "i-terminal", editor: "i-editor", explorer: "i-explorer", git: "i-git", browser: "i-browser",
+  data: "i-database", requests: "i-arrows", containers: "i-box", tunnels: "i-link", env: "i-key",
+  codestats: "i-chart", activity: "i-activity", agent: "i-bot",
+};
+const titles: Record<Props["kind"], [string, string?]> = {
+  terminal: ["zsh", "~/dev/api"], editor: ["orders.ts", "src/routes"], explorer: ["api"], git: ["api · main", "1 change"],
+  browser: ["localhost:5173"], data: ["Data — orders"], requests: ["GET /orders"], containers: ["Containers", "fra-1"],
+  tunnels: ["Tunnels"], env: [".env", "4 values"], codestats: ["Code Stats · api"], activity: ["Activity", "This Mac"],
+  agent: ["agent", "~/dev/api"],
+};
+const [t0, s0] = titles[kind];
+const head = title ?? t0;
+const subtitle = sub ?? s0;
+
+// Bars standing for code: [x, width, class] per line.
+type Seg = [number, number, string];
+const code = (lines: Seg[][], x0: number, y0: number, gap = 17, num = true) =>
+  lines
+    .map((segs, i) => {
+      const y = y0 + i * gap;
+      const n = num ? `<text class="w-num" x="${x0 - 10}" y="${y + 6}" text-anchor="end">${i + 1}</text>` : "";
+      return n + segs.map(([x, w, c]) => `<rect class="${c}" x="${x0 + x}" y="${y}" width="${w}" height="7" rx="3.5"/>`).join("");
+    })
+    .join("");
+
+const bodies: Record<Props["kind"], { h: number; svg: string }> = {
+  terminal: {
+    h: 190,
+    svg: `
+<text class="w-mono" x="16" y="28"><tspan class="t-green">➜</tspan> <tspan class="t-cyan">api</tspan> <tspan class="t-blue">git:(</tspan><tspan class="t-rose">main</tspan><tspan class="t-blue">)</tspan> npm run dev</text>
+<g class="w-lines">
+<text class="w-mono w-dim" x="16" y="50" style="--n:1">&gt; api@0.4.0 dev</text>
+<text class="w-mono" x="16" y="72" style="--n:2"><tspan class="t-green">VITE</tspan> v7.1.4  <tspan class="w-dim">ready in 284 ms</tspan></text>
+<text class="w-mono" x="16" y="94" style="--n:3"><tspan class="t-green">➜</tspan>  Local:   <tspan class="t-cyan">http://localhost:5173/</tspan></text>
+<text class="w-mono w-dim" x="16" y="116" style="--n:4">12:41:07 [vite] hmr update /src/App.tsx</text>
+<text class="w-mono w-dim" x="16" y="138" style="--n:5">12:41:19 [vite] hmr update /src/App.tsx</text>
+</g>
+<rect class="w-caret" x="16" y="152" width="8" height="14" rx="1"/>`,
+  },
+  agent: {
+    h: 190,
+    svg: `
+<text class="w-mono" x="16" y="28"><tspan class="t-violet">◆ agent</tspan> <tspan class="w-dim">reading</tspan> src/routes/orders.ts</text>
+<g class="w-lines">
+<text class="w-mono" x="16" y="52" style="--n:1"><tspan class="t-violet">◆ agent</tspan> <tspan class="w-dim">editing</tspan> orders.ts <tspan class="t-green">+12</tspan> <tspan class="t-rose">−3</tspan></text>
+<text class="w-mono" x="16" y="76" style="--n:2"><tspan class="t-violet">◆ agent</tspan> <tspan class="w-dim">running</tspan> npm test</text>
+<text class="w-mono w-dim" x="16" y="100" style="--n:3">  orders › creates an order (12 ms)</text>
+<text class="w-mono w-dim" x="16" y="122" style="--n:4">  products › lists products (8 ms)</text>
+<text class="w-mono" x="16" y="146" style="--n:5"><tspan class="t-green">✓ 24 passed</tspan> <tspan class="w-dim">in 1.8s</tspan></text>
+</g>
+<rect class="w-caret" x="16" y="160" width="8" height="14" rx="1"/>`,
+  },
+  editor: {
+    h: 220,
+    svg: `
+<rect class="w-active" x="0" y="${16 + 5 * 17 - 5}" width="400" height="17"/>
+${code(
+  [
+    [[0, 40, "c-key"], [46, 90, "c-fn"], [142, 40, "c-key"], [188, 80, "c-str"]],
+    [[0, 40, "c-key"], [46, 30, "c-fn"], [82, 40, "c-key"], [128, 70, "c-str"]],
+    [],
+    [[0, 40, "c-key"], [46, 50, "c-key"], [102, 60, "c-fn"], [168, 120, "c-txt"]],
+    [[18, 60, "c-txt"], [84, 40, "c-fn"], [130, 90, "c-str"], [226, 40, "c-txt"]],
+    [[36, 40, "c-key"], [82, 50, "c-txt"], [138, 34, "c-key"], [178, 70, "c-fn"]],
+    [[36, 120, "c-txt"], [162, 46, "c-num"]],
+    [[36, 40, "c-key"], [82, 60, "c-txt"]],
+    [[18, 30, "c-txt"]],
+    [[0, 16, "c-txt"]],
+    [],
+  ],
+  44,
+  16,
+)}
+<rect class="w-caret" x="${44 + 178 + 72}" y="${16 + 5 * 17 - 2}" width="2" height="12"/>`,
+  },
+  explorer: {
+    h: 200,
+    svg: `
+<g class="w-mono">
+<rect class="w-row-on" x="8" y="14" width="384" height="26" rx="6"/>
+<text x="22" y="32"><tspan class="w-dim">⌄</tspan>  <tspan class="t-blue">▰</tspan> src</text>
+<text x="40" y="60"><tspan class="w-dim">⌄</tspan>  <tspan class="t-blue">▰</tspan> routes</text>
+<text x="76" y="86"><tspan class="t-blue">▤</tspan> orders.ts</text>
+<text x="76" y="112"><tspan class="t-blue">▤</tspan> products.ts</text>
+<text x="58" y="138"><tspan class="t-blue">▤</tspan> server.ts</text>
+<text x="22" y="164"><tspan class="t-amber">▤</tspan> package.json</text>
+<text x="22" y="190"><tspan class="t-cyan">▤</tspan> Dockerfile</text>
+<text class="w-dim" x="300" y="86">1.2 KB</text><text class="w-dim" x="300" y="112">0.9 KB</text><text class="w-dim" x="300" y="138">0.6 KB</text><text class="w-dim" x="300" y="164">277 B</text><text class="w-dim" x="300" y="190">117 B</text>
+</g>`,
+  },
+  git: {
+    h: 220,
+    svg: `
+<rect class="w-pane" x="0" y="0" width="150" height="220"/>
+<g class="w-mono">
+<rect class="w-row-on" x="8" y="12" width="134" height="24" rx="6"/>
+<rect class="w-check" x="16" y="18" width="12" height="12" rx="3"/>
+<text x="34" y="28">orders.ts</text><text class="t-green" x="116" y="28">+12</text>
+<rect class="w-check" x="16" y="46" width="12" height="12" rx="3"/>
+<text x="34" y="56">server.ts</text><text class="t-amber" x="124" y="56">M</text>
+</g>
+<rect class="w-field" x="10" y="150" width="130" height="22" rx="6"/>
+<rect class="w-btn" x="10" y="182" width="130" height="24" rx="6"/>
+<text class="w-mono w-on-btn" x="75" y="198" text-anchor="middle">Commit to main</text>
+<g class="w-diff">
+<rect class="d-del" x="150" y="${16 + 2 * 17 - 5}" width="250" height="17" style="--n:1"/>
+<rect class="d-add" x="150" y="${16 + 3 * 17 - 5}" width="250" height="17" style="--n:2"/>
+<rect class="d-add" x="150" y="${16 + 4 * 17 - 5}" width="250" height="17" style="--n:3"/>
+</g>
+${code(
+  [
+    [[0, 60, "c-txt"], [66, 70, "c-fn"]],
+    [[18, 40, "c-key"], [64, 90, "c-txt"]],
+    [[18, 120, "c-txt"], [144, 40, "c-str"]],
+    [[18, 60, "c-key"], [84, 110, "c-fn"]],
+    [[36, 80, "c-txt"], [122, 50, "c-str"]],
+    [[18, 30, "c-txt"]],
+    [[0, 16, "c-txt"]],
+    [],
+    [[0, 70, "c-key"], [76, 60, "c-txt"]],
+    [[18, 140, "c-txt"]],
+  ],
+  182,
+  16,
+)}`,
+  },
+  browser: {
+    h: 230,
+    svg: `
+<rect class="w-field" x="12" y="10" width="376" height="22" rx="11"/>
+<text class="w-mono w-dim" x="30" y="25">localhost:5173</text>
+<rect class="w-pane" x="0" y="42" width="400" height="188"/>
+<rect class="b-logo" x="24" y="58" width="14" height="14" rx="2"/>
+<rect class="c-txt" x="44" y="61" width="50" height="8" rx="4"/>
+<rect class="c-dim" x="250" y="61" width="34" height="8" rx="4"/><rect class="c-dim" x="292" y="61" width="34" height="8" rx="4"/>
+<rect class="b-cta" x="334" y="56" width="44" height="18" rx="9"/>
+<g class="b-hero">
+<rect class="b-h1" x="90" y="100" width="220" height="18" rx="5"/>
+<rect class="b-h2" x="120" y="124" width="160" height="18" rx="5"/>
+<rect class="c-dim" x="110" y="154" width="180" height="7" rx="3.5"/>
+<rect class="c-dim" x="130" y="166" width="140" height="7" rx="3.5"/>
+<rect class="b-cta" x="150" y="184" width="46" height="18" rx="9"/><rect class="w-field" x="204" y="184" width="46" height="18" rx="9"/>
+</g>`,
+  },
+  data: {
+    h: 220,
+    svg: `
+<rect class="w-pane" x="0" y="0" width="120" height="220"/>
+<g class="w-mono">
+${[["Pg", "t-blue-bg", "orders"], ["Rd", "t-rose-bg", "cache"], ["My", "t-cyan-bg", "legacy"], ["S3", "t-amber-bg", "assets"]]
+  .map(([l, c, n], i) => `<rect class="${c}" x="12" y="${14 + i * 34}" width="24" height="24" rx="6"/><text class="w-on-tile" x="24" y="${30 + i * 34}" text-anchor="middle">${l}</text><text x="44" y="${30 + i * 34}">${n}</text>`)
+  .join("")}
+</g>
+<rect class="w-head-row" x="120" y="0" width="280" height="26"/>
+<g class="w-mono w-dim"><text x="132" y="17">id</text><text x="172" y="17">customer</text><text x="262" y="17">total</text><text x="322" y="17">status</text></g>
+<g class="w-mono">
+${[["1042", "Ada L.", "$128.00", "paid", "t-green"], ["1043", "Grace H.", "$64.50", "paid", "t-green"], ["1044", "Alan T.", "$212.10", "refund", "t-amber"], ["1045", "Linus T.", "$18.00", "paid", "t-green"], ["1046", "Ken T.", "$99.90", "new", "t-blue"], ["1047", "Barbara L.", "$45.00", "paid", "t-green"]]
+  .map(([a, b, c, d, cls], i) => `${i === 2 ? `<rect class="w-row-on" x="120" y="${30 + i * 30}" width="280" height="26"/>` : ""}<text class="w-dim" x="132" y="${47 + i * 30}">${a}</text><text x="172" y="${47 + i * 30}">${b}</text><text x="262" y="${47 + i * 30}">${c}</text><text class="${cls}" x="322" y="${47 + i * 30}">${d}</text>`)
+  .join("")}
+</g>`,
+  },
+  requests: {
+    h: 220,
+    svg: `
+<rect class="w-field" x="12" y="12" width="300" height="26" rx="7"/>
+<rect class="t-green-bg" x="18" y="17" width="40" height="16" rx="4"/>
+<text class="w-mono w-on-tile" x="38" y="29" text-anchor="middle">GET</text>
+<text class="w-mono" x="68" y="29">{{api}}/orders?limit=20</text>
+<rect class="w-btn" x="320" y="12" width="68" height="26" rx="7"/>
+<text class="w-mono w-on-btn" x="354" y="29" text-anchor="middle">Send</text>
+<rect class="w-pane" x="0" y="50" width="400" height="170"/>
+<rect class="t-green-soft" x="12" y="62" width="54" height="18" rx="5"/>
+<text class="w-mono t-green" x="39" y="75" text-anchor="middle">200 OK</text>
+<text class="w-mono w-dim" x="76" y="75">84 ms · 1.2 KB</text>
+<g class="w-mono w-lines">
+<text x="12" y="104" style="--n:1">{</text>
+<text x="12" y="124" style="--n:2">  <tspan class="c-key-t">"orders"</tspan>: [</text>
+<text x="12" y="144" style="--n:3">    { <tspan class="c-key-t">"id"</tspan>: <tspan class="c-num-t">1042</tspan>, <tspan class="c-key-t">"total"</tspan>: <tspan class="c-num-t">128</tspan>,</text>
+<text x="12" y="164" style="--n:4">      <tspan class="c-key-t">"status"</tspan>: <tspan class="c-str-t">"paid"</tspan> },</text>
+<text x="12" y="184" style="--n:5">    …</text>
+<text x="12" y="204" style="--n:6">  ]</text>
+</g>`,
+  },
+  containers: {
+    h: 200,
+    svg: `
+<rect class="w-head-row" x="0" y="0" width="400" height="26"/>
+<g class="w-mono w-dim"><text x="34" y="17">name</text><text x="170" y="17">cpu</text><text x="300" y="17">status</text></g>
+<g class="w-mono">
+${[["api", 42, "Up 2 hours", "dot-green"], ["web", 18, "Up 2 hours", "dot-green"], ["postgres", 26, "Up 6 days", "dot-green"], ["redis", 6, "Up 6 days", "dot-green"], ["worker", 64, "Restarting", "dot-amber"]]
+  .map(([n, c, s, d], i) => `<circle class="${d}" cx="18" cy="${44 + i * 32}" r="4"/><text x="34" y="${48 + i * 32}">${n}</text><rect class="c-dim" x="170" y="${42 + i * 32}" width="100" height="6" rx="3"/><rect class="bar ${d === "dot-amber" ? "t-amber-bg" : "t-green-bg"}" x="170" y="${42 + i * 32}" width="${c}" height="6" rx="3" style="--n:${i}"/><text class="w-dim" x="300" y="${48 + i * 32}">${s}</text>`)
+  .join("")}
+</g>`,
+  },
+  tunnels: {
+    h: 200,
+    svg: `
+<rect class="w-pane" x="24" y="62" width="120" height="70" rx="12"/>
+<text class="w-mono w-dim" x="84" y="88" text-anchor="middle">This Mac</text>
+<text class="w-mono" x="84" y="110" text-anchor="middle">:8080</text>
+<path class="tn-path" d="M144 97 C 200 97, 200 97, 256 97"/>
+<circle class="tn-pulse" r="4"/>
+<circle class="t-green-bg" cx="300" cy="97" r="34"/>
+<circle class="tn-globe" cx="300" cy="97" r="22"/>
+<path class="tn-globe" d="M278 97h44M300 75c-10 10-10 34 0 44M300 75c10 10 10 34 0 44"/>
+<rect class="w-field" x="196" y="150" width="190" height="26" rx="13"/>
+<text class="w-mono" x="291" y="167" text-anchor="middle">quiet-fox.tunnel.gg</text>`,
+  },
+  env: {
+    h: 190,
+    svg: `
+<g class="w-mono">
+${[["DATABASE_URL", "••••••••••••••", 0], ["STRIPE_KEY", "••••••••••", 0], ["PORT", "8080", 1], ["SESSION_SECRET", "••••••••••••", 0], ["APP_VERSION", "••••", 0]]
+  .map(([k, v, open], i) => `${open ? `<rect class="w-row-on" x="8" y="${10 + i * 34}" width="384" height="28" rx="6"/>` : ""}<text class="t-amber" x="20" y="${29 + i * 34}">${k}</text><text class="${open ? "" : "w-dim"}" x="190" y="${29 + i * 34}">${v}</text><path class="env-eye${open ? " is-open" : ""}" d="M362 ${24 + i * 34}c4-6 16-6 20 0c-4 6-16 6-20 0z"/><circle class="env-eye${open ? " is-open" : ""}" cx="372" cy="${24 + i * 34}" r="2.5"/>`)
+  .join("")}
+</g>`,
+  },
+  codestats: {
+    h: 200,
+    svg: `
+<g class="w-mono"><text class="w-dim" x="16" y="26">Files</text><text x="16" y="46">63</text><text class="w-dim" x="110" y="26">Lines</text><text x="110" y="46">4,812</text><text class="w-dim" x="210" y="26">Code</text><text x="210" y="46">3,904</text></g>
+<g class="cs-stack">
+<rect class="t-blue-bg" x="16" y="62" width="${368 * 0.65}" height="10" style="--n:0"/>
+<rect class="t-amber-bg" x="${16 + 368 * 0.65}" y="62" width="${368 * 0.17}" height="10" style="--n:1"/>
+<rect class="t-cyan-bg" x="${16 + 368 * 0.82}" y="62" width="${368 * 0.11}" height="10" style="--n:2"/>
+<rect class="t-rose-bg" x="${16 + 368 * 0.93}" y="62" width="${368 * 0.07}" height="10" style="--n:3"/>
+</g>
+<g class="w-mono">
+${[["TypeScript", "t-blue", 65], ["JSON", "t-amber", 17], ["Dockerfile", "t-cyan", 11], ["Git config", "t-rose", 7]]
+  .map(([n, c, p], i) => `<circle class="${c}-bg" cx="22" cy="${102 + i * 24}" r="4"/><text x="34" y="${106 + i * 24}">${n}</text><rect class="c-dim" x="200" y="${100 + i * 24}" width="140" height="6" rx="3"/><rect class="bar ${c}-bg" x="200" y="${100 + i * 24}" width="${(140 * Number(p)) / 65}" height="6" rx="3" style="--n:${i}"/><text class="w-dim" x="352" y="${106 + i * 24}">${p}%</text>`)
+  .join("")}
+</g>`,
+  },
+  activity: {
+    h: 200,
+    svg: `
+<g class="w-mono"><text class="w-dim" x="16" y="24">CPU</text><text x="16" y="44">38%</text><text class="w-dim" x="110" y="24">Memory</text><text x="110" y="44">14.2 GB</text><text class="w-dim" x="230" y="24">Network</text><text x="230" y="44">↓ 4.1 MB/s</text></g>
+<path class="ac-grid" d="M16 90H384M16 130H384M16 170H384"/>
+<path class="ac-area" d="M16 170 L40 160 L64 166 L88 140 L112 148 L136 118 L160 128 L184 104 L208 112 L232 92 L256 108 L280 86 L304 100 L328 78 L352 94 L384 72 L384 186 L16 186Z"/>
+<path class="ac-line" d="M16 170 L40 160 L64 166 L88 140 L112 148 L136 118 L160 128 L184 104 L208 112 L232 92 L256 108 L280 86 L304 100 L328 78 L352 94 L384 72"/>`,
+  },
+};
+const body = bodies[kind];
+---
+
+<div class:list={["mw", `mw-${kind}`, cls]} data-tint={tint} style={style}>
+  <div class="mw-head">
+    <span class="mw-tile" aria-hidden="true"><svg class="icon"><use href={`#${icons[kind]}`}></use></svg></span>
+    <span class="mw-title">{head}{subtitle && <small>{subtitle}</small>}</span>
+    <span class="mw-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+  </div>
+  <svg class="mw-body" viewBox={`0 0 400 ${body.h}`} aria-hidden="true" set:html={body.svg} />
+</div>
