@@ -81,34 +81,58 @@
 
   // Plugins' drawings start as they come into view (data-reveal adds is-in).
 
-  // Always on: the app closes, the server keeps building, the app comes back
+  // Always on: the lid closes, the server keeps building and queues what the
+  // laptop misses, the lid opens and it all comes over.
   const scene = document.querySelector('[data-detach]');
   if (scene) {
-    const pct = scene.querySelector('[data-pct]');
-    const left = scene.querySelector('[data-left]');
-    const app = scene.querySelector('[data-app]');
+    const frames = [...scene.querySelectorAll('.lid-f')];
+    const cells = [...scene.querySelectorAll('.srv-cell')];
+    const queue = [...scene.querySelectorAll('.srv-q')];
     const caption = scene.querySelector('[data-caption]');
-    let p = 0;
-    let secs = 0;
-    let tick = null;
     const say = (text) => {
       caption.style.opacity = '0';
       setTimeout(() => { caption.textContent = text; caption.style.opacity = '1'; }, 200);
     };
-    const phase = (ph, text) => { scene.dataset.phase = ph; app.textContent = ph; say(text); };
-    const step = () => {
-      if (p >= 100) { p = 0; secs = 0; phase('open', 'The app is open: the build runs on your server.'); }
-      else {
-        p = Math.min(100, p + 4);
-        secs += 11;
-        if (p === 20) phase('closed', 'You quit hyperpane. The build doesn’t notice.');
-        if (p === 100) phase('open', 'Open it again: same windows, with everything they printed meanwhile.');
-      }
-      pct.textContent = String(p);
-      left.textContent = p >= 100 ? 'done · ✓ 24 tests passed' : `running · ${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+    let shown = frames.length - 1;
+    const show = (i) => { frames[shown].style.display = 'none'; frames[i].style.display = ''; shown = i; };
+    let timers = [];
+    const later = (ms, fn) => timers.push(setTimeout(fn, ms));
+    // the lid swings through its frames, easing in and out
+    const swing = (to, ms = 520) => {
+      const from = shown;
+      const t0 = performance.now();
+      const go = (now) => {
+        const t = Math.min(1, (now - t0) / ms);
+        const e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        show(Math.round(from + (to - from) * e));
+        if (t < 1) requestAnimationFrame(go);
+      };
+      requestAnimationFrame(go);
     };
-    const start = () => { if (tick) return; phase('open', 'The app is open: the build runs on your server.'); tick = setInterval(step, reduce ? 900 : 260); };
-    const pause = () => { clearInterval(tick); tick = null; };
+    const progress = (p) => cells.forEach((c, i) => c.classList.toggle('on', i < Math.round(p / 10)));
+    const queued = (n) => queue.forEach((q, i) => q.classList.toggle('on', i < n));
+    const phase = (ph, text) => { scene.dataset.phase = ph; if (text) say(text); };
+    let p = 0;
+    let bar = null;
+    const run = () => {
+      timers.forEach(clearTimeout);
+      timers = [];
+      clearInterval(bar);
+      p = 0; progress(0); queued(0); show(frames.length - 1);
+      phase('open', 'The app is open: the build runs on your server, its output on your screen.');
+      bar = setInterval(() => { p = Math.min(100, p + 1); progress(p); }, 95);
+      later(2400, () => { swing(0); phase('closed', 'You close the laptop. The build doesn\u2019t notice.'); });
+      later(3600, () => queued(1));
+      later(4800, () => queued(2));
+      later(6000, () => queued(3));
+      later(6800, () => { swing(frames.length - 1); queued(0); phase('sync', 'Open it again: everything it printed meanwhile comes over.'); });
+      later(8200, () => phase('open'));
+      later(9600, () => { clearInterval(bar); p = 100; progress(100); phase('done', 'Done: 24 tests passed while you were away.'); });
+      later(12400, run);
+    };
+    const still = () => { show(frames.length - 1); progress(60); phase('open', 'The app is open: the build runs on your server, its output on your screen.'); };
+    const start = () => { if (reduce) still(); else run(); };
+    const pause = () => { timers.forEach(clearTimeout); timers = []; clearInterval(bar); };
     new IntersectionObserver(([e]) => (e.isIntersecting ? start() : pause()), { threshold: 0.3 }).observe(scene);
   }
 

@@ -699,39 +699,72 @@ const things: Record<string, () => { view: string; svg: string }> = {
   },
 };
 
-// The always-on scene: a laptop whose lid closes, a server that keeps going --
+// The always-on scene: a laptop whose lid really closes, a server that keeps
+// building, its output streaming over the cable to the laptop. home.js runs
+// the story: it steps the lid through its frames, lights the progress cells,
+// queues what the laptop missed and sends it over when the lid comes up.
 function always() {
   const s = new Scene(300, 70);
   s.plateR(-60, -40, 520, 260, 0, 8, 20);
-  // the cable
-  s.path3([[150, 120, 8.2], [250, 120, 8.2], [250, 60, 8.2], [300, 60, 8.2]], "iso-cable");
-  // the laptop: base, keys, the lid open and closed
+  // the cable, server to laptop
+  const route: V3[] = [[318, 110, 8.2], [318, 124, 8.2], [150, 124, 8.2]];
+  s.path3(route, "iso-cable");
+  // the laptop's base and keys
   s.box(0, 60, 8, 150, 110, 8);
   for (let r = 0; r < 4; r++) for (let k = 0; k < 9; k++) s.box(10 + k * 15, 66 + r * 14, 16, 11, 9, 1.5, "dark");
-  s.add(`<g class="lid-open">`);
-  s.box(0, 52, 16, 150, 8, 110);
-  s.poly([[6, 60.2, 118], [144, 60.2, 118], [144, 60.2, 24], [6, 60.2, 24]], "iso-screen");
-  s.poly([[14, 60.3, 110], [70, 60.3, 110], [70, 60.3, 70], [14, 60.3, 70]], "iso-face");
-  s.poly([[78, 60.3, 110], [136, 60.3, 110], [136, 60.3, 84], [78, 60.3, 84]], "iso-face-a");
-  s.poly([[78, 60.3, 78], [136, 60.3, 78], [136, 60.3, 32], [78, 60.3, 32]], "iso-face");
-  s.poly([[14, 60.3, 62], [70, 60.3, 62], [70, 60.3, 32], [14, 60.3, 32]], "iso-face");
-  s.add(`</g><g class="lid-shut">`);
-  s.box(0, 60, 16, 150, 110, 5, "base");
-  s.top(50, 120, 21.2, "closed", 9, "iso-tx");
+  s.dot([150.4, 150, 12], "iso-led lap-led", 2.4);
+  // the lid, one frame per angle; the hinge runs along x at y 60, z 18
+  const L = 110;
+  const T = 6;
+  const angles = [0, 9, 19, 30, 42, 55, 68, 80, 91, 100];
+  s.add(`<g class="iso-box" ${s.order()}>`);
+  angles.forEach((deg, i) => {
+    const a = (deg * Math.PI) / 180;
+    const u = [Math.cos(a), Math.sin(a)];
+    const n = [Math.sin(a), -Math.cos(a)];
+    // a point on the lid: x across, along from the hinge, depth from the screen face
+    const at = (x: number, al: number, dp: number): V3 => [x, 60 + al * u[0] - dp * n[0], 18 + al * u[1] - dp * n[1]];
+    const last = i === angles.length - 1;
+    s.add(`<g class="lid-f" data-f="${i}"${last ? "" : ' style="display:none"'}>`);
+    const faceUp = n[0] + n[1];
+    if (faceUp < 0) s.poly([at(0, 0, T), at(150, 0, T), at(150, L, T), at(0, L, T)], "iso-t");
+    s.poly([at(150, 0, 0), at(150, L, 0), at(150, L, T), at(150, 0, T)], "iso-r");
+    s.poly([at(0, L, 0), at(150, L, 0), at(150, L, T), at(0, L, T)], u[1] > u[0] ? "iso-t" : "iso-l");
+    if (faceUp > 0) {
+      s.poly([at(0, 0, 0), at(150, 0, 0), at(150, L, 0), at(0, L, 0)], "iso-l");
+      s.poly([at(6, 8, -0.2), at(144, 8, -0.2), at(144, L - 6, -0.2), at(6, L - 6, -0.2)], "iso-screen");
+      if (deg >= 80) {
+        const panel = (x0: number, x1: number, a0: number, a1: number, cls: string) =>
+          s.poly([at(x0, a0, -0.4), at(x1, a0, -0.4), at(x1, a1, -0.4), at(x0, a1, -0.4)], cls);
+        panel(14, 70, 16, 54, "iso-face");
+        panel(14, 70, 62, L - 14, "iso-face");
+        panel(78, 136, 16, 70, "iso-face scr-log");
+        panel(78, 136, 78, L - 14, "iso-face-a scr-live");
+      }
+    }
+    s.add(`</g>`);
+  });
   s.add(`</g>`);
-  // the server rack
+  // the server rack: four units up top, the build's progress in the bottom one
   s.box(300, 20, 8, 110, 90, 170);
-  for (let u = 0; u < 5; u++) {
+  for (let u = 1; u < 5; u++) {
     s.poly([[304, 110.2, 22 + u * 32], [406, 110.2, 22 + u * 32], [406, 110.2, 44 + u * 32], [304, 110.2, 44 + u * 32]], "iso-unit");
     s.dot([314, 110.4, 33 + u * 32], "iso-led", 2.6);
     s.line([326, 110.4, 33 + u * 32], [380, 110.4, 33 + u * 32], "iso-bar");
   }
-  s.right(410, 100, 150, `<tspan class="iso-rl2">Build</tspan>`, 11, "iso-tx");
-  s.right(410, 100, 112, `<tspan class="iso-big" data-pct>0</tspan><tspan class="iso-unit-t" dx="3">%</tspan>`, 40, "iso-tx");
-  s.right(410, 100, 92, `<tspan data-left>running · 0:00</tspan>`, 10, "iso-tx");
-  s.callout([360, 110, 154], 560, 20, "Build", "BLD-412", [["Role", "npm run build"], ["Type", "fra-1, 16 cores"], ["Spec", "keeps running"]], "right");
-  s.left(-54, 220, 4, `<tspan class="iso-k">app</tspan> <tspan data-app>open</tspan>`, 10, "iso-tx iso-edge");
-  s.left(300, 220, 4, `<tspan class="iso-k">server</tspan> fra-1 · up 41 days`, 10, "iso-tx iso-edge");
+  s.poly([[304, 110.2, 20], [406, 110.2, 20], [406, 110.2, 46], [304, 110.2, 46]], "iso-unit");
+  for (let k = 0; k < 10; k++) {
+    const x = 309 + k * 9.6;
+    s.poly([[x, 110.4, 26], [x + 7, 110.4, 26], [x + 7, 110.4, 40], [x, 110.4, 40]], "srv-cell");
+  }
+  // what the laptop missed, stacking up by the server while the lid is shut
+  for (let q = 0; q < 3; q++) s.box(282, 136, 8 + q * 10, 12, 12, 9, "hi", `srv-q srv-q${q}`);
+  // the output on its way to the laptop: small lit cubes riding the cable
+  const path = "M" + route.map((v) => s.p(v).map(f).join(" ")).join("L");
+  const cube = new Scene(0, 0);
+  cube.box(-5, -5, 0, 10, 10, 8, "hi");
+  for (let i = 0; i < 4; i++)
+    s.add(`<g class="pkt" style="offset-path:path('${path}');animation-delay:${-i * 0.6}s">${cube.svg()}</g>`);
   return { view: "0 0 760 380", svg: s.svg() };
 }
 

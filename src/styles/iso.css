@@ -107,14 +107,24 @@
 @keyframes iso-zz { 0% { opacity: 0; transform: translateY(6px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px); } }
 
 /* The always-on scene: the lid */
-.iso .lid-open, .iso .lid-shut { transition: opacity 600ms var(--ease-in-out); }
-.iso .lid-shut { opacity: 0; }
-.detach[data-phase="closed"] .iso .lid-open { opacity: 0; }
-.detach[data-phase="closed"] .iso .lid-shut { opacity: 1; }
+/* Always on (home.js tells the story through data-phase on .detach) */
+.iso .srv-cell { fill: oklch(0.2 0.004 270); stroke: none; transition: fill 300ms var(--ease-out); }
+.iso .srv-cell.on { fill: var(--acc); }
+.detach[data-phase="done"] .iso .srv-cell.on { fill: oklch(0.78 0.16 150); }
+.detach .iso .iso-box.srv-q { opacity: 0; transform: translateY(-14px); transition: opacity 300ms var(--ease-out), transform 420ms var(--ease-out); }
+.detach .iso .iso-box.srv-q.on { opacity: 1; transform: none; }
+.iso .pkt { offset-rotate: 0deg; offset-distance: 0%; opacity: 0; animation: pkt 2.4s linear infinite; }
+@keyframes pkt { 0% { offset-distance: 0%; opacity: 0; } 8% { opacity: 1; } 88% { opacity: 1; } 100% { offset-distance: 100%; opacity: 0; } }
+.detach[data-phase="closed"] .iso .pkt { visibility: hidden; }
+.detach[data-phase="sync"] .iso .pkt { animation-duration: 0.8s; }
 .detach[data-phase="closed"] .iso .iso-cable { animation-play-state: paused; opacity: 0.35; }
+.iso .lap-led { transition: opacity 300ms; }
+.detach[data-phase="closed"] .iso .lap-led { animation: none; opacity: 0.2; }
+.iso .scr-live { transition: fill 300ms; }
+.detach[data-phase="sync"] .iso .scr-log { fill: oklch(0.42 0.15 262); }
 
 @media (prefers-reduced-motion: reduce) {
   .iso .iso-box, .iso .iso-hi, .iso .iso-pin, .iso .iso-call, .iso .iso-read { transform: none; opacity: 1; }
-  .iso .iso-move, .iso .iso-ride, .iso .iso-belt { animation: none; }
+  .iso .iso-move, .iso .iso-ride, .iso .iso-belt, .iso .pkt { animation: none; }
   .iso .iso-ride { transform: translate(calc(var(--dx) * var(--at)), calc(var(--dy) * var(--at))); }
 }

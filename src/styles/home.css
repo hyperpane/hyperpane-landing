@@ -253,8 +253,7 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
 .detach {
   position: relative; margin-top: var(--s-16);
   display: block;
-  padding: clamp(24px, 4vw, 56px); border-radius: var(--r-stage);
-  background-color: var(--c-ground); border: 1px solid var(--c-line);
+  padding: clamp(8px, 2vw, 24px) 0;
 }
 .detach-wire { position: relative; height: 2px; margin-inline: 10px; background: repeating-linear-gradient(90deg, var(--c-line-3) 0 6px, transparent 6px 12px); }
 .detach-wire .pulse { position: absolute; top: -3px; left: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--h-green); animation: travel 1.8s var(--ease-in-out) infinite; }
