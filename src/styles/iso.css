@@ -5,9 +5,9 @@
 .iso :is(polygon, path, ellipse) { stroke-linejoin: round; }
 
 /* Faces: top lightest, front-right, front-left darkest; edges grey */
-.iso .iso-t { fill: oklch(0.235 0.004 270); stroke: oklch(0.47 0.006 270); stroke-width: 1.3; }
-.iso .iso-r { fill: oklch(0.185 0.004 270); stroke: oklch(0.47 0.006 270); stroke-width: 1.3; }
-.iso .iso-l { fill: oklch(0.155 0.004 270); stroke: oklch(0.47 0.006 270); stroke-width: 1.3; }
+.iso .iso-t { fill: oklch(0.235 0.004 270); stroke: oklch(0.52 0.006 270); stroke-width: 1.6; }
+.iso .iso-r { fill: oklch(0.185 0.004 270); stroke: oklch(0.52 0.006 270); stroke-width: 1.6; }
+.iso .iso-l { fill: oklch(0.155 0.004 270); stroke: oklch(0.52 0.006 270); stroke-width: 1.6; }
 .iso .iso-tk { fill: oklch(0.175 0.003 270); stroke: oklch(0.36 0.005 270); stroke-width: 1.2; }
 .iso .iso-rk { fill: oklch(0.14 0.003 270); stroke: oklch(0.36 0.005 270); stroke-width: 1.2; }
 .iso .iso-lk { fill: oklch(0.12 0.003 270); stroke: oklch(0.36 0.005 270); stroke-width: 1.2; }
@@ -55,6 +55,15 @@
 .iso .iso-ring { fill: none; stroke: oklch(1 0 0 / 0.16); stroke-width: 1.2; }
 .iso .iso-truss { stroke: oklch(0.68 0.18 258 / 0.75); stroke-width: 1.4; }
 .iso .iso-spoke { stroke: oklch(1 0 0 / 0.32); stroke-width: 3; stroke-linecap: round; }
+/* a solid's shadow on the plate */
+.iso .iso-rim-r { fill: oklch(0.2 0.004 270); stroke: oklch(0.2 0.004 270); stroke-width: 0.6; }
+.iso .iso-rim-l { fill: oklch(0.165 0.004 270); stroke: oklch(0.165 0.004 270); stroke-width: 0.6; }
+.iso .iso-rim-edge { fill: none; stroke: oklch(0.4 0.005 270); stroke-width: 1.2; stroke-linejoin: round; }
+.iso .iso-plate .iso-tk { stroke-width: 1.4; }
+.iso .iso-cast { fill: oklch(0 0 0 / 0.42); }
+.iso .iso-plate { opacity: 1 !important; transform: none !important; }
+/* where a part came out */
+.iso .iso-hole { fill: oklch(0.11 0.003 270); stroke: oklch(0.36 0.005 270); stroke-width: 1; }
 .iso .iso-glass :is(.iso-t, .iso-r, .iso-l) { fill: oklch(1 0 0 / 0.03); stroke: oklch(1 0 0 / 0.3); }
 
 /* The callout: flat, as a spec sheet */

@@ -17,6 +17,65 @@ export class Scene {
   track = true;
   /** Compact: no callout, no readout (small cards). */
   compact = false;
+  /** The ground's height: solids standing on it cast a shadow onto it. */
+  ground: number | null = null;
+  /** A solid's shadow on the ground: its footprint and the footprint moved
+   * by its height along the light (from the back right), as one shape. */
+  shadow(foot: [number, number][], h: number) {
+    if (this.ground === null) return;
+    const g = this.ground;
+    const lx = -0.25 * h;
+    const ly = 0.8 * h;
+    const pts: [number, number][] = [];
+    this.track = false;
+    for (const [x, y] of foot) {
+      pts.push(this.p([x, y, g]));
+      pts.push(this.p([x + lx, y + ly, g]));
+    }
+    this.track = true;
+    // the outline round them all (monotone chain)
+    pts.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const cross = (o: number[], a: number[], b: number[]) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const lo: number[][] = [];
+    for (const q of pts) { while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); }
+    const hi: number[][] = [];
+    for (const q of [...pts].reverse()) { while (hi.length >= 2 && cross(hi[hi.length - 2], hi[hi.length - 1], q) <= 0) hi.pop(); hi.push(q); }
+    const hull = [...lo.slice(0, -1), ...hi.slice(0, -1)];
+    this.add(`<polygon class="iso-cast" points="${hull.map((q) => q.map(f).join(",")).join(" ")}"/>`);
+  }
+  /** A plate with rounded corners, t thick, its top at z + t. */
+  plateR(x: number, y: number, w: number, d: number, z: number, t: number, r = 14) {
+    const pts: [number, number][] = [];
+    const corner = (cx: number, cy: number, a0: number) => {
+      for (let i = 0; i <= 6; i++) {
+        const a = a0 + (i / 6) * (Math.PI / 2);
+        pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]);
+      }
+    };
+    corner(x + w - r, y + r, -Math.PI / 2);
+    corner(x + w - r, y + d - r, 0);
+    corner(x + r, y + d - r, Math.PI / 2);
+    corner(x + r, y + r, Math.PI);
+    this.add(`<g class="iso-plate" ${this.order()}>`);
+    // its rim: a strip between the top's outline and the bottom's, the
+    // front of it shown (the back is under the top)
+    const n = pts.length;
+    for (let i = 0; i < n; i++) {
+      const [a0, b0] = pts[i];
+      const [a1, b1] = pts[(i + 1) % n];
+      // only where the edge faces you (toward +x or +y)
+      if (b1 - b0 > 0.01 || a0 - a1 > 0.01) {
+        const facing = b1 - b0 > a0 - a1 ? "iso-rim-r" : "iso-rim-l";
+        this.poly([[a0, b0, z], [a1, b1, z], [a1, b1, z + t], [a0, b0, z + t]], facing);
+      }
+    }
+
+    this.poly(pts.map(([a, b]) => [a, b, z + t] as V3), "iso-tk");
+    this.add("</g>");
+    this.ground = z + t;
+    return this;
+  }
+
   /** Each solid's place in the order it's built (its entrance delay). */
   k = 0;
   order() {
@@ -60,6 +119,7 @@ export class Scene {
   /** A box at (x, y, z), w along x, d along y, h up; the visible faces. */
   box(x: number, y: number, z: number, w: number, d: number, h: number, tone: Tone = "base", extra = "") {
     const t = tone === "hi" ? "a" : tone === "dark" ? "k" : "";
+    if (this.ground !== null && Math.abs(z - this.ground) < 0.6 && h > 3) this.shadow([[x, y], [x + w, y], [x + w, y + d], [x, y + d]], h);
     const g = `<g class="iso-box${tone === "hi" ? " iso-hi" : ""} ${extra}" ${this.order()}>`;
     this.add(g);
     // front-left face (y = y + d)
@@ -74,6 +134,8 @@ export class Scene {
   /** A vertical cylinder: its top ellipse, its side. */
   cyl(x: number, y: number, z: number, r: number, h: number, tone: Tone = "base", extra = "") {
     const t = tone === "hi" ? "a" : tone === "dark" ? "k" : "";
+    if (this.ground !== null && Math.abs(z - this.ground) < 0.6 && h > 3)
+      this.shadow(Array.from({ length: 16 }, (_, i) => [x + r * Math.cos((i / 16) * Math.PI * 2), y + r * Math.sin((i / 16) * Math.PI * 2)] as [number, number]), h);
     const [cx, cyTop] = this.p([x, y, z + h]);
     const [, cyBot] = this.p([x, y, z]);
     const rx = r * Math.SQRT2 * C;
@@ -126,6 +188,18 @@ export class Scene {
     const [px, py] = this.p(v);
     this.track = true;
     return this.add(`<circle class="iso-pin" cx="${f(px)}" cy="${f(py)}" r="3.5"/>`);
+  }
+
+  /** A band round a cylinder (a ring of its side): no top of its own. */
+  band(x: number, y: number, z: number, r: number, h: number, tone: Tone = "hi", extra = "") {
+    const t = tone === "hi" ? "a" : "";
+    const [cx, top] = this.p([x, y, z + h]);
+    const [, bot] = this.p([x, y, z]);
+    const rx = r * Math.SQRT2 * C;
+    const ry = r * Math.SQRT2 * S;
+    this.add(`<g class="iso-box${tone === "hi" ? " iso-hi" : ""} ${extra}" ${this.order()}>`);
+    this.add(`<path class="iso-r${t}" d="M${f(cx - rx)} ${f(top)}A${f(rx)} ${f(ry)} 0 0 0 ${f(cx + rx)} ${f(top)}V${f(bot)}A${f(rx)} ${f(ry)} 0 0 1 ${f(cx - rx)} ${f(bot)}Z"/>`);
+    return this.add("</g>");
   }
 
   /** A circle standing on a front-left face (y fixed), as points. */
@@ -259,7 +333,8 @@ function role(id: string) {
   const r = roleDefs[id];
   const s = new Scene(250, 110);
   // the canvas: a plate, its dot grid
-  s.box(-30, -30, 0, 380, 240, 10, "dark");
+  s.plateR(-30, -30, 380, 240, 0, 10, 18);
+  s.ground = null;
   for (let gx = -20; gx <= 340; gx += 20) for (let gy = -20; gy <= 200; gy += 20) s.dot([gx, gy, 10.2], "iso-grid", 0.9);
   // the windows, back to front; the lit one raised
   for (const wn of r.wins) win(s, wn.x, wn.y, wn.w, wn.d, wn.title, wn.rows, { hi: wn.hi, lift: wn.hi ? 26 : 0, prompt: wn.prompt });
@@ -274,7 +349,7 @@ function role(id: string) {
 
 // The plugins and built-ins, each a thing on a plate ---------------------------
 function plate(s: Scene, w: number, d: number) {
-  s.box(-20, -20, 0, w, d, 8, "dark");
+  s.plateR(-20, -20, w, d, 0, 8, 16);
 }
 
 let compactNext = false;
@@ -334,9 +409,27 @@ const things: Record<string, () => { view: string; svg: string }> = {
     // rails: main, and a branch that leaves it and comes back, a train on it
     const s = make(170, 50);
     plate(s, 300, 170);
+    // Two rails, 5 either side of the path, offset square to it (mitred at bends).
     const rail = (pts: [number, number][], cls = "iso-rail") => {
-      s.path3(pts.map(([x, y]) => [x, y - 5, 8.3] as V3), cls);
-      s.path3(pts.map(([x, y]) => [x, y + 5, 8.3] as V3), cls);
+      const side = (sgn: number) =>
+        pts.map(([x, y], i) => {
+          const n = (a: [number, number], b: [number, number]) => {
+            const dx = b[0] - a[0];
+            const dy = b[1] - a[1];
+            const l = Math.hypot(dx, dy) || 1;
+            return [-dy / l, dx / l];
+          };
+          const n0 = i > 0 ? n(pts[i - 1], pts[i]) : n(pts[i], pts[i + 1]);
+          const n1 = i < pts.length - 1 ? n(pts[i], pts[i + 1]) : n0;
+          let mx = n0[0] + n1[0];
+          let my = n0[1] + n1[1];
+          const ml = Math.hypot(mx, my) || 1;
+          mx /= ml; my /= ml;
+          const k = 5 / Math.max(0.35, mx * n1[0] + my * n1[1]);
+          return [x + sgn * mx * k, y + sgn * my * k, 8.3] as V3;
+        });
+      s.path3(side(-1), cls);
+      s.path3(side(1), cls);
     };
     for (let x = -10; x <= 270; x += 12) s.line([x, 32, 8.2], [x, 48, 8.2], "iso-sleeper");
     rail([[-10, 40], [270, 40]]);
@@ -345,7 +438,7 @@ const things: Record<string, () => { view: string; svg: string }> = {
     // a signal at the switch
     s.box(20, 20, 8, 6, 6, 60, "dark");
     s.box(16, 16, 68, 14, 8, 16, "base");
-    s.dot([30, 24, 78], "iso-led", 2.6);
+    s.dot([30.3, 20, 76], "iso-led", 2.6);
     // the train: three cars, the engine lit
     s.box(80, 102, 8, 34, 16, 16, "base");
     s.box(118, 102, 8, 34, 16, 16, "base");
@@ -388,7 +481,7 @@ const things: Record<string, () => { view: string; svg: string }> = {
       const ry = 46 * Math.SQRT2 * S;
       s.add(`<path class="iso-ring" d="M${f(cx - rx)} ${f(cy)}A${f(rx)} ${f(ry)} 0 0 0 ${f(cx + rx)} ${f(cy)}"/>`);
     }
-    s.cyl(60, 70, 50, 47.5, 14, "hi", "iso-lit");
+    s.band(60, 70, 50, 47, 14, "hi", "iso-lit");
     s.cyl(60, 70, 100, 18, 10, "base");
     s.cyl(196, 50, 8, 24, 54, "base");
     s.cyl(140, 132, 28, 9, 12, "hi");
@@ -439,19 +532,20 @@ const things: Record<string, () => { view: string; svg: string }> = {
   tunnels() {
     // a bridge from your machine's island to the open internet's
     const s = make(150, 40);
-    s.box(-20, 30, 0, 90, 110, 26, "dark");
-    s.box(180, 10, 0, 110, 140, 26, "dark");
+    s.plateR(-20, 30, 90, 110, 0, 26, 14);
+    s.plateR(180, 10, 110, 140, 0, 26, 14);
+    s.ground = 26;
     s.box(0, 50, 26, 50, 50, 40);
     s.poly([[50.2, 58, 54], [50.2, 92, 54], [50.2, 92, 58], [50.2, 58, 58]], "iso-face-a");
     s.box(70, 72, 24, 110, 16, 6, "hi", "iso-lit");
-    for (let x = 70; x < 180; x += 22) {
+    for (let x = 70; x + 22 <= 180; x += 22) {
       s.line([x, 72, 30], [x + 11, 72, 52], "iso-truss");
       s.line([x + 11, 72, 52], [x + 22, 72, 30], "iso-truss");
       s.line([x, 88, 30], [x + 11, 88, 52], "iso-truss");
       s.line([x + 11, 88, 52], [x + 22, 88, 30], "iso-truss");
     }
-    s.line([70, 72, 52], [180, 72, 52], "iso-truss");
-    s.line([70, 88, 52], [180, 88, 52], "iso-truss");
+    s.line([81, 72, 52], [169, 72, 52], "iso-truss");
+    s.line([81, 88, 52], [169, 88, 52], "iso-truss");
     s.cyl(240, 70, 26, 30, 50, "base");
     s.box(236, 66, 76, 8, 8, 46, "dark");
     s.dot([240, 70, 124], "iso-led", 3);
@@ -492,16 +586,16 @@ const things: Record<string, () => { view: string; svg: string }> = {
     const s = make(170, 70);
     plate(s, 220, 200);
     const cx = 90, cy = 90, r = 70;
-    const parts: [number, number][] = [[0, 0.65], [0.65, 0.82], [0.82, 0.93], [0.93, 1]];
     const tau = Math.PI * 2;
-    const order = [3, 0, 2];
-    for (const i of order) {
-      const [a, b] = parts[i];
-      s.wedge(cx, cy, 8, r, 22, a * tau - 0.6, b * tau - 0.6, "base");
-    }
+    const turn = -0.6;
+    const parts: [number, number][] = [[0, 0.65], [0.65, 0.82], [0.82, 0.93], [0.93, 1]];
+    s.cyl(cx, cy, 8, r, 22, "base");
+    // where the slice came out, darker; the slices' edges on the top
     const [a, b] = parts[1];
-    const mid = ((a + b) / 2) * tau - 0.6;
-    s.wedge(cx + 18 * Math.cos(mid), cy + 18 * Math.sin(mid), 22, r, 22, a * tau - 0.6, b * tau - 0.6, "hi", "iso-lit");
+    s.poly(s.sector(cx, cy, 30.1, r, a * tau + turn, b * tau + turn), "iso-hole");
+    for (const [p0] of parts) s.line([cx, cy, 30.2], [cx + r * Math.cos(p0 * tau + turn), cy + r * Math.sin(p0 * tau + turn), 30.2], "iso-ln");
+    const mid = ((a + b) / 2) * tau + turn;
+    s.wedge(cx + 22 * Math.cos(mid), cy + 22 * Math.sin(mid), 34, r, 22, a * tau + turn, b * tau + turn, "hi", "iso-lit");
     return out(s);
   },
   pets() {
@@ -526,7 +620,7 @@ const things: Record<string, () => { view: string; svg: string }> = {
 // The always-on scene: a laptop whose lid closes, a server that keeps going --
 function always() {
   const s = new Scene(300, 70);
-  s.box(-60, -40, 0, 520, 260, 8, "dark");
+  s.plateR(-60, -40, 520, 260, 0, 8, 20);
   // the cable
   s.path3([[150, 120, 8.2], [250, 120, 8.2], [250, 60, 8.2], [300, 60, 8.2]], "iso-cable");
   // the laptop: base, keys, the lid open and closed
