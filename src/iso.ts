@@ -17,6 +17,11 @@ export class Scene {
   track = true;
   /** Compact: no callout, no readout (small cards). */
   compact = false;
+  /** Each solid's place in the order it's built (its entrance delay). */
+  k = 0;
+  order() {
+    return `style="--k:${Math.min(this.k++, 40)}"`;
+  }
   constructor(public ox: number, public oy: number) {}
 
   p([x, y, z]: V3): [number, number] {
@@ -55,7 +60,7 @@ export class Scene {
   /** A box at (x, y, z), w along x, d along y, h up; the visible faces. */
   box(x: number, y: number, z: number, w: number, d: number, h: number, tone: Tone = "base", extra = "") {
     const t = tone === "hi" ? "a" : tone === "dark" ? "k" : "";
-    const g = `<g class="iso-box${tone === "hi" ? " iso-hi" : ""} ${extra}">`;
+    const g = `<g class="iso-box${tone === "hi" ? " iso-hi" : ""} ${extra}" ${this.order()}>`;
     this.add(g);
     // front-left face (y = y + d)
     this.poly([[x, y + d, z], [x + w, y + d, z], [x + w, y + d, z + h], [x, y + d, z + h]], `iso-l${t}`);
@@ -73,7 +78,7 @@ export class Scene {
     const [, cyBot] = this.p([x, y, z]);
     const rx = r * Math.SQRT2 * C;
     const ry = r * Math.SQRT2 * S;
-    this.add(`<g class="iso-box${tone === "hi" ? " iso-hi" : ""} ${extra}">`);
+    this.add(`<g class="iso-box${tone === "hi" ? " iso-hi" : ""} ${extra}" ${this.order()}>`);
     this.add(
       `<path class="iso-r${t}" d="M${f(cx - rx)} ${f(cyTop)}V${f(cyBot)}A${f(rx)} ${f(ry)} 0 0 0 ${f(cx + rx)} ${f(cyBot)}V${f(cyTop)}Z"/>`,
     );
@@ -150,7 +155,7 @@ export class Scene {
       arcTop.push([cx + r * Math.cos(a), cy + r * Math.sin(a), z + h]);
       arcBot.push([cx + r * Math.cos(a), cy + r * Math.sin(a), z]);
     }
-    this.add(`<g class="iso-box${tone === "hi" ? " iso-hi" : ""} ${extra}">`);
+    this.add(`<g class="iso-box${tone === "hi" ? " iso-hi" : ""} ${extra}" ${this.order()}>`);
     this.poly([[cx, cy, z], [cx, cy, z + h], arcTop[0], arcBot[0]], `iso-l${t}`);
     this.poly([[cx, cy, z], [cx, cy, z + h], arcTop[n], arcBot[n]], `iso-l${t}`);
     this.poly([...arcTop, ...arcBot.reverse()], `iso-r${t}`);

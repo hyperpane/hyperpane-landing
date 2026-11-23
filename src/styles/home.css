@@ -381,3 +381,39 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
   [data-rise], .stage { opacity: 1; transform: none; animation: none; }
   .dw, .rw, .stage-toolbar { transform: none !important; }
 }
+
+/* Scroll transitions --------------------------------------------------------- */
+/* A section's title rises out of a mask, line by line. */
+.sec-head .sec-title { clip-path: inset(0 0 0 0); }
+.sec-head[data-reveal] { opacity: 1; transform: none; }
+.sec-head[data-reveal] .sec-title,
+.sec-head[data-reveal] .sec-text {
+  opacity: 0; transform: translateY(0.5em);
+  transition: opacity 900ms var(--ease-out), transform 1100ms var(--ease-out);
+}
+.sec-head[data-reveal] .sec-title .dim { display: inline-block; transform: translateY(0.4em); opacity: 0; transition: transform 1100ms var(--ease-out) 160ms, opacity 900ms var(--ease-out) 160ms; }
+.sec-head[data-reveal] .sec-text { transition-delay: 260ms; }
+.sec-head.is-in .sec-title, .sec-head.is-in .sec-text, .sec-head.is-in .sec-title .dim { opacity: 1; transform: none; }
+
+/* Cards come up a little further, and settle */
+.bi[data-reveal], .pl[data-reveal], .always-list li[data-reveal] { transform: translateY(40px); }
+.bi[data-reveal].is-in, .pl[data-reveal].is-in, .always-list li[data-reveal].is-in { transform: none; }
+
+/* Tied to the scroll where the browser can: the hero's words drift up and
+   out, the Plugins page and the download card straighten as they come. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-copy { animation: hero-out linear both; animation-timeline: view(); animation-range: exit -10% exit 60%; }
+    @keyframes hero-out { to { opacity: 0.15; transform: translateY(-60px) scale(0.98); } }
+    .page-shot { animation: lean-in linear both; animation-timeline: view(); animation-range: entry 0% cover 45%; transform-origin: 50% 100%; }
+    @keyframes lean-in { from { opacity: 0.3; transform: perspective(1600px) rotateX(18deg) scale(0.92); } to { opacity: 1; transform: none; } }
+    .get-card { animation: rise-in linear both; animation-timeline: view(); animation-range: entry 0% cover 40%; }
+    @keyframes rise-in { from { opacity: 0.4; transform: translateY(60px) scale(0.96); } to { opacity: 1; transform: none; } }
+    .roles-canvas { animation: lean-in linear both; animation-timeline: view(); animation-range: entry 0% cover 35%; transform-origin: 50% 100%; }
+    .detach { animation: lean-in linear both; animation-timeline: view(); animation-range: entry 0% cover 40%; transform-origin: 50% 100%; }
+    .page-shot[data-reveal], .detach[data-reveal], .get-card[data-reveal], .roles-canvas[data-reveal] { opacity: 1; transition: none; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sec-head[data-reveal] .sec-title, .sec-head[data-reveal] .sec-text, .sec-head[data-reveal] .sec-title .dim { opacity: 1; transform: none; }
+}

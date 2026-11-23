@@ -74,8 +74,17 @@
 /* Motion: in, once in view; the lit part breathes; a request travels */
 .iso .iso-call, .iso .iso-read { opacity: 0; transition: opacity 700ms var(--ease-out) 500ms; }
 :is(.is-in, [data-on]) .iso .iso-call, :is(.is-in, [data-on]) .iso .iso-read { opacity: 1; }
-.iso .iso-hi { transform: translateY(6px); opacity: 0.4; transition: transform 900ms var(--ease-out) 200ms, opacity 700ms var(--ease-out) 200ms; }
-:is(.is-in, [data-on]) .iso .iso-hi { transform: none; opacity: 1; }
+/* Built part by part: each solid drops onto its place in the order it was
+   drawn (back to front), the lit one last to land. */
+.iso .iso-box {
+  opacity: 0; transform: translateY(-18px);
+  transition: opacity 420ms var(--ease-out), transform 760ms var(--ease-out);
+  transition-delay: calc(var(--k, 0) * 26ms + 80ms);
+}
+:is(.is-in, [data-on]) .iso .iso-box { opacity: 1; transform: none; }
+.iso .iso-hi { transform: translateY(-34px); }
+.iso .iso-pin { opacity: 0; transition: opacity 400ms var(--ease-out) 900ms; }
+:is(.is-in, [data-on]) .iso .iso-pin { opacity: 1; }
 :is(.is-in, [data-on]) .iso .iso-lit { animation: iso-glow 3.2s var(--ease-in-out) 1.2s infinite; }
 .iso .iso-move { animation: iso-move 3s var(--ease-in-out) infinite; }
 @keyframes iso-glow { 50% { filter: drop-shadow(0 0 22px oklch(0.62 0.19 260 / 0.75)); } }
@@ -92,6 +101,6 @@
 .detach[data-phase="closed"] .iso .iso-cable { animation-play-state: paused; opacity: 0.35; }
 
 @media (prefers-reduced-motion: reduce) {
-  .iso .iso-hi, .iso .iso-call, .iso .iso-read { transform: none; opacity: 1; }
+  .iso .iso-box, .iso .iso-hi, .iso .iso-pin, .iso .iso-call, .iso .iso-read { transform: none; opacity: 1; }
   .iso .iso-move { animation: none; }
 }
