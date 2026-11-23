@@ -426,3 +426,12 @@ a:hover .link .icon, .link:hover .icon { transform: translateX(3px); }
   }
   .windows { margin-top: 0; padding-block: var(--header-h) 48px; }
 }
+
+/* The agent in the bottom-right corner (agent.js plays it) */
+.agent {
+  position: fixed; right: clamp(12px, 2vw, 28px); bottom: clamp(12px, 2vw, 28px); z-index: 40;
+  width: clamp(44px, 4.4vw, 64px); aspect-ratio: 1; pointer-events: none;
+  opacity: 0; transform: translateY(8px); transition: opacity 500ms var(--ease-out), transform 500ms var(--ease-out);
+}
+.agent.is-on { opacity: 1; transform: none; }
+.agent svg { display: block; }
