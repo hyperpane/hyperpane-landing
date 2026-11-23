@@ -1,26 +1,39 @@
-// hyperpane landing: the top bar's hairline once the page scrolls, and which
-// download is this computer's. Nothing else on the page moves.
+// Every page: the header (its ground once the page scrolls, the menu on a
+// phone) and things that rise into view as they come.
 
 (() => {
   'use strict';
+  document.documentElement.classList.remove('no-js');
 
-  const topbar = document.querySelector('[data-topbar]');
-  const onScroll = () => topbar.toggleAttribute('data-scrolled', scrollY > 8);
-  addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
-
-  const platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
-  const ipad = /Mac/i.test(platform) && navigator.maxTouchPoints > 1;
-  let os = null;
-  if (/Mac/i.test(platform) && !ipad) os = 'mac';
-  else if (/Win/i.test(platform)) os = 'win';
-  else if (/Linux/i.test(platform) && !/Android/i.test(navigator.userAgent)) os = 'linux';
-
-  const row = os && document.querySelector(`.platform[data-os="${os}"] .platform-name`);
-  if (row) {
-    const tag = document.createElement('span');
-    tag.className = 'this-computer';
-    tag.textContent = 'This computer';
-    row.append(tag);
+  const header = document.querySelector('[data-header]');
+  if (header) {
+    const onScroll = () => header.toggleAttribute('data-scrolled', scrollY > 8);
+    addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    const menu = header.querySelector('[data-menu]');
+    const set = (open) => {
+      header.toggleAttribute('data-open', open);
+      menu?.setAttribute('aria-expanded', String(open));
+      document.body.style.overflow = open ? 'hidden' : '';
+    };
+    menu?.addEventListener('click', () => set(!header.hasAttribute('data-open')));
+    addEventListener('keydown', (e) => e.key === 'Escape' && set(false));
+    document.querySelectorAll('.sheet a').forEach((a) => a.addEventListener('click', () => set(false)));
+    matchMedia('(min-width: 861px)').addEventListener('change', (e) => e.matches && set(false));
   }
+
+  const items = document.querySelectorAll('[data-reveal]');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          e.target.classList.add('is-in');
+          io.unobserve(e.target);
+        }
+      },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },
+    );
+    items.forEach((el) => io.observe(el));
+  } else items.forEach((el) => el.classList.add('is-in'));
 })();

@@ -8,17 +8,14 @@ import { platforms, ready, servers, version } from "../downloads";
 ---
 
 <Base title="Download" description="Download hyperpane for macOS, Windows or Linux.">
-  <section class="band band-hero dl-page" aria-labelledby="dl-title">
-    <div class="cells">
-      <header class="cell span-12 head-main">
-        <p class="label">Download</p>
-        <h1 id="dl-title" class="h2">Get hyperpane.</h1>
-      </header>
-      <div class="cell span-12 head-side">
+  <div class="dl wrap">
+  <section class="dl-section" aria-labelledby="dl-title">
+      <header class="dl-head">
+        <h1 id="dl-title">Get hyperpane.</h1>
         <p>Version {version} for macOS, Windows and Linux. {ready ? "Out now." : "The first builds are almost here: the buttons turn on the day they ship."}</p>
-      </div>
+      </header>
 
-      <div class="cell span-12 dlm" data-dl>
+      <div class="dlm" data-dl>
         <div class="dlm-systems" role="radiogroup" aria-label="System">
           {platforms.map((p, i) => (
             <label class="dlm-os" data-os={p.id}>
@@ -49,19 +46,12 @@ import { platforms, ready, servers, version } from "../downloads";
           </div>
         ))}
       </div>
-    </div>
   </section>
 
-  <section class="band" aria-labelledby="server-title">
-    <div class="cells">
-      <header class="cell span-12 head-main">
-        <p class="label">Server</p>
-        <h2 id="server-title" class="h2">For your other machines.</h2>
-      </header>
-      <div class="cell span-12 head-side">
-        <p>Put it on a machine you reach over the network, and the app on your computer opens projects there.</p>
-      </div>
-      <div class="cell span-12 dlm">
+  <section class="dl-section" aria-labelledby="server-title">
+      <h2 id="server-title">For your other machines.</h2>
+      <p>Put it on a machine you reach over the network, and the app on your computer opens projects there.</p>
+      <div class="dlm">
         <div class="dlm-files">
           {servers.map((s) => (
             <div class="dlm-file">
@@ -77,8 +67,8 @@ import { platforms, ready, servers, version } from "../downloads";
           ))}
         </div>
       </div>
-    </div>
   </section>
+  </div>
 </Base>
 
 <script>

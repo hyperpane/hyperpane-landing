@@ -1,23 +1,36 @@
 ---
-// The header, as resend.com's: the logotype on the left, the page's
-// sections in the middle, Docs and Download on the right. Clear over the
-// page, blurred behind; a hairline under it once the page scrolls (site.js).
+// The header every page shares, the landing's and the docs': the logotype
+// (with "Docs" beside it in the docs), the sections in the middle, Docs and
+// Download on the right; on a phone, a menu that covers the page.
 import { nav, site } from "../site";
+interface Props {
+  /** In the docs: the header is solid from the top, and says where you are. */
+  docs?: boolean;
+}
+const { docs = false } = Astro.props;
 const path = Astro.url.pathname.replace(/\/$/, "") || "/";
 const middle = nav.filter((item) => item.href !== "/docs");
 ---
 
-<header class="titlebar" data-topbar>
-  <a class="tb-brand" href="/" aria-label={`${site.name} home`}>
+<header class="hdr" data-header data-solid={docs ? "" : undefined}>
+  <a class="hdr-brand" href="/" aria-label={`${site.name} home`}>
     <svg class="logotype" viewBox="0 0 82 17" aria-hidden="true"><use href="#logotype"></use></svg>
+    {docs && <span class="hdr-tag">Docs</span>}
   </a>
-  <nav class="tb-nav" aria-label="Main">
-    {middle.map((item) => (
-      <a class="tb-link" href={item.href}>{item.label}</a>
-    ))}
+  <nav class="hdr-nav" aria-label="Main">
+    {middle.map((item) => <a class="hdr-link" href={item.href}>{item.label}</a>)}
   </nav>
-  <div class="tb-end">
-    <a class="tb-link" href="/docs" aria-current={path.startsWith("/docs") ? "page" : undefined}>Docs</a>
-    <a class="tb-cta" href="/download">Download</a>
+  <div class="hdr-end">
+    <a class="hdr-link" href="/docs" aria-current={path.startsWith("/docs") ? "page" : undefined}>Docs</a>
+    <a class="btn btn-primary btn-sm" href="/download">Download</a>
+    <button class="hdr-menu" type="button" aria-label="Menu" aria-expanded="false" data-menu>
+      <span></span><span></span>
+    </button>
   </div>
 </header>
+<nav class="sheet" aria-label="Menu">
+  {nav.map((item) => (
+    <a href={item.href}>{item.label}<svg class="icon" aria-hidden="true"><use href="#i-right"></use></svg></a>
+  ))}
+  <a class="btn btn-primary" href="/download">Download</a>
+</nav>

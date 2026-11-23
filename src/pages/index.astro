@@ -1,14 +1,347 @@
 ---
-// The landing, as it was built (src/landing/home.html: the sections inside
-// <main>), in the site's frame.
+// The landing: the app itself as the stage. Every picture of hyperpane on
+// it is the real app (public/shots: captured from a running build, private
+// details blurred); around them, the page's words, as they were.
 import Base from "../layouts/Base.astro";
-import home from "../landing/home.html?raw";
+
+const shot = (name: string) => `/shots/${name}.webp`;
+
+// The hero's desk: real windows over the real app, placed on its canvas (in
+// percents of the canvas panel). Each moves by its header.
+const desk = [
+  { id: "git", img: "git", label: "Git", x: 37.5, y: 3.2, w: 58.5, ratio: 1924 / 1204, z: 3 },
+  { id: "editor", img: "editor", label: "Editor", x: 2.6, y: 7.6, w: 41, ratio: 1280 / 1122, z: 2 },
+  { id: "browser", img: "browser", label: "Browser", x: 49, y: 46, w: 47.5, ratio: 1924 / 1204, z: 4 },
+  { id: "terminal", img: "terminal", label: "Terminal", x: 4.6, y: 58, w: 47.5, ratio: 1764 / 684, z: 5 },
+];
+
+const facts = [
+  { label: "Runs on", value: "macOS, Windows, Linux" },
+  { label: "Built in", value: "Terminal, Editor, Explorer" },
+  { label: "Plugins", value: "Git, Browser, Data and more" },
+  { label: "Always on", value: "Keeps working when you quit" },
+];
+
+// Roles: each with its words and three real windows on a small canvas.
+const roles = [
+  {
+    id: "engineers", name: "Engineers", icon: "i-code",
+    text: "Editor, terminal and Git side by side: laid out like a desk, not hidden in tabs.",
+    wins: [
+      { img: "editor2", x: 3, y: 6, w: 46, ratio: 1280 / 1122 },
+      { img: "terminal", x: 52, y: 6, w: 45, ratio: 1764 / 684 },
+      { img: "git", x: 52, y: 42, w: 45, ratio: 1924 / 1204 },
+    ],
+  },
+  {
+    id: "frontend", name: "Frontend & design", icon: "i-browser",
+    text: "Your app in a real browser window, phone and desktop sizes, next to the code that draws it.",
+    wins: [
+      { img: "browser", x: 3, y: 8, w: 58, ratio: 1924 / 1204 },
+      { img: "editor", x: 64, y: 6, w: 33, ratio: 1280 / 1122 },
+      { img: "explorer", x: 64, y: 54, w: 33, ratio: 1524 / 1044 },
+    ],
+  },
+  {
+    id: "devops", name: "DevOps & SRE", icon: "i-server",
+    text: "Terminals on every machine you run, with containers and live activity, in one place.",
+    wins: [
+      { img: "containers", x: 3, y: 6, w: 55, ratio: 2004 / 1284 },
+      { img: "terminal", x: 61, y: 6, w: 36, ratio: 1764 / 684 },
+      { img: "tunnels", x: 61, y: 34, w: 36, ratio: 1644 / 1124 },
+    ],
+  },
+  {
+    id: "data", name: "Backend & data", icon: "i-database",
+    text: "Your databases and APIs next to the code that uses them: query, call, compare.",
+    wins: [
+      { img: "data", x: 3, y: 6, w: 55, ratio: 2004 / 1284 },
+      { img: "requests", x: 61, y: 6, w: 36, ratio: 2004 / 1284 },
+      { img: "editor2", x: 61, y: 46, w: 36, ratio: 1280 / 1122 },
+    ],
+  },
+  {
+    id: "agents", name: "AI agents", icon: "i-bot",
+    text: "Agents open terminals, type and read the screen, while you watch every window they touch.",
+    wins: [
+      { img: "agent", x: 3, y: 6, w: 50, ratio: 1524 / 1044 },
+      { img: "terminal", x: 56, y: 6, w: 41, ratio: 1764 / 684 },
+      { img: "browser", x: 56, y: 38, w: 41, ratio: 1924 / 1204 },
+    ],
+  },
+];
+
+const builtIn = [
+  { name: "Terminal", icon: "i-terminal", img: "terminal", text: "Your shell, on any of your machines, that keeps running when you close the app." },
+  { name: "Editor", icon: "i-editor", img: "editor", text: "Any file, with highlighting, find and replace and multiple cursors." },
+  { name: "Explorer", icon: "i-explorer", img: "explorer", text: "Your folders as a list: sort, search, drag to move, open in the Editor." },
+];
+
+const plugins = [
+  { name: "Git", icon: "i-git", hue: "blue", img: "git", repo: "hp-git", size: "wide", text: "Commit, branch and sync, laid out like GitHub Desktop." },
+  { name: "Browser", icon: "i-browser", hue: "cyan", img: "browser", repo: "hp-browser", size: "wide", text: "A real web page in a window, at phone, tablet or desktop size." },
+  { name: "Data", icon: "i-database", hue: "violet", img: "data", repo: "hp-data", size: "tall", text: "Every database you use, from Postgres to Redis and S3." },
+  { name: "Requests", icon: "i-arrows", hue: "amber", img: "requests", repo: "hp-requests", text: "Try any API, with your saved requests and their history." },
+  { name: "Containers", icon: "i-box", hue: "teal", img: "containers", repo: "hp-containers", text: "Your containers and services at a glance, with their logs." },
+  { name: "Tunnels", icon: "i-link", hue: "green", img: "tunnels", repo: "hp-tunnels", text: "Share something running on your machine with a link." },
+  { name: "Activity", icon: "i-activity", hue: "rose", repo: "hp-activity", text: "What your machine is doing: CPU, memory, disk and network." },
+  { name: "Env", icon: "i-key", hue: "orange", img: "env", repo: "hp-env", text: "Your project’s settings and secrets, hidden until you look." },
+  { name: "Code Stats", icon: "i-chart", hue: "blue", img: "codestats", repo: "hp-codestats", text: "Your code counted, by language and by folder." },
+  { name: "Pets", icon: "i-cat", hue: "rose", repo: "hp-pets", text: "A little pixel cat that naps on the window you’re working in." },
+];
+
+const always = [
+  { title: "Quitting only detaches", text: "Builds, tests and agents carry on without you.", icon: "i-power" },
+  { title: "Exactly where you left it", text: "Reopen the project: same windows, same places, with everything they printed meanwhile.", icon: "i-history" },
+  { title: "No babysitting", text: "Start a build or an agent, close the lid, and come back to the result.", icon: "i-check" },
+];
+
+const systems = [
+  { name: "macOS", icon: "os-mac", os: "mac" },
+  { name: "Windows", icon: "os-win", os: "win" },
+  { name: "Linux", icon: "os-linux", os: "linux" },
+];
 ---
 
 <Base>
-  <Fragment set:html={home} />
+  <!-- Hero ---------------------------------------------------------------- -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-copy wrap">
+      <a class="hero-pill" href="/download" data-rise style="--i:0">
+        <span class="pip" aria-hidden="true"></span>First builds are on their way<span class="hero-pill-go">Downloads<svg class="icon" aria-hidden="true"><use href="#i-right"></use></svg></span>
+      </a>
+      <h1 id="hero-title" class="hero-title" data-rise style="--i:1">
+        <span>The next-gen IDE</span>
+        <span class="hero-title-2">for every role.</span>
+      </h1>
+      <p class="hero-sub" data-rise style="--i:2">Code, terminals, Git, a browser and your agents — side by side as live windows, one canvas per project. They keep working when you close the app.</p>
+      <div class="hero-cta" data-rise style="--i:3">
+        <a class="btn btn-primary" href="/download">Download<svg class="icon arrow" aria-hidden="true"><use href="#i-download"></use></svg></a>
+        <a class="btn btn-ghost" href="/docs">Read the docs<svg class="icon arrow" aria-hidden="true"><use href="#i-right"></use></svg></a>
+      </div>
+    </div>
+
+    <div class="stage-wrap" data-stage-wrap>
+      <figure class="stage" data-stage aria-label="hyperpane with a project open: an editor, a terminal, Git and a browser as windows on one canvas">
+        <img class="stage-chrome" src={shot("app-chrome")} width="2880" height="1730" alt="" decoding="async" fetchpriority="high" />
+        <div class="stage-canvas" data-canvas>
+          {desk.map((d) => (
+            <div
+              class="dw"
+              data-win={d.id}
+              style={`--x:${d.x}%;--y:${d.y}%;--w:${d.w}%;--ratio:${d.ratio};z-index:${d.z}`}
+            >
+              <img src={shot(d.img)} alt={`The ${d.label} window`} decoding="async" draggable="false" />
+              <span class="dw-grip" aria-hidden="true"></span>
+            </div>
+          ))}
+          <img class="stage-toolbar" src={shot("toolbar")} alt="" decoding="async" draggable="false" />
+          <span class="stage-hint" aria-hidden="true">Drag a window by its header</span>
+        </div>
+      </figure>
+    </div>
+
+    <dl class="facts wrap">
+      {facts.map((f, i) => (
+        <div class="fact" data-reveal style={`--d:${i * 70}ms`}>
+          <dt>{f.label}</dt>
+          <dd>{f.value}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <!-- Roles --------------------------------------------------------------- -->
+  <section class="roles wrap" id="roles" aria-labelledby="roles-title">
+    <header class="sec-head" data-reveal>
+      <h2 id="roles-title" class="sec-title">One workspace.<br /><span class="dim">Every role.</span></h2>
+      <p class="sec-text">Open the windows your work needs and arrange them your way. Whatever you do, it’s the same app and the same project.</p>
+    </header>
+
+    <div class="roles-body" data-roles>
+      <div class="roles-list" role="tablist" aria-label="Roles">
+        {roles.map((r, i) => (
+          <button
+            class="role"
+            role="tab"
+            id={`role-${r.id}`}
+            aria-controls="roles-canvas"
+            aria-selected={i === 0 ? "true" : "false"}
+            tabindex={i === 0 ? 0 : -1}
+            data-role={r.id}
+          >
+            <span class="role-icon" aria-hidden="true"><svg class="icon"><use href={`#${r.icon}`}></use></svg></span>
+            <span class="role-name">{r.name}</span>
+            <span class="role-text">{r.text}</span>
+            <span class="role-bar" aria-hidden="true"><span></span></span>
+          </button>
+        ))}
+      </div>
+      <div class="roles-canvas" id="roles-canvas" role="tabpanel" aria-live="polite" data-reveal>
+        {roles.map((r, i) => (
+          <div class="rset" data-set={r.id} data-on={i === 0 ? "" : undefined} aria-hidden={i === 0 ? undefined : "true"}>
+            {r.wins.map((w, n) => (
+              <img
+                class="rw"
+                src={shot(w.img)}
+                alt=""
+                loading="lazy"
+                decoding="async"
+                style={`--x:${w.x}%;--y:${w.y}%;--w:${w.w}%;--ratio:${w.ratio};--n:${n}`}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Windows ------------------------------------------------------------- -->
+  <section class="windows" id="plugins" aria-labelledby="windows-title">
+    <div class="wrap">
+      <header class="sec-head sec-head-wide" data-reveal>
+        <h2 id="windows-title" class="sec-title">Every tool is a window.<br /><span class="dim">Add the ones you need.</span></h2>
+        <p class="sec-text">Three come built in. The rest are a click away in Plugins, and each opens as one more window on your canvas.</p>
+      </header>
+
+      <h3 class="shelf-title" data-reveal>Built in</h3>
+      <div class="builtin">
+        {builtIn.map((b, i) => (
+          <article class="bi" data-reveal style={`--d:${i * 80}ms`}>
+            <div class="bi-shot"><img src={shot(b.img)} alt={`The ${b.name} window`} loading="lazy" decoding="async" /></div>
+            <div class="bi-copy">
+              <span class="tile-icon" aria-hidden="true"><svg class="icon"><use href={`#${b.icon}`}></use></svg></span>
+              <h4>{b.name}</h4>
+              <p>{b.text}</p>
+            </div>
+          </article>
+        ))}
+        <a class="bi bi-own" href="/docs/plugins/writing" data-reveal style="--d:240ms">
+          <div class="own-art" aria-hidden="true">
+            <span class="own-win own-win-1"></span>
+            <span class="own-win own-win-2"></span>
+            <span class="own-plus"><svg class="icon"><use href="#i-plus"></use></svg></span>
+          </div>
+          <div class="bi-copy">
+            <span class="kicker">Your own</span>
+            <h4>Missing a tool? Make it a window like any other.</h4>
+            <span class="link">How to make one<svg class="icon" aria-hidden="true"><use href="#i-right"></use></svg></span>
+          </div>
+        </a>
+      </div>
+
+      <h3 class="shelf-title" data-reveal>Plugins</h3>
+      <div class="shelf">
+        {plugins.map((p, i) => (
+          <article class:list={["pl", p.size && `pl-${p.size}`, !p.img && "pl-art"]} style={`--hue:var(--h-${p.hue});--d:${(i % 4) * 70}ms`} data-reveal>
+            <header class="pl-head">
+              <span class="pl-tile" aria-hidden="true"><svg class="icon"><use href={`#${p.icon}`}></use></svg></span>
+              <h4>{p.name}</h4>
+              <a class="pl-gh" href={`https://github.com/hyperpane/${p.repo}`} aria-label={`${p.name} on GitHub`}>
+                <svg class="icon" aria-hidden="true"><use href="#i-github"></use></svg>
+              </a>
+            </header>
+            <p>{p.text}</p>
+            {p.img ? (
+              <div class="pl-shot"><img src={shot(p.img)} alt={`The ${p.name} window`} loading="lazy" decoding="async" /></div>
+            ) : p.name === "Activity" ? (
+              <svg class="pl-draw pl-activity" viewBox="0 0 320 120" aria-hidden="true">
+                <path class="grid" d="M0 30H320M0 60H320M0 90H320" />
+                <path class="area" d="M0 96 L24 88 L48 92 L72 70 L96 76 L120 52 L144 62 L168 40 L192 48 L216 30 L240 44 L264 26 L288 38 L320 22 L320 120 L0 120Z" />
+                <path class="line" d="M0 96 L24 88 L48 92 L72 70 L96 76 L120 52 L144 62 L168 40 L192 48 L216 30 L240 44 L264 26 L288 38 L320 22" />
+              </svg>
+            ) : (
+              <div class="pl-draw pl-pets" aria-hidden="true">
+                <svg viewBox="0 0 16 12" class="cat" shape-rendering="crispEdges">
+                  <path d="M2 2h1v1h1v1h4V3h1V2h1v3h1v1h1v1h1v4H2V7H1V5h1z" />
+                  <path class="eye" d="M4 6h1v1H4zM8 6h1v1H8z" />
+                </svg>
+                <span class="zz">z</span><span class="zz zz-2">z</span>
+              </div>
+            )}
+          </article>
+        ))}
+        <a class="pl pl-more" href="/docs/plugins/writing" data-reveal style="--d:140ms">
+          <span class="kicker">More on the way</span>
+          <p>New plugins land in the app as they’re ready, or make the one you’re missing.</p>
+          <span class="link">Write a plugin<svg class="icon" aria-hidden="true"><use href="#i-right"></use></svg></span>
+        </a>
+      </div>
+
+      <figure class="page-shot" data-reveal>
+        <img src={shot("page-plugins")} width="2400" height="1444" alt="The Plugins page: what’s in the project, what’s available and updates" loading="lazy" decoding="async" />
+      </figure>
+    </div>
+  </section>
+
+  <!-- Always on ----------------------------------------------------------- -->
+  <section class="always wrap" id="detach" aria-labelledby="always-title">
+    <header class="sec-head" data-reveal>
+      <h2 id="always-title" class="sec-title">Close the app.<br /><span class="dim">Your work keeps running.</span></h2>
+      <p class="sec-text">Terminals, agents and long tasks don’t stop when you close hyperpane. Open it again and everything is where you left it.</p>
+    </header>
+
+    <div class="detach" data-detach data-reveal>
+      <div class="detach-app" aria-hidden="true">
+        <div class="lid">
+          <img src={shot("app-chrome")} alt="" loading="lazy" decoding="async" />
+          <img class="lid-win" src={shot("terminal")} alt="" loading="lazy" decoding="async" />
+        </div>
+        <span class="detach-state" data-app-state>App open</span>
+      </div>
+      <div class="detach-wire" aria-hidden="true"><span class="pulse"></span></div>
+      <div class="detach-server" aria-hidden="true">
+        <header>
+          <svg class="icon"><use href="#i-server"></use></svg>
+          <span>server</span>
+          <span class="live"><span class="pip"></span><span data-uptime>running · 0:00</span></span>
+        </header>
+        <pre data-log></pre>
+        <div class="meter"><span data-meter></span></div>
+      </div>
+      <p class="detach-caption" data-caption>The app is open: the build runs on your server.</p>
+    </div>
+
+    <ol class="always-list">
+      {always.map((a, i) => (
+        <li data-reveal style={`--d:${i * 90}ms`}>
+          <span class="tile-icon" aria-hidden="true"><svg class="icon"><use href={`#${a.icon}`}></use></svg></span>
+          <h3>{a.title}</h3>
+          <p>{a.text}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <!-- Download ------------------------------------------------------------ -->
+  <section class="get wrap" id="download" aria-labelledby="get-title">
+    <div class="get-card" data-reveal>
+      <div class="get-glow" aria-hidden="true"></div>
+      <h2 id="get-title" class="get-title">The first builds are almost here.</h2>
+      <p class="get-text">For macOS, Windows and Linux. Pick yours on the download page.</p>
+      <ul class="get-systems">
+        {systems.map((s) => (
+          <li data-os={s.os}>
+            <svg class="icon" aria-hidden="true"><use href={`#${s.icon}`}></use></svg>
+            <span>{s.name}</span>
+            <em>Soon</em>
+          </li>
+        ))}
+      </ul>
+      <a class="btn btn-primary" href="/download">Go to downloads<svg class="icon arrow" aria-hidden="true"><use href="#i-right"></use></svg></a>
+    </div>
+  </section>
+
+  <!-- The canvas bar, as a section dock ---------------------------------- -->
+  <nav class="dock" aria-label="Sections" data-dock>
+    <a href="#roles" data-dock-to="roles"><svg class="icon" aria-hidden="true"><use href="#i-layers"></use></svg><span>Roles</span></a>
+    <a href="#plugins" data-dock-to="plugins"><svg class="icon" aria-hidden="true"><use href="#i-puzzle"></use></svg><span>Windows</span></a>
+    <a href="#detach" data-dock-to="detach"><svg class="icon" aria-hidden="true"><use href="#i-power"></use></svg><span>Always on</span></a>
+    <span class="dock-rule" aria-hidden="true"></span>
+    <a href="/download" class="dock-get"><svg class="icon" aria-hidden="true"><use href="#i-download"></use></svg><span>Download</span></a>
+  </nav>
 </Base>
 
 <script>
-  import "../landing/interact.js";
+  import "../landing/home.js";
 </script>

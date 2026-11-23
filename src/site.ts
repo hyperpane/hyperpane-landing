@@ -9,7 +9,7 @@ export const site = {
   url: "https://hyperpane.app",
 };
 
-/** The top bar's links. The landing's sections are on the home page. */
+/** The header's links. The landing's sections are on the home page. */
 export const nav = [
   { label: "Roles", href: "/#roles" },
   { label: "Windows", href: "/#plugins" },

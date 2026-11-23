@@ -21,28 +21,27 @@ const jsonLd = {
 };
 ---
 
-<Docs title="Documentation" description={`Documentation for ${site.name}.`} jsonLd={jsonLd} current="__index">
-  <header class="doc-head">
-    <span class="doc-eyebrow">Documentation</span>
+<Docs title="Documentation" description={`Documentation for ${site.name}.`} jsonLd={jsonLd} current="__index" toc={false}>
+  <header class="dhero">
     <h1>Learn hyperpane</h1>
     <p class="lead">Start here, then go through the topics below.</p>
   </header>
-
-  <div class="cards">
-    {sections.map((section, n) => (
-      <section class="cards__section">
-        <h2 class="cards__h">{section.name}</h2>
-        <div class="cards__grid">
-          {section.items.map((doc) => (
-            <a class="dcard" data-section={n} href={`/docs/${doc.id}`}>
-              <svg class="fact-icon" aria-hidden="true"><use href={`#${["i-star", "i-layers", "i-puzzle"][n] ?? "i-file-text"}`}></use></svg>
-              <h3>{doc.data.title}</h3>
-              <p>{doc.data.description}</p>
-              <span class="dcard__go">Read<svg class="icon" aria-hidden="true"><use href="#i-right"></use></svg></span>
-            </a>
-          ))}
-        </div>
-      </section>
-    ))}
-  </div>
+  <figure class="dshot">
+    <img src="/shots/page-settings.webp" width="2400" height="1444" alt="hyperpane’s Settings, with its sections in the sidebar" loading="eager" decoding="async" />
+  </figure>
+  {sections.map((section, n) => (
+    <section class="dcards">
+      <h2>{section.name}</h2>
+      <div class="dcards-grid">
+        {section.items.map((doc) => (
+          <a class="dcard" href={`/docs/${doc.id}`}>
+            <span class="tile-icon" aria-hidden="true"><svg class="icon"><use href={`#${["i-star", "i-layers", "i-puzzle", "i-code"][n] ?? "i-file-text"}`}></use></svg></span>
+            <h3>{doc.data.title}</h3>
+            <p>{doc.data.description}</p>
+            <span class="link">Read<svg class="icon" aria-hidden="true"><use href="#i-right"></use></svg></span>
+          </a>
+        ))}
+      </div>
+    </section>
+  ))}
 </Docs>

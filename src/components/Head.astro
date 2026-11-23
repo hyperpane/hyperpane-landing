@@ -1,17 +1,10 @@
 ---
 import { site } from "../site";
 import "../styles/tokens.css";
-import "../styles/theme-astralyx.css";
-import "../styles/site.css";
-import "../styles/mockups.css";
+import "../styles/base.css";
+import "../styles/home.css";
 import "../styles/docs.css";
 import "../styles/download.css";
-import "../styles/app.css";
-import "../styles/free.css";
-import "../styles/resend.css";
-import "../styles/download-manager.css";
-import "../styles/cards.css";
-import "../styles/docs-look.css";
 
 interface Props {
   title?: string;
@@ -66,6 +59,6 @@ const ldList = [baseLd, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd])
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..700&family=JetBrains+Mono:wght@400;500;700&display=swap" />
 
 {ldList.map((ld) => <script type="application/ld+json" set:html={JSON.stringify(ld)} />)}
