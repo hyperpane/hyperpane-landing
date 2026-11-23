@@ -115,24 +115,47 @@ export class Scene {
     return this.add(`<circle class="${cls}" cx="${f(x)}" cy="${f(y)}" r="${r}"/>`);
   }
 
-  /** The callout: a dot on the part, a leader to a label block (flat). */
-  callout(v: V3, lx: number, ly: number, title: string, code: string, rows: [string, string][], side: "left" | "right" = "right") {
-    if (this.compact) return this;
+  /** The lit part's pin (the spec's words were dropped: the drawing says it). */
+  callout(v: V3, ..._rest: unknown[]) {
     this.track = false;
     const [px, py] = this.p(v);
     this.track = true;
-    const w = 170;
-    const x0 = side === "right" ? lx : lx - w;
-    const under = ly + 14 + rows.length * 15;
-    const ex = side === "right" ? x0 : x0 + w;
-    this.add(`<g class="iso-call">`);
-    this.add(`<path class="iso-lead" d="M${f(px)} ${f(py)}L${f(ex)} ${f(under)}H${f(side === "right" ? x0 + w : x0)}"/>`);
-    this.add(`<circle class="iso-pin" cx="${f(px)}" cy="${f(py)}" r="3.5"/>`);
-    this.add(`<text class="iso-ct" x="${x0}" y="${ly}">${title}<tspan class="iso-code" dx="7">${code}</tspan></text>`);
-    rows.forEach(([k, val], i) => {
-      this.add(`<text class="iso-ck" x="${x0}" y="${ly + 17 + i * 15}">${k}</text><text class="iso-cv" x="${x0 + 44}" y="${ly + 17 + i * 15}">${val}</text>`);
+    return this.add(`<circle class="iso-pin" cx="${f(px)}" cy="${f(py)}" r="3.5"/>`);
+  }
+
+  /** A circle standing on a front-left face (y fixed), as points. */
+  ringY(cx: number, y: number, cz: number, r: number, n = 28): V3[] {
+    return Array.from({ length: n }, (_, i) => {
+      const t = (i / n) * Math.PI * 2;
+      return [cx + r * Math.cos(t), y, cz + r * Math.sin(t)] as V3;
     });
-    return this.add(`</g>`);
+  }
+  /** A pie sector's top (angles in radians, on the xy plane), as points. */
+  sector(cx: number, cy: number, z: number, r: number, a0: number, a1: number, n = 18): V3[] {
+    const pts: V3[] = [[cx, cy, z]];
+    for (let i = 0; i <= n; i++) {
+      const t = a0 + ((a1 - a0) * i) / n;
+      pts.push([cx + r * Math.cos(t), cy + r * Math.sin(t), z]);
+    }
+    return pts;
+  }
+  /** A pie sector as a solid: its outer wall, its cut walls, its top. */
+  wedge(cx: number, cy: number, z: number, r: number, h: number, a0: number, a1: number, tone: Tone = "base", extra = "") {
+    const t = tone === "hi" ? "a" : tone === "dark" ? "k" : "";
+    const n = 18;
+    const arcTop: V3[] = [];
+    const arcBot: V3[] = [];
+    for (let i = 0; i <= n; i++) {
+      const a = a0 + ((a1 - a0) * i) / n;
+      arcTop.push([cx + r * Math.cos(a), cy + r * Math.sin(a), z + h]);
+      arcBot.push([cx + r * Math.cos(a), cy + r * Math.sin(a), z]);
+    }
+    this.add(`<g class="iso-box${tone === "hi" ? " iso-hi" : ""} ${extra}">`);
+    this.poly([[cx, cy, z], [cx, cy, z + h], arcTop[0], arcBot[0]], `iso-l${t}`);
+    this.poly([[cx, cy, z], [cx, cy, z + h], arcTop[n], arcBot[n]], `iso-l${t}`);
+    this.poly([...arcTop, ...arcBot.reverse()], `iso-r${t}`);
+    this.poly(this.sector(cx, cy, z + h, r, a0, a1, n), `iso-t${t}`);
+    return this.add("</g>");
   }
 
   /** A big readout, flat (label over the number, a unit after it). */
@@ -177,9 +200,9 @@ type Role = { wins: RoleWin[]; call: [string, string, [string, string][]]; read:
 const roleDefs: Record<string, Role> = {
   engineers: {
     wins: [
-      { x: 0, y: 0, w: 150, d: 120, title: "orders.ts", rows: [70, 100, 50, 86, 64, 90, 40, 76, 58] },
-      { x: 170, y: 0, w: 150, d: 70, title: "api · main", rows: [90, 60, 110, 40] },
-      { x: 170, y: 90, w: 150, d: 90, title: "zsh · npm run dev", rows: [96, 70, 110, 84], hi: true, prompt: true },
+      { x: 0, y: 0, w: 150, d: 180, title: "orders.ts", rows: [70, 100, 50, 86, 64, 90, 40, 76, 58, 96, 44, 80, 60, 70, 50, 90, 64] },
+      { x: 170, y: 0, w: 150, d: 80, title: "api · main", rows: [90, 60, 110, 40, 80, 100] },
+      { x: 170, y: 100, w: 150, d: 80, title: "zsh · npm run dev", rows: [96, 70, 110], hi: true, prompt: true },
     ],
     call: ["Terminal", "T-01", [["Role", "npm run dev"], ["Type", "zsh, This Mac"], ["Spec", "up 2 h 14 m"]]],
     read: ["Windows", "3", "", "one canvas, one project"],
@@ -187,9 +210,9 @@ const roleDefs: Record<string, Role> = {
   },
   frontend: {
     wins: [
-      { x: 0, y: 0, w: 190, d: 130, title: "localhost:5173", rows: [60, 150, 120, 0, 70, 70, 70], hi: true },
-      { x: 210, y: 0, w: 110, d: 80, title: "styles.css", rows: [60, 80, 40, 70, 50] },
-      { x: 210, y: 100, w: 110, d: 80, title: "assets", rows: [40, 70, 50, 60] },
+      { x: 0, y: 0, w: 190, d: 180, title: "localhost:5173", rows: [60, 150, 120, 0, 70, 70, 70, 0, 150, 120, 150, 90, 120, 60, 100, 80, 50], hi: true },
+      { x: 210, y: 0, w: 110, d: 80, title: "styles.css", rows: [60, 80, 40, 70, 50, 74] },
+      { x: 210, y: 100, w: 110, d: 80, title: "assets", rows: [40, 70, 50, 60, 76, 30] },
     ],
     call: ["Browser", "B-01", [["Role", "your app, live"], ["Type", "390 · 768 · 1440"], ["Spec", "reloads on save"]]],
     read: ["Viewport", "390", "px", "phone, beside the code"],
@@ -197,9 +220,9 @@ const roleDefs: Record<string, Role> = {
   },
   devops: {
     wins: [
-      { x: 0, y: 0, w: 160, d: 110, title: "Containers · fra-1", rows: [120, 120, 120, 120, 120] },
+      { x: 0, y: 0, w: 160, d: 180, title: "Containers · fra-1", rows: [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120] },
       { x: 180, y: 0, w: 140, d: 80, title: "deploy@fra-1", rows: [90, 70, 110], hi: true, prompt: true },
-      { x: 180, y: 100, w: 140, d: 80, title: "Activity", rows: [40, 90, 60, 110] },
+      { x: 180, y: 100, w: 140, d: 80, title: "Activity", rows: [40, 90, 60, 110, 70, 96] },
     ],
     call: ["Terminal", "FRA-1", [["Role", "deploy, logs"], ["Type", "ssh, a server"], ["Spec", "keeps running"]]],
     read: ["Machines", "4", "", "every one you run"],
@@ -207,9 +230,9 @@ const roleDefs: Record<string, Role> = {
   },
   data: {
     wins: [
-      { x: 0, y: 0, w: 170, d: 130, title: "Data — orders", rows: [150, 150, 150, 150, 150, 150, 150], hi: true },
-      { x: 190, y: 0, w: 130, d: 80, title: "GET /orders", rows: [50, 90, 70, 100] },
-      { x: 190, y: 100, w: 130, d: 80, title: "orders.ts", rows: [70, 100, 60, 84] },
+      { x: 0, y: 0, w: 170, d: 180, title: "Data — orders", rows: [150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150, 150], hi: true },
+      { x: 190, y: 0, w: 130, d: 80, title: "GET /orders", rows: [50, 90, 70, 100, 60, 86] },
+      { x: 190, y: 100, w: 130, d: 80, title: "orders.ts", rows: [70, 100, 60, 84, 40, 90] },
     ],
     call: ["Postgres", "PG-1", [["Role", "orders, 18.2k rows"], ["Type", "PostgreSQL 17"], ["Spec", "query in 4 ms"]]],
     read: ["Rows", "18.2", "k", "next to the code"],
@@ -217,9 +240,9 @@ const roleDefs: Record<string, Role> = {
   },
   agents: {
     wins: [
-      { x: 0, y: 0, w: 150, d: 110, title: "agent · claude", rows: [110, 80, 120, 64, 96], hi: true, prompt: true },
-      { x: 170, y: 0, w: 150, d: 80, title: "tests", rows: [90, 90, 90, 60] },
-      { x: 170, y: 100, w: 150, d: 80, title: "localhost:5173", rows: [50, 120, 90] },
+      { x: 0, y: 0, w: 150, d: 180, title: "agent · claude", rows: [110, 80, 120, 64, 96, 110, 70, 120, 90, 60, 110, 84, 100, 70], hi: true, prompt: true },
+      { x: 170, y: 0, w: 150, d: 80, title: "tests", rows: [90, 90, 90, 60, 90, 90] },
+      { x: 170, y: 100, w: 150, d: 80, title: "localhost:5173", rows: [50, 120, 90, 0, 110, 80] },
     ],
     call: ["Agent", "AG-1", [["Role", "edits orders.ts"], ["Type", "in a terminal"], ["Spec", "24 tests passed"]]],
     read: ["Watching", "3", "", "every window it touches"],
@@ -232,17 +255,16 @@ function role(id: string) {
   const s = new Scene(250, 110);
   // the canvas: a plate, its dot grid
   s.box(-30, -30, 0, 380, 240, 10, "dark");
-  for (let gx = -10; gx <= 330; gx += 30) for (let gy = -10; gy <= 200; gy += 30) s.dot([gx, gy, 10.2], "iso-grid", 0.9);
+  for (let gx = -20; gx <= 340; gx += 20) for (let gy = -20; gy <= 200; gy += 20) s.dot([gx, gy, 10.2], "iso-grid", 0.9);
   // the windows, back to front; the lit one raised
   for (const wn of r.wins) win(s, wn.x, wn.y, wn.w, wn.d, wn.title, wn.rows, { hi: wn.hi, lift: wn.hi ? 26 : 0, prompt: wn.prompt });
   // a list along the plate's front edge
   r.list.forEach(([k, v], i) => {
-    s.left(-24 + i * 118, 210, 4, `<tspan class="iso-k">${k}</tspan> ${v}`, 8.5, "iso-tx iso-edge");
+    s.left(-20 + i * 120, 210, 3, `<tspan class="iso-k">${k}</tspan> ${v}`, 8.5, "iso-tx iso-edge");
   });
   const lit = r.wins.find((w) => w.hi)!;
   s.callout([lit.x + lit.w * 0.6, lit.y + lit.d * 0.55, 10 + 26 + 5.2], 455, 40, r.call[0], r.call[1], r.call[2]);
-  s.readout(20, 318, r.read[0], r.read[1], r.read[2], r.read[3]);
-  return { view: "0 0 640 380", svg: s.svg() };
+  return { view: s.tight(18), svg: s.svg() };
 }
 
 // The plugins and built-ins, each a thing on a plate ---------------------------
@@ -256,21 +278,22 @@ const make = (ox: number, oy: number) => {
   s.compact = compactNext;
   return s;
 };
-const out = (s: Scene, view: string) => ({ view: s.compact ? s.tight() : view, svg: s.svg() });
+const out = (s: Scene) => ({ view: s.tight(), svg: s.svg() });
 
 const things: Record<string, () => { view: string; svg: string }> = {
   terminal() {
-    const s = make(170, 70);
-    plate(s, 220, 170);
-    s.box(10, 70, 8, 160, 70, 6); // keyboard
-    for (let r = 0; r < 4; r++) for (let k = 0; k < 9; k++) s.box(18 + k * 17, 76 + r * 15, 14, 12, 10, 2, "dark");
-    s.box(10, 30, 8, 160, 10, 95); // the screen, standing
-    s.right(170, 38, 85, "~/api ❯ npm run dev", 8, "iso-tx iso-tx-on");
-    s.right(170, 38, 70, "VITE ready in 284 ms", 7.5, "iso-tx");
-    s.right(170, 38, 58, "➜ localhost:5173", 7.5, "iso-tx");
-    s.poly([[170.2, 38, 30], [170.2, 30, 30], [170.2, 30, 42], [170.2, 38, 42]], "iso-cursor");
-    s.callout([170, 34, 36], 286, 28, "Shell", "SH-1", [["Role", "any machine"], ["Spec", "keeps running"]]);
-    return out(s, "0 0 470 250");
+    const s = make(200, 40);
+    plate(s, 220, 220);
+    s.box(40, 20, 8, 120, 160, 6);
+    for (let r = 0; r < 7; r++) for (let k = 0; k < 10; k++) s.box(48 + r * 15, 28 + k * 15, 14, 11, 11, 2.4, r === 6 && k === 4 ? "hi" : "dark");
+    s.box(0, 10, 8, 12, 180, 120);
+    s.poly([[12.2, 182, 120], [12.2, 18, 120], [12.2, 18, 18], [12.2, 182, 18]], "iso-screen");
+    s.right(12.4, 172, 102, "~/api ❯ npm run dev", 10, "iso-tx iso-tx-on");
+    s.right(12.4, 172, 86, "VITE v7 ready in 284 ms", 9, "iso-tx");
+    s.right(12.4, 172, 72, "➜ localhost:5173", 9, "iso-tx");
+    s.right(12.4, 172, 58, "hmr update /src/App.tsx", 9, "iso-tx");
+    s.poly([[12.4, 172, 32], [12.4, 164, 32], [12.4, 164, 44], [12.4, 172, 44]], "iso-cursor");
+    return out(s);
   },
   editor() {
     const s = make(190, 60);
@@ -278,141 +301,217 @@ const things: Record<string, () => { view: string; svg: string }> = {
     s.box(30, 10, 8, 130, 110, 4, "dark");
     s.box(20, 0, 12, 130, 110, 4, "dark");
     s.box(10, -10, 16, 130, 110, 4);
-    s.bars(22, 4, 20.1, [40, 80, 60, 0, 90, 70, 50, 84, 30, 64]);
-    s.line([34, 36, 20.2], [110, 36, 20.2], "iso-bar-lit");
-    s.callout([90, 36, 20], 300, 28, "Line 4", "ED-1", [["Role", "find, replace"], ["Spec", "many cursors"]]);
-    return out(s, "0 0 470 250");
+    // the gutter, the lines, the one being edited
+    s.poly([[10, -10, 20.1], [26, -10, 20.1], [26, 100, 20.1], [10, 100, 20.1]], "iso-head");
+    for (let i = 0; i < 11; i++) s.line([14, 4 + i * 8, 20.2], [20, 4 + i * 8, 20.2], "iso-bar");
+    s.bars(32, 4, 20.2, [40, 80, 60, 0, 90, 70, 50, 84, 30, 64, 46]);
+    s.box(30, 33, 20.2, 92, 6, 1.2, "hi", "iso-lit");
+    s.box(124, 31, 20.2, 3, 10, 7, "hi");
+    return out(s);
   },
   explorer() {
-    const s = make(170, 60);
-    plate(s, 220, 170);
-    const nodes: [number, number, string, boolean?][] = [
-      [0, 0, "src"], [40, 30, "routes"], [80, 60, "orders.ts", true], [80, 90, "products.ts"], [40, 120, "server.ts"],
-    ];
-    s.path3([[8, 6, 8.2], [8, 126, 8.2]], "iso-ln");
-    s.path3([[48, 36, 8.2], [48, 96, 8.2]], "iso-ln");
-    nodes.forEach(([x, y, n, hi]) => {
-      s.box(x, y, 8, 60, 18, 7, hi ? "hi" : "base", hi ? "iso-lit" : "");
-      s.top(x + 6, y + 12, 15.2, n, 7, hi ? "iso-tx iso-tx-on" : "iso-tx");
-    });
-    s.callout([110, 69, 15], 300, 30, "orders.ts", "1.2 KB", [["Role", "open, rename"], ["Spec", "drag to move"]]);
-    return out(s, "0 0 470 250");
+    // a filing cabinet, one drawer out with its folders
+    const s = make(170, 50);
+    plate(s, 200, 180);
+    s.box(0, 20, 8, 80, 120, 150);
+    for (let d = 0; d < 4; d++) {
+      if (d === 2) continue;
+      s.poly([[80.2, 28, 18 + d * 36], [80.2, 132, 18 + d * 36], [80.2, 132, 48 + d * 36], [80.2, 28, 48 + d * 36]], "iso-face");
+      s.box(80.2, 70, 30 + d * 36, 4, 20, 5, "dark");
+    }
+    s.poly([[80.2, 28, 90], [80.2, 132, 90], [80.2, 132, 120], [80.2, 28, 120]], "iso-unit");
+    s.box(80, 30, 90, 80, 100, 28, "hi", "iso-lit");
+    for (let k = 0; k < 6; k++) s.box(92 + k * 11, 38, 118, 6, 84, 10 + (k % 3) * 3, k === 3 ? "hi" : "base");
+    s.box(160, 72, 98, 4, 16, 5, "dark");
+    return out(s);
   },
   git() {
-    const s = make(170, 60);
-    plate(s, 260, 150);
-    s.path3([[0, 40, 8.2], [220, 40, 8.2]], "iso-rail");
-    s.path3([[60, 40, 8.2], [80, 90, 8.2], [160, 90, 8.2], [180, 40, 8.2]], "iso-rail-a");
-    [0, 30, 60, 120, 180, 210].forEach((x) => s.cyl(x, 40, 8, 7, 6, x === 180 ? "hi" : "base", x === 180 ? "iso-lit" : ""));
-    [100, 140].forEach((x) => s.cyl(x, 90, 8, 6, 5, "base"));
-    s.topY(0, 30, 8.5, "main", 8, "iso-tx");
-    s.top(100, 104, 8.5, "feature/orders", 7.5, "iso-tx");
-    s.callout([180, 40, 14], 300, 22, "Merge", "a3f9c1", [["Role", "feature → main"], ["Type", "+12 −3, 2 files"], ["Spec", "synced"]]);
-    return out(s, "0 0 470 250");
+    // rails: main, and a branch that leaves it and comes back, a train on it
+    const s = make(170, 50);
+    plate(s, 300, 170);
+    const rail = (pts: [number, number][], cls = "iso-rail") => {
+      s.path3(pts.map(([x, y]) => [x, y - 5, 8.3] as V3), cls);
+      s.path3(pts.map(([x, y]) => [x, y + 5, 8.3] as V3), cls);
+    };
+    for (let x = -10; x <= 270; x += 12) s.line([x, 32, 8.2], [x, 48, 8.2], "iso-sleeper");
+    rail([[-10, 40], [270, 40]]);
+    for (let x = 60; x <= 200; x += 12) s.line([x, 102, 8.2], [x, 118, 8.2], "iso-sleeper");
+    rail([[30, 40], [60, 110], [200, 110], [230, 40]], "iso-rail-a");
+    // a signal at the switch
+    s.box(20, 20, 8, 6, 6, 60, "dark");
+    s.box(16, 16, 68, 14, 8, 16, "base");
+    s.dot([30, 24, 78], "iso-led", 2.6);
+    // the train: three cars, the engine lit
+    s.box(80, 102, 8, 34, 16, 16, "base");
+    s.box(118, 102, 8, 34, 16, 16, "base");
+    s.box(156, 102, 8, 38, 16, 20, "hi", "iso-lit");
+    s.box(184, 104, 28, 8, 12, 8, "hi");
+    return out(s);
   },
   browser() {
-    const s = make(160, 60);
-    plate(s, 240, 160);
-    s.box(70, 70, 8, 40, 30, 12, "dark"); // stand
-    s.box(84, 80, 20, 12, 10, 40, "dark");
-    s.box(30, 75, 50, 130, 12, 100); // screen (facing front-right)
-    // the page on its front-left face (y = 87)
-    s.poly([[36, 87.2, 136], [154, 87.2, 136], [154, 87.2, 128], [36, 87.2, 128]], "iso-face");
-    s.poly([[56, 87.2, 115], [134, 87.2, 115], [134, 87.2, 98], [56, 87.2, 98]], "iso-face-a");
-    s.poly([[70, 87.2, 90], [120, 87.2, 90], [120, 87.2, 84], [70, 87.2, 84]], "iso-face");
-    [40, 82, 124].forEach((x) => s.poly([[x, 87.2, 76], [x + 30, 87.2, 76], [x + 30, 87.2, 58], [x, 87.2, 58]], "iso-face"));
-    s.callout([95, 87, 106], 310, 28, "localhost", "5173", [["Role", "your app, live"], ["Type", "phone · tablet"], ["Spec", "reloads on save"]]);
-    return out(s, "0 0 470 250");
+    // the same page at three sizes: a desktop, a tablet, a phone
+    const s = make(150, 30);
+    plate(s, 230, 230);
+    const screen = (x: number, y0: number, y1: number, z0: number, z1: number, lit = false) => {
+      s.poly([[x, y1, z1], [x, y0, z1], [x, y0, z0], [x, y1, z0]], lit ? "iso-face-a" : "iso-screen");
+      const w = y1 - y0;
+      s.poly([[x + 0.2, y1 - 4, z1 - 4], [x + 0.2, y0 + 4, z1 - 4], [x + 0.2, y0 + 4, z1 - 10], [x + 0.2, y1 - 4, z1 - 10]], lit ? "iso-head-a" : "iso-face");
+      s.poly([[x + 0.2, y0 + w * 0.7, z1 - 18], [x + 0.2, y0 + w * 0.3, z1 - 18], [x + 0.2, y0 + w * 0.3, z1 - 18 - (z1 - z0) * 0.22], [x + 0.2, y0 + w * 0.7, z1 - 18 - (z1 - z0) * 0.22]], lit ? "iso-head-a" : "iso-face");
+    };
+    s.box(10, 60, 8, 30, 50, 6, "dark");
+    s.box(20, 80, 14, 8, 10, 30, "dark");
+    s.box(0, 10, 44, 10, 150, 96);
+    screen(10.2, 16, 154, 50, 134);
+    s.box(70, 40, 8, 24, 70, 4, "dark");
+    s.box(80, 44, 12, 6, 62, 82);
+    screen(86.2, 48, 102, 16, 90);
+    s.box(140, 100, 8, 16, 34, 3, "dark");
+    s.box(146, 104, 11, 4, 26, 52, "hi", "iso-lit");
+    screen(150.2, 106, 128, 15, 60, true);
+    return out(s);
   },
   data() {
-    const s = make(190, 70);
-    plate(s, 220, 170);
-    s.cyl(80, 60, 8, 50, 22, "base");
-    s.cyl(80, 60, 34, 50, 22, "base");
-    s.cyl(80, 60, 60, 50, 22, "hi", "iso-lit");
-    s.left(30, 110, 18, "redis", 8, "iso-tx");
-    s.left(30, 110, 44, "s3", 8, "iso-tx");
-    s.callout([80, 60, 82], 300, 22, "orders", "PG-1", [["Role", "18.2k rows"], ["Type", "PostgreSQL 17"], ["Spec", "query 4 ms"]]);
-    return out(s, "0 0 470 250");
+    // a tank farm: postgres, piped to redis and an s3 store
+    const s = make(200, 70);
+    plate(s, 250, 190);
+    s.box(70, 50, 30, 110, 8, 8, "dark");
+    s.box(70, 128, 30, 70, 8, 8, "dark");
+    s.cyl(60, 70, 8, 46, 92, "base");
+    for (const z of [30, 54, 78]) {
+      const [cx, cy] = s.p([60, 70, z]);
+      const rx = 46 * Math.SQRT2 * C;
+      const ry = 46 * Math.SQRT2 * S;
+      s.add(`<path class="iso-ring" d="M${f(cx - rx)} ${f(cy)}A${f(rx)} ${f(ry)} 0 0 0 ${f(cx + rx)} ${f(cy)}"/>`);
+    }
+    s.cyl(60, 70, 50, 47.5, 14, "hi", "iso-lit");
+    s.cyl(60, 70, 100, 18, 10, "base");
+    s.cyl(196, 50, 8, 24, 54, "base");
+    s.cyl(140, 132, 28, 9, 12, "hi");
+    s.box(160, 110, 8, 60, 60, 38);
+    for (let i = 0; i < 3; i++) s.box(166 + i * 18, 116, 46, 14, 48, 8, "dark");
+    return out(s);
   },
   requests() {
-    const s = make(150, 70);
-    plate(s, 280, 140);
-    s.box(0, 30, 8, 50, 50, 60);
-    s.box(190, 30, 8, 50, 50, 90);
-    s.left(4, 80, 30, "you", 8, "iso-tx");
-    s.left(194, 80, 50, "api", 8, "iso-tx");
-    s.box(50, 50, 48, 140, 10, 3, "dark");
-    s.box(90, 46, 51, 26, 18, 10, "hi", "iso-lit iso-move");
-    s.callout([103, 55, 61], 320, 24, "GET /orders", "200", [["Role", "saved request"], ["Type", "JSON, 1.2 KB"], ["Spec", "84 ms"]]);
-    return out(s, "0 0 490 250");
+    // pneumatic post between your desk and the api
+    const s = make(150, 50);
+    plate(s, 290, 160);
+    const tower = (x: number, y: number, w: number, d: number, h: number) => {
+      s.box(x, y, 8, w, d, h);
+      for (let fl = 0; fl < Math.floor((h - 10) / 18); fl++)
+        for (let k = 0; k < Math.floor(d / 14); k++)
+          s.poly([[x + w + 0.2, y + 5 + k * 14, 16 + fl * 18], [x + w + 0.2, y + 13 + k * 14, 16 + fl * 18], [x + w + 0.2, y + 13 + k * 14, 26 + fl * 18], [x + w + 0.2, y + 5 + k * 14, 26 + fl * 18]], "iso-face");
+    };
+    tower(0, 40, 50, 56, 70);
+    tower(196, 20, 64, 84, 130);
+    s.box(50, 62, 58, 146, 12, 12, "base", "iso-glass");
+    s.box(80, 63, 60, 24, 10, 8, "hi", "iso-lit iso-move");
+    s.box(44, 58, 52, 8, 20, 24, "dark");
+    s.box(192, 58, 52, 8, 20, 24, "dark");
+    return out(s);
   },
   containers() {
-    const s = make(180, 70);
-    plate(s, 220, 170);
-    s.box(0, 40, 8, 80, 50, 40);
-    s.box(90, 40, 8, 80, 50, 40);
-    s.box(0, 100, 8, 80, 50, 40);
-    s.box(90, 100, 8, 80, 50, 40);
-    s.box(40, 70, 48, 80, 50, 40, "hi", "iso-lit");
-    for (let i = 0; i < 5; i++) s.line([46 + i * 15, 120.1, 52], [46 + i * 15, 120.1, 84], "iso-rib");
-    s.callout([80, 95, 88], 300, 22, "api", "C-01", [["Role", "up 2 hours"], ["Type", "node:22"], ["Spec", "cpu 42%"]]);
-    return out(s, "0 0 470 250");
+    // a gantry crane lifting one container off the stack
+    const s = make(190, 30);
+    plate(s, 250, 220);
+    s.box(-6, 10, 8, 8, 8, 150, "dark");
+    s.box(194, 10, 8, 8, 8, 150, "dark");
+    s.box(-6, 10, 158, 208, 8, 10);
+    s.box(20, 40, 8, 80, 50, 34);
+    s.box(110, 40, 8, 80, 50, 34);
+    s.box(20, 100, 8, 80, 50, 34);
+    s.box(110, 100, 8, 80, 50, 34);
+    s.box(20, 40, 42, 80, 50, 34);
+    s.line([105, 70, 158], [105, 70, 116], "iso-cable");
+    s.line([105, 86, 168], [105, 86, 116], "iso-cable");
+    s.box(64, 52, 82, 80, 50, 34, "hi", "iso-lit");
+    for (let i = 0; i < 5; i++) s.line([72 + i * 16, 102.1, 86], [72 + i * 16, 102.1, 112], "iso-rib");
+    s.box(92, 10, 168, 30, 160, 10, "base");
+    s.box(-6, 170, 8, 8, 8, 150, "dark");
+    s.box(194, 170, 8, 8, 8, 150, "dark");
+    s.box(-6, 170, 158, 208, 8, 10);
+    return out(s);
   },
   tunnels() {
-    const s = make(150, 70);
-    plate(s, 280, 140);
-    s.box(0, 40, 8, 60, 50, 40);
-    s.left(6, 90, 20, ":8080", 8, "iso-tx");
-    s.box(60, 58, 26, 150, 14, 14, "hi", "iso-lit");
-    s.cyl(230, 65, 8, 26, 60, "base");
-    s.top(214, 70, 68.2, "a link", 8, "iso-tx");
-    s.callout([150, 65, 40], 320, 24, "Tunnel", "quiet-fox", [["Role", "share a port"], ["Type", "HTTPS link"], ["Spec", "open 3 h"]]);
-    return out(s, "0 0 490 250");
+    // a bridge from your machine's island to the open internet's
+    const s = make(150, 40);
+    s.box(-20, 30, 0, 90, 110, 26, "dark");
+    s.box(180, 10, 0, 110, 140, 26, "dark");
+    s.box(0, 50, 26, 50, 50, 40);
+    s.poly([[50.2, 58, 54], [50.2, 92, 54], [50.2, 92, 58], [50.2, 58, 58]], "iso-face-a");
+    s.box(70, 72, 24, 110, 16, 6, "hi", "iso-lit");
+    for (let x = 70; x < 180; x += 22) {
+      s.line([x, 72, 30], [x + 11, 72, 52], "iso-truss");
+      s.line([x + 11, 72, 52], [x + 22, 72, 30], "iso-truss");
+      s.line([x, 88, 30], [x + 11, 88, 52], "iso-truss");
+      s.line([x + 11, 88, 52], [x + 22, 88, 30], "iso-truss");
+    }
+    s.line([70, 72, 52], [180, 72, 52], "iso-truss");
+    s.line([70, 88, 52], [180, 88, 52], "iso-truss");
+    s.cyl(240, 70, 26, 30, 50, "base");
+    s.box(236, 66, 76, 8, 8, 46, "dark");
+    s.dot([240, 70, 124], "iso-led", 3);
+    return out(s);
   },
   activity() {
+    // a mixing desk: a fader and a meter for each of CPU, memory, disk, net
     const s = make(170, 60);
-    plate(s, 230, 170);
-    const h = [[30, 46, 22, 60], [38, 70, 52, 30], [64, 92, 40, 54], [28, 50, 76, 44]];
-    h.forEach((row, j) => row.forEach((v, i) => s.box(i * 44, j * 36, 8, 32, 26, v, i === 2 && j === 2 ? "hi" : "base", i === 2 && j === 2 ? "iso-lit" : "")));
-    s.callout([104, 85, 48], 300, 22, "Core 7", "CPU", [["Role", "38% now"], ["Spec", "peak 92%"]]);
-    return out(s, "0 0 470 250");
+    plate(s, 250, 170);
+    s.box(0, 0, 8, 210, 130, 18);
+    for (let c = 0; c < 5; c++) {
+      const x = 16 + c * 40;
+      const lvl = [5, 9, 3, 7, 6][c];
+      for (let k = 0; k < 10; k++) s.box(x, 8, 26 + k * 7, 22, 10, 5, k < lvl ? (c === 1 && k >= 7 ? "hi" : "base") : "dark");
+      s.box(x + 8, 30, 26.2, 6, 80, 1.5, "dark");
+      s.box(x + 2, 40 + ((c * 23) % 60), 27, 18, 12, 8, c === 1 ? "hi" : "base", c === 1 ? "iso-lit" : "");
+    }
+    return out(s);
   },
   env() {
-    const s = make(180, 70);
-    plate(s, 220, 170);
-    s.box(20, 30, 8, 130, 100, 110);
-    s.poly([[40, 130.2, 30], [130, 130.2, 30], [130, 130.2, 100], [40, 130.2, 100]], "iso-face");
-    s.cyl(85, 131, 58, 14, 5, "hi", "iso-lit");
-    s.left(44, 130.3, 108, "DATABASE_URL  ••••••", 7.5, "iso-tx");
-    s.callout([85, 131, 63], 300, 24, ".env", "4 values", [["Role", "settings, secrets"], ["Spec", "hidden until you look"]]);
-    return out(s, "0 0 470 250");
+    // a vault: its round door, the wheel, the lock lit
+    const s = make(180, 60);
+    plate(s, 220, 180);
+    s.box(20, 20, 8, 140, 110, 130);
+    s.poly(s.ringY(90, 130.2, 73, 54), "iso-face");
+    s.poly(s.ringY(90, 130.4, 73, 44), "iso-unit");
+    for (let k = 0; k < 6; k++) {
+      const a = (k / 6) * Math.PI * 2;
+      s.line([90 + 12 * Math.cos(a), 130.5, 73 + 12 * Math.sin(a)], [90 + 36 * Math.cos(a), 130.5, 73 + 36 * Math.sin(a)], "iso-spoke");
+    }
+    s.poly(s.ringY(90, 130.6, 73, 12), "iso-face-a");
+    s.box(158, 40, 30, 8, 14, 80, "dark");
+    s.box(160, 60, 70, 10, 6, 12, "hi", "iso-lit");
+    return out(s);
   },
   codestats() {
+    // the code as a pie: TypeScript, JSON, Dockerfile, Git; one slice out
     const s = make(170, 70);
-    plate(s, 250, 140);
-    const langs: [string, number][] = [["TypeScript", 96], ["JSON", 25], ["Dockerfile", 16], ["Git", 10]];
-    langs.forEach(([n, v], i) => {
-      s.box(i * 50, 40, 8, 36, 36, v, i === 0 ? "hi" : "base", i === 0 ? "iso-lit" : "");
-      s.left(i * 50, 76.3, 4, n, 7, "iso-tx");
-    });
-    s.callout([18, 58, 104], 300, 22, "TypeScript", "65%", [["Role", "3,904 lines"], ["Spec", "by folder too"]]);
-    return out(s, "0 0 470 250");
+    plate(s, 220, 200);
+    const cx = 90, cy = 90, r = 70;
+    const parts: [number, number][] = [[0, 0.65], [0.65, 0.82], [0.82, 0.93], [0.93, 1]];
+    const tau = Math.PI * 2;
+    const order = [3, 0, 2];
+    for (const i of order) {
+      const [a, b] = parts[i];
+      s.wedge(cx, cy, 8, r, 22, a * tau - 0.6, b * tau - 0.6, "base");
+    }
+    const [a, b] = parts[1];
+    const mid = ((a + b) / 2) * tau - 0.6;
+    s.wedge(cx + 18 * Math.cos(mid), cy + 18 * Math.sin(mid), 22, r, 22, a * tau - 0.6, b * tau - 0.6, "hi", "iso-lit");
+    return out(s);
   },
   pets() {
     const s = make(190, 80);
     plate(s, 200, 150);
-    s.box(20, 30, 8, 140, 90, 8, "dark"); // the window it naps on
-    // a voxel cat
+    s.box(20, 30, 8, 140, 90, 8, "dark");
     s.box(60, 60, 16, 50, 28, 22, "hi", "iso-lit");
     s.box(100, 62, 16, 26, 24, 30, "hi", "iso-lit");
     s.box(102, 62, 46, 6, 6, 8, "hi");
     s.box(118, 62, 46, 6, 6, 8, "hi");
     s.box(40, 70, 16, 22, 6, 6, "hi");
+    s.cyl(140, 40, 16, 10, 16, "base");
     s.top(130, 40, 70, "z", 12, "iso-tx iso-z");
     s.top(140, 30, 86, "z", 9, "iso-tx iso-z iso-z2");
-    s.callout([90, 74, 38], 300, 26, "Cat", "PX-1", [["Role", "naps on your window"], ["Spec", "purrs when tests pass"]]);
-    return out(s, "0 0 470 250");
+    return out(s);
   },
   agent() {
     return role("agents");
