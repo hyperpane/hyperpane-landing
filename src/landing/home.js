@@ -163,14 +163,26 @@
       };
       requestAnimationFrame(step);
     };
+    // A swipe's momentum keeps sending wheel events after the jump; those are
+    // eaten. A new swipe is told apart by a pause in the events or by the
+    // deltas growing again instead of fading.
+    let lastT = 0;
+    let lastAbs = 0;
+    let tail = false;
     addEventListener('wheel', (e) => {
       if (!paged.matches || e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return;
-      // inside a running glide
+      const now = performance.now();
+      const abs = Math.abs(e.deltaY);
+      const fresh = now - lastT > 90 || abs > lastAbs * 1.5 + 6;
+      lastT = now;
+      lastAbs = abs;
       if (busy) { e.preventDefault(); return; }
+      if (tail && !fresh) { e.preventDefault(); return; }
+      tail = false;
       const down = e.deltaY > 0;
       const vh = innerHeight;
       // the block that holds the middle of the screen
-      let i = blocks.findIndex((b) => { const r = b.getBoundingClientRect(); return r.top <= vh / 2 && r.bottom > vh / 2; });
+      const i = blocks.findIndex((b) => { const r = b.getBoundingClientRect(); return r.top <= vh / 2 && r.bottom > vh / 2; });
       if (i < 0) return;
       const r = blocks[i].getBoundingClientRect();
       // still more of this block to see: scroll it normally
@@ -178,26 +190,17 @@
       if (!down && r.top < -4) return;
       const j = i + (down ? 1 : -1);
       if (j < 0 || j >= blocks.length) return;
-      e.preventDefault();
       const next = blocks[j];
       const top = next.getBoundingClientRect().top + scrollY;
       const tall = next.offsetHeight > vh + 4;
       // going up into a tall block lands on its end, not its start
-      glide(down || !tall ? top : top + next.offsetHeight - vh);
-      swallowUntilQuiet();
+      const to = down || !tall ? top : top + next.offsetHeight - vh;
+      const max = document.documentElement.scrollHeight - vh;
+      // nowhere to go (the page's end): let the browser have it
+      if (Math.abs(Math.max(0, Math.min(max, to)) - scrollY) < 2) return;
+      e.preventDefault();
+      tail = true;
+      glide(to);
     }, { passive: false });
-    // eat the rest of this swipe's momentum so it doesn't carry on a page
-    let quiet = 0;
-    const swallowUntilQuiet = () => {
-      const eat = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        clearTimeout(quiet);
-        quiet = setTimeout(() => removeEventListener('wheel', eat, { capture: true }), 220);
-      };
-      clearTimeout(quiet);
-      addEventListener('wheel', eat, { capture: true, passive: false });
-      quiet = setTimeout(() => removeEventListener('wheel', eat, { capture: true }), 900);
-    };
   }
 })();
