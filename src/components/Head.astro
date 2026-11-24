@@ -33,6 +33,14 @@ const ldList = [baseLd, ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd])
 
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<!-- Google Analytics, through Google Tag Manager (GTM-TGG7G5RQ) -->
+<script is:inline async src="https://www.googletagmanager.com/gtm.js?id=GTM-TGG7G5RQ"></script>
+<script is:inline>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+</script>
 <meta name="generator" content={Astro.generator} />
 
 <title>{fullTitle}</title>
