@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 
+Sitemap: https://hyperpane.app/sitemap.xml
 Sitemap: https://hyperpane.app/sitemap-index.xml

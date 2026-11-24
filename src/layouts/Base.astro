@@ -9,14 +9,15 @@ interface Props {
   description?: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   type?: "website" | "article";
+  noindex?: boolean;
 }
-const { title, description, jsonLd, type } = Astro.props;
+const { title, description, jsonLd, type, noindex } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <Head title={title} description={description} jsonLd={jsonLd} type={type} />
+    <Head title={title} description={description} jsonLd={jsonLd} type={type} noindex={noindex} />
   </head>
   <body>
     <Sprite />

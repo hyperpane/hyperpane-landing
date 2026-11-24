@@ -1,0 +1,42 @@
+---
+// Questions and answers: the page answer engines quote, with its FAQPage data.
+import Base from "../layouts/Base.astro";
+import { faq } from "../faq";
+import { site } from "../site";
+import { breadcrumbs } from "../seo";
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    url: `${site.url}/faq`,
+    mainEntity: faq.map(({ q, a }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+  },
+  { "@context": "https://schema.org", ...breadcrumbs([["Home", "/"], ["FAQ", "/faq"]]) },
+];
+---
+
+<Base title="FAQ" description={`Answers about ${site.name}: what it is, how terminals keep running when the app closes, remote servers and VPSs, AI coding agents, plugins and platforms.`} jsonLd={jsonLd}>
+  <div class="wrap faq">
+    <header class="dhero">
+      <h1>Questions, answered</h1>
+      <p class="lead">What {site.name} is, and how it works.</p>
+    </header>
+    <div class="prose">
+      {faq.map(({ q, a }) => (
+        <section>
+          <h2>{q}</h2>
+          <p>{a}</p>
+        </section>
+      ))}
+      <p>More in the <a href="/docs">documentation</a>, or <a href="/download">download {site.name}</a>.</p>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .faq { padding-block: var(--s-10, 5rem); }
+  .faq .prose { margin-top: var(--s-8, 3rem); }
+  .faq h2 { font-size: var(--text-xl, 1.35rem); color: var(--c-ink, #fff); letter-spacing: -0.02em; margin-top: 2em; }
+  .faq h2 + p { margin-top: 0.5em; }
+</style>

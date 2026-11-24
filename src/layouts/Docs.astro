@@ -17,8 +17,10 @@ interface Props {
   current?: string;
   /** "On this page" beside it (the overview has none). */
   toc?: boolean;
+  /** The page as Markdown (docs/<id>.md), for LLMs. */
+  markdown?: string;
 }
-const { title, description, jsonLd, current, toc = true } = Astro.props;
+const { title, description, jsonLd, current, toc = true, markdown } = Astro.props;
 
 const docs = (await getCollection("docs")).sort((a, b) => a.data.order - b.data.order);
 const sections: { name: string; items: typeof docs }[] = [];
@@ -34,7 +36,7 @@ const page = docs.find((d) => d.id === current);
 <!doctype html>
 <html lang="en" class="no-js">
   <head>
-    <Head title={title} description={description} jsonLd={jsonLd} type="article" />
+    <Head title={title} description={description} jsonLd={jsonLd} type="article" markdown={markdown} />
   </head>
   <body class="is-docs">
     <Sprite />

@@ -4,10 +4,11 @@
 // Recommended; and the server for the other machines. Nothing is out yet, so
 // every button says "Soon".
 import Base from "../layouts/Base.astro";
+import { breadcrumbs } from "../seo";
 import { platforms, ready, servers, version } from "../downloads";
 ---
 
-<Base title="Download" description="Download hyperpane for macOS, Windows or Linux.">
+<Base title="Download" description="Download hyperpane for macOS (Apple silicon and Intel), Windows or Linux, and hyperpane-server for the other machines your projects run on." jsonLd={{ "@context": "https://schema.org", ...breadcrumbs([["Home", "/"], ["Download", "/download"]]) }}>
   <div class="dl wrap">
   <section class="dl-section" aria-labelledby="dl-title">
       <header class="dl-head">
