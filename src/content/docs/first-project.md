@@ -1,6 +1,6 @@
 ---
 title: Your first project
-description: "Make a project from a folder, add plugins, and put its first windows on the canvas."
+description: "Make a project from a folder, choose which plugins to see, and put its first windows on the canvas."
 section: Get started
 order: 3
 ---
@@ -17,7 +17,7 @@ A project is a folder on a server, with a canvas of its own. Here's how to make 
 4. **Name:** leave it empty to use the folder's name, or type your own.
 5. Click **Create**.
 
-hyperpane then offers **Add plugins**: the plugins this project could have, such as Git or Browser. Tick the ones you want, or skip it. You can add more later from the [Plugins](/docs/plugins) page.
+Every plugin on the project's server is there in it. On the [Plugins](/docs/plugins) page you can hide the ones you don't want to see in this project.
 
 The project opens on an empty canvas, and shows in the sidebar under its server.
 

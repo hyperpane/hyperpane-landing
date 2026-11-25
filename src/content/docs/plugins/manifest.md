@@ -164,7 +164,7 @@ A package needs a `client` part, a `server` part, or both.
 
 | Field | Type | Required | What it is |
 |---|---|---|---|
-| `main` | string | yes | The entry file, relative to `src/client/`: a `.ts`, `.tsx`, `.js` or `.jsx` file. |
+| `main` | string | yes | The entry file, relative to `src/client/`: a `.ts`, `.tsx`, `.js` or `.jsx` file. The build bundles from it into `dist/client/`. |
 | `styles` | string[] | no | `.css` files in `src/client/` loaded into every frame. |
 | `tailwind` | boolean | no | Default `true`: the app compiles the Tailwind classes your client code uses against its theme. `false` gets the UI kit's precompiled stylesheet instead. |
 
@@ -179,7 +179,7 @@ Every view of the client part (node, card, page, panel, overlay, footer item, di
 | Field | Type | Required | What it is |
 |---|---|---|---|
 | `runtime` | `"node"` | yes | The only runtime. |
-| `main` | string | yes | The entry file, relative to `src/server/`: a `.ts`, `.js` or `.mjs` file. |
+| `main` | string | yes | The entry file, relative to `src/server/`: a `.ts`, `.js` or `.mjs` file. The build bundles from it into `dist/server/main.mjs`, which is what servers run. |
 | `memory` | number | no | Memory for the process, in whole MiB. Default 512, at most 4096. |
 | `schedules` | object[] | no | Scheduled jobs. See below. |
 

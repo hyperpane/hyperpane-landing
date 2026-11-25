@@ -55,6 +55,19 @@ On the server's machine:
 | `hyperpane-server config` | Show its settings and the values in use |
 | `hyperpane-server config set KEY VALUE` | Change a setting |
 
+## Plugins folder
+
+A server runs the [plugins](/docs/plugins) in its plugins folder, on in every project, and sends their interfaces to every app that connects. Each plugin is a folder named by its id, with its `plugin.json` and its built `dist/`.
+
+| Server | Plugins folder |
+| --- | --- |
+| Your computer's | `~/.hyperpane/plugins` (`%APPDATA%\hyperpane\plugins` on Windows) |
+| Another | `plugin-packages` in its data folder |
+
+Choose another with the `plugins` setting (`hyperpane-server config set plugins /srv/hyperpane/plugins`, then restart it), or for one run with `hyperpane-server run --plugins PATH`. The path must be absolute.
+
+The server looks at the folder every 2 seconds: add, replace or remove a plugin's folder and it follows. Links to folders elsewhere work too.
+
 ## The connection
 
 Every connection to a server needs its key, and everything sent is encrypted end to end with it, even on your local network. Without the key, nobody can connect.

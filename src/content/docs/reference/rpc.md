@@ -7,7 +7,7 @@ order: 30
 
 # RPC
 
-A plugin's client part runs in a **frame**: an isolated, sandboxed web page at `plugin://<id>/`, shown in a window on the canvas, a card, a page, a panel, an overlay or a dialog. Everything the frame does outside itself goes through this RPC, which it speaks with the app over a `MessagePort`: calling its server part (and other plugins'), changing its window, showing menus and dialogs, reading the canvas, driving terminals and editors.
+A plugin's client part runs in a **frame**: an isolated, sandboxed web page with an origin of its own (see [Where a frame comes from](#where-a-frame-comes-from)), shown in a window on the canvas, a card, a page, a panel, an overlay or a dialog. Everything the frame does outside itself goes through this RPC, which it speaks with the app over a `MessagePort`: calling its server part (and other plugins'), changing its window, showing menus and dialogs, reading the canvas, driving terminals and editors.
 
 You rarely speak it by hand. `@hyperpane/sdk/client` implements the frame's side, and its `host` object wraps every method on this page (see the [SDK reference](/docs/plugins/sdk) and [Writing a plugin](/docs/plugins/writing)). This page is the contract underneath: what crosses the port, what each method takes and returns, and how it fails.
 
@@ -27,18 +27,25 @@ You rarely speak it by hand. `@hyperpane/sdk/client` implements the frame's side
 
 Messages are plain objects sent with `postMessage` and structured cloning: there are no JSON strings on the port, and `Uint8Array` and `ArrayBuffer` values arrive as they are.
 
+## Where a frame comes from
+
+The app has no plugins of its own. A frame's files are its plugin's built interface (`dist/client/`), which the app gets from the plugin's server, file by file, with the store's [`client_file`](/docs/reference/protocol), checking each against the sha256 in the interface's `client.json`. Each plugin on each server has its own origin:
+
+| App | A frame's address |
+| --- | --- |
+| Desktop | `plugin://<plugin>.<server>/`: Electron's handler asks the app for each file, which fetches it from the server. |
+| Web | `https://<plugin>--<server>.plugins.<the app's host>/`: a small page there asks the app for the files, keeps them in the browser's cache by the interface's hash, and a service worker serves them. |
+
+`<server>` is the server's id. The query says which view it is and which interface: `?v=<view>&k=<kind>&w=<window>&i=<instance>&h=<hash>`. When the plugin is rebuilt on the server, its hash changes, and its frames load again with the new files.
+
 ## Connecting
 
-1. The app creates the iframe:
-
-   ```text
-   plugin://<id>/?v=<view>&k=<kind>&w=<window>&i=<instance>
-   ```
+1. The app creates the iframe at the frame's address (above).
 
 2. On the iframe's `load` event, the app creates a `MessageChannel` and transfers one port to the frame:
 
    ```ts
-   iframe.contentWindow.postMessage({ hyperpane: 'connect', api: 1 }, 'plugin://<id>', [port2]);
+   iframe.contentWindow.postMessage({ hyperpane: 'connect', api: 1 }, frameOrigin, [port2]);
    ```
 
    The SDK accepts this message only once, only when `event.source === window.parent`, `data.hyperpane === 'connect'` and a port is attached. The frame's Content Security Policy (`frame-ancestors`) ensures the parent is the app.
@@ -190,7 +197,7 @@ interface Shortcut { id: string; code: string; meta: boolean; ctrl: boolean; alt
 
 ### Permissions
 
-Every permission the app checks is the **approved** one: what the user confirmed when the plugin was installed. An update that asks for more runs with what it had until the user allows the rest (its Plugins page and its windows' menu offer **Allow**); an update that asks for less loses it at once. `init.permissions`, the app's checks, the frame's CSP and its iframe's `allow` attribute all use that set.
+Every permission the app checks is the **approved** one: what the user confirmed when they first showed the plugin. An update that asks for more runs with what it had until the user allows the rest (its Plugins page and its windows' menu offer **Allow**); an update that asks for less loses it at once. `init.permissions`, the app's checks, the frame's CSP and its iframe's `allow` attribute all use that set.
 
 | Permission | Unlocks |
 |---|---|

@@ -12,28 +12,19 @@ Every window in hyperpane is a plugin, and the built-in ones are written with th
 - **The client part** is a web app (React and TypeScript) that runs in a sandboxed frame, one per window, card, page or panel. It draws the interface and reaches everything else through the app.
 - **The server part** is optional. It's a Node process on hyperpane's server, the one that holds the project, started on the first call and stopped when idle. It does the work: reading files, running processes, using the network.
 
-Both parts are TypeScript that runs as written. There is no bundler and no build output.
+You write both parts in TypeScript under `src/`; a build turns them into `dist/`, which is what a server runs and sends to the apps.
 
 This page walks you through the template from start to finish. For the full API, see the [SDK reference](/docs/plugins/sdk). For every manifest field, see [plugin.json](/docs/plugins/manifest).
 
 ## What you need
 
-- **The desktop app.** You'll load and run your plugin in it.
-- **Node 24 or newer, with npm**, for the template's `build.sh`. It installs the type checker and the SDK's types, and runs the tests. (The plugin itself doesn't need these to run.)
-- **git**, if you'll share the plugin on GitHub. The app also uses git to install plugins from GitHub.
+- **A hyperpane server** to run it on: this machine's (the app starts one) or any other.
+- **Node 24 or newer, with npm**, to build it. The template's `build.sh` installs the type checker and the SDK's types, checks the plugin, runs the tests, and builds it.
+- **The SDK repository** ([hyperpane/hyperpane-sdk](https://github.com/hyperpane/hyperpane-sdk)): its `tools/plugins.mjs` builds plugins. Clone it beside your plugin, or point `HYPERPANE_SDK_REPO` at it.
 
 ## Start from the template
 
-The quickest way to start: open **Plugins**, choose **Add plugin**, then **New plugin**. Give it an id (2–32 lowercase letters, digits and dashes, starting with a letter) and a name. The app copies the template into your plugins folder under that id and opens the plugin's page.
-
-The plugins folder is:
-
-| System | Plugins folder |
-|---|---|
-| macOS, Linux | `~/.hyperpane/plugins` |
-| Windows | `%APPDATA%\hyperpane\plugins` |
-
-You can also copy the template by hand. It ships with the app (`resources/sdk/template`) and lives in the SDK's repository as `sdk/template`. If you copy it, rename the folder and the `id` in `plugin.json` to match.
+The template lives in the SDK's repository as `template/`. Copy it, then rename the folder and the `id` in `plugin.json` to your plugin's id (2–32 lowercase letters, digits and dashes, starting with a letter).
 
 The template is a working plugin called Example. It has two window types (**Note** and **Stats**) linked by ports, a **Pinned notes** card, a server part that keeps pins in the project, settings, a secret, and the event bus. It's easiest to change it into your own plugin rather than start from an empty folder.
 
@@ -45,9 +36,9 @@ my-plugin/
 ├── icon.svg               the plugin's icon
 ├── icons/                 window type and card icons
 ├── README.md              the plugin's page in Plugins
-├── build.sh, build.bat    install the dev tools, check, test
+├── build.sh, build.bat    install the dev tools, check, test, build
 ├── package.json           dev tools only (TypeScript, types); never shipped
-├── src/
+├── src/                   what you write
 │   ├── client/
 │   │   ├── main.tsx       the client part's entry
 │   │   ├── app/App.tsx    which view a frame is
@@ -61,17 +52,22 @@ my-plugin/
 │   │   ├── package.json   must say "type": "module"
 │   │   └── tsconfig.json
 │   └── shared/            types and code both parts use
+├── dist/                  what runs: built from src/ (below)
+│   ├── client/            the interface: index.html, its bundled code, client.json
+│   └── server/main.mjs    the server part, one module with its dependencies
 └── test/
     ├── server/            tests of the server part
     └── client/            tests of client code against a fake app
 ```
 
-The rules the app checks:
+`dist/` is what a server runs and what it sends to the apps; `src/` is only for you (a plugin you share may leave it out). The app runs no plugin code of its own and builds nothing: every plugin's interface comes from the server it's on.
+
+The rules the checks apply:
 
 - The folder's name must equal the plugin's `id`.
-- `client.main` is a path inside `src/client/`, and `server.main` is a path inside `src/server/`.
+- `client.main` is a path inside `src/client/`, and `server.main` is a path inside `src/server/`: the build starts there.
 - `src/server/package.json` says `"type": "module"`.
-- Relative imports name the file with its extension (`import { count } from '../shared/count.ts'`), and types come in with `import type`. Both parts run as written, so only TypeScript that erases cleanly works: no `enum`s, no `namespace`s with values. The template's `tsconfig.json` files check this.
+- Relative imports name the file with its extension (`import { count } from '../shared/count.ts'`), and types come in with `import type`. The template's `tsconfig.json` files check this.
 
 ## plugin.json
 
@@ -199,11 +195,11 @@ export function Note() {
 
 Some things to know about how frames work:
 
-- **Styling.** Tailwind classes work as they do in the app. The app compiles the classes your client code uses. Inside a window, use the window's colors (`--node-fg`, `--node-muted`, `--node-border`, `--node-accent` and the rest) so it follows every theme. The [SDK reference](/docs/plugins/sdk#styling) lists them.
-- **Components.** `@hyperpane/ui` has the app's own components: `ToolButton`, `NodeButton`, `NodeInput`, `NodeMessage`, `Tabs`, `Toolbar`, `useMenu`, and more. React, the SDK, the UI kit, CodeMirror and Lucide icons always come from the app, so you don't install or bundle them.
+- **Styling.** Tailwind classes work as they do in the app. The build compiles the classes your client code uses, on the app's theme tokens. Inside a window, use the window's colors (`--node-fg`, `--node-muted`, `--node-border`, `--node-accent` and the rest) so it follows every theme. The [SDK reference](/docs/plugins/sdk#styling) lists them.
+- **Components.** `@hyperpane/ui` has the app's own components: `ToolButton`, `NodeButton`, `NodeInput`, `NodeMessage`, `Tabs`, `Toolbar`, `useMenu`, and more. React, the SDK, the UI kit, CodeMirror and Lucide icons come with the SDK, in the app's versions: you don't install them, and the build bundles one copy of each.
 - **No network.** Frames have no network by default. Do network work in the server part, or ask for the `network` permission.
 - **Input.** The app handles canvas input for you. The first click on a window only focuses it, wheel events that nothing in the frame scrolls pan the canvas, and the app's shortcuts work unless your handler calls `preventDefault()`.
-- **Other npm packages** for the client go in `src/client/package.json` and are installed into `src/client/node_modules`. They must be ES modules.
+- **Other npm packages** for the client go in `src/client/package.json` and are installed into `src/client/node_modules`. The build bundles them.
 
 ## A server part
 
@@ -294,20 +290,33 @@ Things to know about the server part:
 - **Where to keep things.** `host.projectStorage(project)` is a folder inside the project (`.hyperpane/<id>/`), so teammates who commit the project get it too. `host.dataDir` is this machine's own. Keep tokens in `host.secrets`.
 - **Other plugins.** `host.call('files', …)` reaches another plugin's server part, if it's in your `dependencies` or `uses`.
 - **Don't block.** The server ends a process that stops answering its pings. Move heavy work to `worker_threads`.
-- **npm packages** go in `src/server/package.json` and are installed into `src/server/node_modules`. They must be pure JavaScript, without native addons, and their install scripts never run.
+- **npm packages** go in `src/server/package.json` and are installed into `src/server/node_modules`. The build bundles them into `dist/server/main.mjs`. They must be pure JavaScript, without native addons.
 
-Code both parts use (types, the bus's topics, a counting function) goes in `src/shared/`. Both parts load it as written.
+Code both parts use (types, the bus's topics, a counting function) goes in `src/shared/`. The build bundles it into each part that imports it.
 
 ## Building and checking
 
 ```sh
-./build.sh               # install the dev tools, type-check both parts, check plugin.json
-./build.sh --test        # the same, then run the tests
-./build.sh --no-install  # only check
+./build.sh               # install the dev tools, type-check both parts, check plugin.json, build dist/
+./build.sh --test        # the same, and run the tests
+./build.sh --no-install  # check and build only
+./build.sh --no-build    # don't build dist/
 ./build.sh --quiet       # print only problems
 ```
 
-Use `build.bat` on Windows. Nothing gets built: `build.sh` installs TypeScript and the SDK's types into `node_modules`, installs `src/client` and `src/server` dependencies in place, runs `tsc --noEmit` for each part, and checks `plugin.json` the same way the app does. To run only the manifest check:
+Use `build.bat` on Windows. `build.sh` installs TypeScript and the SDK's types into `node_modules`, installs `src/client` and `src/server` dependencies in place, runs `tsc --noEmit` for each part, checks `plugin.json`, and builds `dist/` with the SDK's `tools/plugins.mjs`. To build without it:
+
+```sh
+node ../hyperpane-sdk/tools/plugins.mjs build .
+```
+
+The build bundles each part with what it imports, npm packages included:
+
+- **The interface** goes to `dist/client/`: an `index.html`, its code and styles in files named by their hash, the fonts and images it uses, and `client.json` listing every file with its sha256. Servers send these files to the apps as they are, and the apps check each against its hash.
+- **The server part** goes to `dist/server/main.mjs`, one module. The SDK comes from the server that runs it.
+- The plugin's icons are copied beside them.
+
+To run only the manifest check:
 
 ```sh
 node node_modules/@hyperpane/sdk/manifest/cli.js check .
@@ -315,30 +324,19 @@ node node_modules/@hyperpane/sdk/manifest/cli.js check .
 
 ## Running it in the app
 
-You have three ways to run your plugin while you work on it.
-
-**From the plugins folder.** A plugin made with **New plugin** is already there. The app notices changes in the plugins folder by itself:
-
-1. Open a project, open your plugin's page in **Plugins**, and turn it on in the project. The app asks you to approve its permissions, and uploads its server part to the project's server.
-2. Open a window of it from the canvas's new-window menu, or see its card in the sidebar.
-3. After you change the client part, reload the window from its menu.
-4. After you change the server part, choose **Update** on the plugin's page to upload it again.
-
-**From the Development tab.** Turn on **Developer mode** in the Plugins page's **⋯** menu, open **Development** and **Add folder** (or drop your plugin's folder there). The app loads the plugin from that folder and watches it: saving a client file reloads its windows, and saving a server file (or `plugin.json`) installs its server part again on the project's server and restarts it. **Logs** shows its log live. It stays until you take the folder out or turn Developer mode off. See [Plugins](/docs/plugins#developer-mode).
-
-**Live, from a terminal.** Dev mode watches your folder and reloads as you save:
+A server runs the plugins in its **plugins folder**: for this machine's server, `~/.hyperpane/plugins` (`%APPDATA%\hyperpane\plugins` on Windows), unless you set another in its [settings](/docs/servers#plugins-folder). Put your plugin there, or a link to it, and it runs:
 
 ```sh
-hyperpane plugin dev                 # in the plugin's folder (npm run dev in the template)
-hyperpane plugin dev ../my-plugin --project <project id>
+ln -s ~/work/my-plugin ~/.hyperpane/plugins/my-plugin    # the link's name is the plugin's id
+./build.sh --no-install                                  # after each change
 ```
 
-- The **server part** is installed on this machine's server as a dev install, then installed again and restarted each time a file in `src/server/`, `src/shared/` or `plugin.json` changes. `--server KEY` uses another server. `--project` turns the plugin on in that project.
-- The **log** prints as it's written: the server part's `console` output, the server's lines about it, and errors from its frames.
-- The **app** loads the client part from your folder and reloads its frames when a file in `src/client/` or `src/shared/` changes. Windows and their data stay. The plugin's page shows a **Dev** badge, a live **Logs** tab and **Reload**.
-- **Ctrl+C** stops it. The app goes back to the plugins folder's copy, if any, and the dev install is removed from the server (`--keep` leaves it).
+- The server looks at the folder every 2 seconds. It reads your plugin again when its `plugin.json` or `dist/client/client.json` changes, which every build does.
+- A changed **server part** is replaced: the old one stops, the next call starts the new one.
+- A changed **interface** reaches the app at once: your plugin's windows load again with the new files. Windows and their data stay.
+- In the app, the plugin shows on the Plugins page, on in every project. Open a window of it from the canvas's new-window menu, or see its card in the sidebar. **Logs** on its page shows its server part's log, live; so does `hyperpane plugins log <id>`.
 
-If `plugin.json` has a problem, dev mode prints it and waits for you to fix it.
+If `plugin.json` has a problem, the server logs it and leaves the plugin out until it's fixed.
 
 ## Driving other plugins' windows
 
@@ -484,46 +482,19 @@ it's for, what makes it worth having.
 
 Write it plainly, in the second person, about what the user gets. Give every setting, window type, card, command and button in `plugin.json` a title people understand, and explain every permission you ask for in the README's Permissions table.
 
-## Sharing it on GitHub
+## Sharing it
 
-People install plugins from git repositories: in **Plugins**, they choose **Add plugin**, then **Install from GitHub**, and paste a link. The app clones the repository with the system's git, checks the package exactly as it checks any other, and puts it in their plugins folder under its id. It also remembers where the plugin came from, so they can update it later.
+A server runs what's in its plugins folder, so sharing a plugin means getting its folder there: the person who runs the server puts it in, the same as you did.
 
-### Set up the repository
+- **As a folder or a repository.** Ship `plugin.json`, `dist/`, the icons and the README. `src/` is optional. If you share the repository, commit `dist/`, or ask people to build it.
+- **As an archive.** `node ../hyperpane-sdk/tools/plugins.mjs pack --out DIR` makes `DIR/<id>.tar.gz` (with `dist/`) and a `SHA256SUMS.txt`, for a release page. Unpacked into a plugins folder, it runs.
+- **Updates.** Raise `version` in `plugin.json`, build, and replace the folder. The server picks the new one up within 2 seconds.
 
-1. **Put the plugin at the root of the repository**, with `plugin.json` at the top. A plugin in a subfolder works too: people paste a link to that folder (`https://github.com/you/plugins/tree/main/notes`).
-2. **Name it after the id.** hyperpane's own plugins live at `github.com/hyperpane/hp-<id>` (`hp-pets`, `hp-codestats`). Naming yours `hp-<id>` makes it easy to recognize. The repository name doesn't have to match the id, though: the app names the folder after the `id` in `plugin.json`.
-3. **Set `homepage`** in `plugin.json` to the repository's address.
-4. **Commit `src/client/node_modules` and `src/server/node_modules`** if your plugin has npm dependencies. The app never runs npm or install scripts: a package that lists dependencies must bring them. The template's `.gitignore` already leaves out only the root `node_modules` (your dev tools).
-5. **Check it** with `./build.sh --test` before you push.
-
-### Links people can paste
-
-| Link | What it installs |
-|---|---|
-| `https://github.com/you/hp-notes` | The default branch. |
-| `github.com/you/hp-notes` | The same, as copied from the address bar. |
-| `https://github.com/you/hp-notes/tree/v0.2.0` | A branch or tag. |
-| `https://github.com/you/plugins/tree/main/notes` | A plugin in a subfolder. |
-| `git@github.com:you/hp-notes.git` | Over SSH. |
-
-Other https git hosts work the same way, GitLab's `/-/tree/` links included. Private repositories work if the user's git can reach them. The app keeps no tokens: credentials are left to git.
-
-### What happens when someone installs it
-
-- The app warns that plugins run code with the user's access, and names the repository.
-- It refuses a package that fails the checks, listing the problems, and refuses one whose id is already in the plugins folder.
-- It shows the permissions the plugin asks for, and whether it has a server part. The user approves the permissions when they turn the plugin on in a project.
-- The installed copy keeps no `.git` folder.
-
-**Install from file** in the same menu takes a plugin's folder or a `.tar.gz` of one. That's useful for sharing a plugin without a repository.
-
-### Releasing updates
-
-Raise `version` in `plugin.json` and push. On your plugin's page, users choose **Check for updates**. The app looks at the repository, and if its `plugin.json` has a newer version, offers **Update to x.y.z**. The copy it replaces is kept in the plugins folder's `.backup`. If the user changed the plugin's files locally, the app asks before replacing them.
+Dependencies are bundled into `dist/` by the build, so nobody needs `node_modules`, npm or install scripts to run it.
 
 ### Signatures
 
-Built-in plugins are signed by hyperpane. A plugin you share doesn't have to be signed. Unsigned, it still installs, with a warning. If you do sign it, the app shows it as **Verified** once the user trusts you as a publisher, and refuses the package if any of its files changed after signing. So sign last, after the version bump. See [`signature`](/docs/plugins/manifest#signature).
+Built-in plugins are signed by hyperpane. A plugin you share doesn't have to be: unsigned, it still runs, and the server notes it in its log. A signature currently covers `src/` and `plugin.json`'s working fields, not `dist/`; sign last, after the version bump. See [`signature`](/docs/plugins/manifest#signature).
 
 ## Next
 

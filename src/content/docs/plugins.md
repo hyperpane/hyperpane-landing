@@ -1,6 +1,6 @@
 ---
 title: Plugins
-description: "The built-in windows and the plugins you can add, installing them from the Plugins page or GitHub, updating and removing them."
+description: "The built-in windows and the plugins a server can run: where they come from, showing them in a project, updating and removing them."
 section: Plugins
 order: 20
 ---
@@ -9,9 +9,21 @@ order: 20
 
 Every kind of window in hyperpane is a plugin, the built-in ones too. A plugin can add windows, panels, pages, menu items, commands with shortcuts, and settings. Many also have a part that runs on the server, so their work goes on when the app is closed.
 
+## Where plugins live
+
+Plugins run on a [server](/docs/servers), and each server runs the plugins in its **plugins folder**. The app has none of its own: when you open a project, it gets every plugin's interface from the server, so the same plugins show wherever you connect from, desktop or web.
+
+| Server | Plugins folder |
+| --- | --- |
+| This machine's (macOS, Linux) | `~/.hyperpane/plugins` |
+| This machine's (Windows) | `%APPDATA%\hyperpane\plugins` |
+| Any server | Its `plugins` [setting](/docs/servers#plugins-folder), or `hyperpane-server run --plugins PATH` |
+
+A plugin in the folder is on in every project on that server. The server looks at the folder every 2 seconds, so a plugin you add, update or remove there shows up, changes or goes within moments.
+
 ## Built-in
 
-These come with the app, and the app keeps them up to date: a newer app brings newer copies. If you changed one, the copy it replaces is kept in a backup folder.
+These come with the app. When it starts this machine's server, the app puts its own copies in the plugins folder if they're missing there or older; a newer copy you put there is left alone.
 
 | Plugin | What it is |
 | --- | --- |
@@ -19,7 +31,9 @@ These come with the app, and the app keeps them up to date: a newer app brings n
 | **Editor** | A code editor for any file on the server: highlighting for most languages, find and replace, multiple cursors, auto-save. It follows changes on disk. Pictures, video and sound show as they are. |
 | **Explorer** | A folder as a Finder-style list that follows the disk: expand in place, sort, search by name, drag to move or copy, open files in the Editor. Shows Git status when Git is installed. |
 
-## Plugins you can add
+## More plugins
+
+Put a plugin's folder (or its unpacked release archive) in the server's plugins folder, named by its id, and it runs:
 
 | Plugin | What it is |
 | --- | --- |
@@ -36,72 +50,39 @@ These come with the app, and the app keeps them up to date: a newer app brings n
 
 ## The Plugins page
 
-Plugins are installed **per project**: each project has the ones it needs. Open the Plugins page from:
+The Plugins page lists the plugins on the open project's server. Open it from:
 
 - **Plugins** in a project's menu in the sidebar;
 - **Plugins** when you right-click the canvas;
 - **Add plugins** in [Settings](/docs/settings);
 - or search for "Plugins" with ⌘K (Ctrl+K).
 
-The page judges every plugin against the open project and the server it runs on, in four tabs:
+It has two tabs: **In this project** (the plugins shown in it) and **Available** (the server's other plugins).
 
-- **In this project:** what the project has.
-- **Available:** what you can install in it.
-- **Updates:** plugins with a newer version.
-- **Unavailable:** what can't be used here, and why.
+### Show or hide a plugin in a project
 
-Click a plugin for its own page: its readme, its **Settings**, what it adds (**Contributions**), its server part on each server (**Server**), and its **Logs**.
+Each plugin has a switch for the open project. It only changes what you see: a hidden plugin's windows, buttons, cards and menu items leave this app's view of the project, but the plugin keeps running on the server, for every project, and its windows stay in the project. Turn it back on and they're there. Plugins that others need are shown with them.
 
-### Developer mode
-
-Turn on **Developer mode** in the page's **⋯** menu for a fifth tab, **Development**: plugins loaded straight from the folders you work in, in place of the plugins folder's copy.
-
-- **Add folder** (or drop a folder on the tab) adds a plugin's folder. Its plugin is loaded from there until you take it out.
-- Saving a file reloads it: its windows at once, and its server part is installed again on the project's server.
-- Each folder shows whether it's being watched, when it last reloaded, where its server part runs, and any problem in its `plugin.json`. **Open** and **Logs** go to its page; **⋯** shows it in its folder, copies the path, installs the server part again, or takes it out.
-- Plugins run with [`hyperpane plugin dev`](/docs/reference/cli#plugin-dev) from a terminal show there too.
-
-Turning Developer mode off unloads the folders (they stay listed for next time) and the plugins folder's copies come back. See [Writing a plugin](/docs/plugins/writing#running-it-in-the-app).
-
-## Install a plugin
-
-Click **Install** on a plugin to add it to the open project. Before it's installed you see what it asks for: its permissions (such as reaching the network, using the clipboard, driving terminals, or opening and controlling other plugins' windows), what it adds, and the jobs it would run on a schedule. Camera, microphone and screen are asked for again the first time a plugin uses them.
+The first time a plugin is shown, you see what it asks for: its permissions (such as reaching the network, using the clipboard, driving terminals, or opening and controlling other plugins' windows), what it adds, and the jobs it runs on a schedule. Camera, microphone and screen are asked for again the first time a plugin uses them.
 
 Some plugins drive others: an AI plugin can open a Browser beside its window and read and click pages in it. It needs the **Opens and controls other plugins' windows** permission, and only reaches the plugins it names; the windows it opens show on your canvas, and you can use or close them.
 
-New projects offer this too: right after **New project**, the **Add plugins** dialog lists the plugins the project could have.
+> A plugin runs code with your access on the server. Put plugins from people you trust in a server's plugins folder.
 
-### From GitHub
+### A plugin's page
 
-1. On the Plugins page, click **Add plugin** and choose **Install from GitHub**.
-2. Paste a repository's link, such as `https://github.com/hyperpane/hp-git`, or a link to a folder inside one (`…/tree/main/plugins/notes`).
-3. hyperpane clones it into your plugins folder and shows what it asks for. Then install it in the project.
-
-This uses git on your computer, so the option shows only when git is installed.
-
-> A plugin runs code with your access on the server. Install plugins from people you trust.
-
-### From a file
-
-**Add plugin › Install from file** installs a plugin package you have on disk.
-
-### Your plugins folder
-
-Every plugin package lives in your plugins folder. The page's **⋯** menu has **Open plugins folder**, and **Look for changes** to pick up packages you added or edited there by hand.
+Click a plugin for its page: **Details** (what it is and asks for), its **Settings**, what it adds (**Contributions**), its server part on each server (**Server**), and, when it has one, its server part's **Logs**, live.
 
 ## Update a plugin
 
-- The **Updates** tab lists plugins with a newer version.
-- A plugin installed from GitHub has **Check for updates** on its page, and **Update** when there is one.
-- On a plugin's **Server** tab, a server with an older copy of its server part shows **Update to …**.
+Replace its folder in the server's plugins folder with the newer one. The server picks it up within 2 seconds: its server part restarts on the next call, and its open windows load the new interface. Windows and their data stay.
 
 If an update asks for more than you allowed before, its windows offer **Allow what … asks for** in their menu.
 
 ## Remove a plugin
 
-- **Remove from project** takes it out of the open project. If other plugins need it, hyperpane asks whether to turn them off too. Their windows stay, and show what's missing.
-- **Remove** on a plugin's **Server** tab takes its server part off that server. Its data on the server stays.
-- For a plugin you installed yourself (from GitHub or a file), **Delete** on its page moves its package folder to the Trash (the Recycle Bin on Windows). Projects that use it show what's missing.
+- **From your view of a project:** turn its switch off (above).
+- **From a server:** take its folder out of the server's plugins folder. Its server part stops, and projects that have its windows show what's missing. Its data on the server stays.
 
 ## Write your own
 

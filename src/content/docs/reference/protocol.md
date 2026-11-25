@@ -322,8 +322,9 @@ hyperpane call hyperpane '{"op":"list"}'
 | op | Request | Reply |
 |---|---|---|
 | `info` | — | `{protocol: 3, server, os, arch, target, runtime: {name: "node", version} \| null, limits: {archive, unpacked, files, chunk}, streams: {supported, window, maxWindow, maxChunk, perConnection, perProcess}}` |
-| `list` | — | `{parts: Part[], schedules?, dev?}` |
-| `watch` | — | Subscription: `{parts, schedules?, dev?}` now, on every change, and every 5 s (memory) |
+| `list` | — | `{parts: Part[], schedules?, dev?, source?, plugins?}` |
+| `watch` | — | Subscription: `{parts, schedules?, dev?, source?, plugins?}` now, on every change, and every 5 s (memory) |
+| `client_file` | `{plugin, path}` | `{contentType, sha256, data}` (`data` base64): one file of a plugin's interface; `path` is one of `plugins.<plugin>.interface.files` (at most 32 MiB) |
 | `install_begin` | `{plugin, version, sha256, size, force?}` | `{upload: "u-…"}`, or `{installed: Part}` when that id, version and sha256 are already installed (without `force`) |
 | `install_chunk` | `{upload, offset, data}` (`data` base64, at most 1 MiB raw) | `{received}` |
 | `install_commit` | `{upload, project?, dev?}` | `{installed: Part}`. Assigns `project` if given. `dev` marks a dev install. |
@@ -359,6 +360,14 @@ hyperpane call hyperpane '{"op":"list"}'
 
 - `memory` is resident memory in bytes, `since` when the process started (ms since 1970), `error` the last start failure or crash, `calls` its open calls. `pid`, `memory` and `since` are `null` when it isn't running. Terminal is always listed as built in.
 - `dev` lists the ids of dev installs (see [`hyperpane plugin dev`](/docs/reference/cli#plugin-dev)).
+- **The plugins folder.** A server runs the plugins in its [plugins folder](/docs/servers#plugins-folder) (`run --plugins PATH`, the `plugins` setting). Each is `plugin.json` and `dist/`, with `src/` when it ships its sources: its server part runs from `dist/server/main.mjs` (else from its sources), its interface is `dist/client/`. Every one is on in all the server's projects. `list` and `watch` then have `source: "folder"` and `plugins`, every plugin in the folder by id:
+
+  ```jsonc
+  {"version":"0.1.8","manifest":{…},"icons":{"icon.svg":"<svg…>"},
+   "interface":{"hash":"…","entry":"index.html","files":{"index.html":{"sha256":"…","size":812},"assets/main-1a2b3c.js":{…}}}}
+  ```
+
+  `manifest` is its `plugin.json` without `signature`, `icons` the SVGs it names, `interface` (when it has one built) its `client.json`. Clients have no plugins of their own: they build their list from this, show or hide plugins per project, and fetch interfaces with `client_file`, keeping what they have until `hash` changes. The folder is looked at every 2 s: a plugin added, changed (its `plugin.json` or `client.json`) or removed is picked up, and a changed server part replaces the old one once its calls end. Uploading over a folder's plugin is refused, and so is uninstalling one.
 - **Installing.** `install_begin` is refused when `size` exceeds `limits.archive` (64 MiB), the id is malformed or reserved, the version isn't `x.y.z[-pre]`, or a newer version is installed ("A newer Git (0.1.6) is on this server; 3 projects use it."), unless `force`. Send `install_chunk`s in order; `offset` must equal the bytes received so far. An upload idle for 10 minutes is dropped. `install_commit` checks [the archive](#the-archive) and, if anything is wrong, replies with why and leaves nothing behind.
 - **Enabling.** `enable`/`disable` work only on the project's home server ("This server isn't the project's home: use assign."). They change the document (`DocOp::SetPlugin`) and assign or unassign the part if installed. A part with no projects left is stopped once its open calls end and is removed; its data stays. `assign` needs the part installed ("Git's server part isn't on this server.").
 - **Uninstalling** is refused while projects are assigned, unless `force`. Terminal can't be uninstalled. `purge` also deletes the plugin's data folder, secrets and settings.
@@ -1053,7 +1062,7 @@ A server part can't open a browser on the user's computer, but an app can. With 
 
 ## The archive
 
-A client installs a server part by uploading a deterministic `.tar.gz` of `plugin.json`, `src/server/**` and `src/shared/**` (without `node_modules/.bin`) through the store's `install_*` ops:
+A client installs a server part by uploading a deterministic `.tar.gz` of `plugin.json`, `src/server/**` and `src/shared/**`, and `dist/server/**` when the part is built (without `node_modules/.bin`), through the store's `install_*` ops. (A server with a plugins folder gets most plugins from there instead; see above.)
 
 - ustar entries using `prefix` and `name` (paths at most 200 bytes), sorted by path bytewise, regular files only;
 - mode 0644, uid and gid 0, empty user and group names, mtime 0;
@@ -1064,8 +1073,8 @@ The same packer always gives the same bytes, and so the same SHA-256, for the sa
 The server checks, in order:
 
 1. The size equals `install_begin`'s, and the SHA-256 matches.
-2. Each entry is a regular file; has no absolute path, `..` or `.` segment, empty segment, backslash, drive letter, NUL or control character, or any of `<>:"|?*`; isn't a Windows reserved name (`CON`, `PRN`, `AUX`, `NUL`, `COM1`–`9`, `LPT1`–`9`) and doesn't end in a dot or space; doesn't differ from another entry only in case; starts with `plugin.json`, `src/server/` or `src/shared/`; and isn't a native addon or binary (`*.node`, `*.dll`, `*.so`, `*.dylib`, `*.exe`, `binding.gyp`). At most 20,000 files, 256 MiB in all, 64 MiB per file.
-3. `plugin.json` (at most 256 KB) parses, `manifest` is 1, its `id` and `version` match the request, `server.runtime` is `node`, `server.main` exists under `src/server/` and ends in `.ts`, `.js` or `.mjs`, and `src/server/package.json` has `"type": "module"`.
+2. Each entry is a regular file; has no absolute path, `..` or `.` segment, empty segment, backslash, drive letter, NUL or control character, or any of `<>:"|?*`; isn't a Windows reserved name (`CON`, `PRN`, `AUX`, `NUL`, `COM1`–`9`, `LPT1`–`9`) and doesn't end in a dot or space; doesn't differ from another entry only in case; starts with `plugin.json`, `src/server/`, `src/shared/` or `dist/server/`; and isn't a native addon or binary (`*.node`, `*.dll`, `*.so`, `*.dylib`, `*.exe`, `binding.gyp`). At most 20,000 files, 256 MiB in all, 64 MiB per file.
+3. `plugin.json` (at most 256 KB) parses, `manifest` is 1, its `id` and `version` match the request, `server.runtime` is `node`, and either `dist/server/main.mjs` is there (a built part, which is what runs), or `server.main` exists under `src/server/` and ends in `.ts`, `.js` or `.mjs` and `src/server/package.json` has `"type": "module"`.
 4. The staging folder becomes `<data>/plugin-parts/<id>/<version>-<sha8>/`.
 
 ## Limits

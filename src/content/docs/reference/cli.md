@@ -227,7 +227,7 @@ What a plugin's server part accepts is up to the plugin; see [Writing a plugin](
 
 ## Plugins
 
-These commands manage plugins' **server parts** on the server: the code that runs there. A plugin's client part (its windows) lives in the app.
+These commands manage plugins' **server parts** on the server: the code that runs there. A server runs the plugins in its [plugins folder](/docs/servers#plugins-folder), and sends their interfaces to the apps; to add, update or remove a plugin, change that folder.
 
 ### `plugins list`
 
@@ -261,7 +261,7 @@ installed echo 0.1.0
 on in 9f2c41e0b7a3: echo, editor, explorer, files, terminal
 ```
 
-The package must have a server part (`src/server`). The server checks the archive and `plugin.json` and refuses one with problems, saying why. To install the whole plugin, client part included, use the app's Plugins page. While you're developing a plugin, use [`plugin dev`](#plugin-dev) instead.
+The package must have a server part (`src/server`). The server checks the archive and `plugin.json` and refuses one with problems, saying why, and refuses it for a plugin its plugins folder has. This installs only the server part: for the whole plugin, interface included, put it in the server's [plugins folder](/docs/servers#plugins-folder).
 
 ### `plugins enable` and `disable`
 
@@ -299,9 +299,9 @@ Runs the plugin in `DIR` (default: the current folder, which must hold `plugin.j
 - **Checks** `plugin.json` as the server and the app do (`manifest` is 1, a valid id and version, `server.main` and `client.main` exist, `src/server/package.json` has `"type": "module"`), plus the SDK's own validator when the package has `@hyperpane/sdk` installed. Problems are printed, and it waits for you to fix them.
 - **Installs the server part** (when there's `src/server`) on the server as a dev install, replacing any version there, and restarts it at once so a crash on start shows immediately. Each change under `src/server/`, `src/shared/` or to `plugin.json` installs and restarts it again, once the files have been still for the debounce time. `node_modules` isn't watched. A failed install is printed, and it keeps watching.
 - **Shows the log** as it's written: the last 20 lines first, then everything the part and the server write about it, plus errors and warnings from the plugin's windows in the app.
-- **Loads the client part** in the app on this machine from `DIR`, in place of any installed copy (its Plugins page shows a **Dev** badge). A change under `src/client/` or `src/shared/` reloads the plugin's frames; a change to `plugin.json` also rereads its contributions, settings and icons. Windows and their data stay.
+- **The client part** isn't loaded from `DIR` any more: apps get every plugin's interface from its server. To run a whole plugin while you write it, put it in the server's plugins folder and build it after each change; see [Running it in the app](/docs/plugins/writing#running-it-in-the-app).
 
-**Ctrl+C** ends dev mode: the app goes back to the installed copy, if any, and the dev install is removed from the server (its data stays), unless you passed `--keep` or another install of the plugin was there before dev mode replaced it.
+A dev install is refused for a plugin the server's plugins folder has. **Ctrl+C** ends dev mode: the dev install is removed from the server (its data stays), unless you passed `--keep` or another install of the plugin was there before dev mode replaced it.
 
 | Option | Description |
 |---|---|
@@ -319,7 +319,6 @@ hyperpane plugin dev --project 9f2c41e0b7a3
 ```text
 dev mode: Echo 0.1.0 from /home/you/code/hyperpane-echo
   server: my-server (127.0.0.1:38888)
-  app: loads Echo's client part from here (/home/you/.hyperpane/plugins/.dev.json)
 ✓ server part installed (3f9a1c2e) and started
   on in 9f2c41e0b7a3: echo, editor, explorer, files, terminal
 watching for changes; Ctrl+C ends dev mode
@@ -328,7 +327,7 @@ watching for changes; Ctrl+C ends dev mode
 ✓ server part installed (b71e04d9) and started
 ```
 
-The app learns about dev plugins through `.dev.json` in its plugins folder, so dev mode works with the app closed, and the app picks the plugin up when it starts. If `hyperpane` is killed rather than stopped with Ctrl+C, the app ignores its entry once the process is gone. See [Writing a plugin](/docs/plugins/writing) for the whole workflow.
+See [Writing a plugin](/docs/plugins/writing) for the whole workflow.
 
 ## Server settings
 
@@ -343,6 +342,7 @@ These read and change the server's `config.json`. You can also edit that file by
 | `idle_exit_secs` | Exit after this many seconds with nothing running and no client attached; `0` never (at most 2,592,000). Default: never (60 for the local server). | At once |
 | `plugin_idle_secs` | Stop an idle plugin server part after this many seconds (it starts again on its next call): 10 to 604,800, or `0` never. Default `300`. | After a restart |
 | `node` | The full path of the Node that runs plugins' server parts. Default: `$HYPERPANE_NODE`, the bundled runtime, or `node` on `PATH`. | After a restart |
+| `plugins` | The [plugins folder](/docs/servers#plugins-folder): the absolute path of the folder whose plugins the server runs. Default: `~/.hyperpane/plugins` (`%APPDATA%\hyperpane\plugins`) for this machine's local server, `plugin-packages` in the data folder for others. `run --plugins PATH` overrides it. | After a restart |
 
 ### `config`
 

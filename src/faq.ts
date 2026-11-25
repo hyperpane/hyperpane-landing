@@ -27,11 +27,11 @@ export const faq: { q: string; a: string }[] = [
   },
   {
     q: "What windows does hyperpane have?",
-    a: "Built in: Terminal, Editor and Explorer. As plugins: Git, Browser, Data (databases), Requests (HTTP and WebSocket requests), Containers, Tunnels, Activity, Env (environment files), Code Stats and more. Plugins are installed per project.",
+    a: "Built in: Terminal, Editor and Explorer. As plugins: Git, Browser, Data (databases), Requests (HTTP and WebSocket requests), Containers, Tunnels, Activity, Env (environment files), Code Stats and more. Plugins live on the server, in its plugins folder; each project shows the ones you want.",
   },
   {
     q: "Can I write my own hyperpane plugin?",
-    a: "Yes. Every window in hyperpane is a plugin, and the built-in windows use the same public API that any plugin gets. A plugin can have a part in the app and a part on the server. The docs cover writing one, its manifest and the SDK.",
+    a: "Yes. Every window in hyperpane is a plugin, and the built-in windows use the same public API that any plugin gets. A plugin has an interface, which its server sends to the app, and can have a part that runs on the server. The docs cover writing one, its manifest and the SDK.",
   },
   {
     q: "Does hyperpane have a command line?",
